@@ -1,6 +1,56 @@
 @push('styles')
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
     <style>
+        body, .bg-gray-100, .min-h-screen, .filament-main, .filament-panels-page, .filament-panels-page *, .filament-main *, .filament-panels-page .bg-white {
+            background: #18181b !important;
+            color: #f4f4f5 !important;
+            font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
+        }
+        .border, .border-gray-100, .border-gray-200, .border-gray-300, .border-gray-400, .border-gray-500, .border-gray-600, .border-gray-700, .border-gray-800, .border-gray-900 {
+            border-color: #27272a !important;
+        }
+        .bg-white, .bg-gray-50, .bg-gray-100, .bg-gray-200, .bg-gray-300, .bg-gray-400, .bg-gray-500, .bg-gray-600, .bg-gray-700, .bg-gray-800, .bg-gray-900 {
+            background: #18181b !important;
+        }
+        .text-gray-900, .text-gray-800, .text-gray-700, .text-gray-600, .text-gray-500, .text-gray-400, .text-gray-300, .text-gray-200, .text-gray-100 {
+            color: #f4f4f5 !important;
+        }
+        input, textarea, select, .ts-control, .ts-dropdown, .ts-wrapper, .filament-input, .filament-select {
+            background: #18181b !important;
+            color: #f4f4f5 !important;
+            border: 1px solid #27272a !important;
+            border-radius: 0.5rem !important;
+            font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
+        }
+        .ts-dropdown {
+            background: #23232b !important;
+            color: #f4f4f5 !important;
+        }
+        .ts-dropdown .option:not(.active):hover {
+            background: #33334d !important;
+            color: #f4f4f5 !important;
+        }
+        .ts-dropdown .active, .ts-dropdown .option.active, .ts-dropdown .option:focus, .ts-dropdown .option:hover {
+            background: #a5c9fa !important;
+            color: #18181b !important;
+            text-shadow: none !important;
+        }
+        .ts-control .item, .tomselect-dark .ts-control .item {
+            background: #18181b !important;
+            color: var(--primary-500) !important;
+        }
+        label {
+            color: #f4f4f5 !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.01em !important;
+        }
+        button, .filament-button, .filament-panels-page button {
+            background: #23232b !important;
+            color: #f4f4f5 !important;
+            border: 1px solid #27272a !important;
+            border-radius: 0.5rem !important;
+            font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
+        }
         .ts-wrapper, .ts-wrapper:focus, .ts-wrapper.focus,
         .ts-control, .ts-control:focus, .ts-control.focus {
             box-shadow: none !important;
@@ -8,17 +58,18 @@
             border: none !important;
         }
         .ts-wrapper {
-            background: #18181b !important;
-            border-radius: 0.5rem !important;
             border: 1px solid #27272a !important;
-            font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
+            border-radius: 0.5rem !important;
         }
         .ts-control {
-            background: #18181b !important;
-            color: #f4f4f5 !important;
-            min-height: 44px !important;
-            font-size: 1rem !important;
+            border: none !important;
             border-radius: 0.5rem !important;
+        }
+        .ts-wrapper.focus, .ts-wrapper:focus {
+            border: 1.5px solid #3b82f6 !important;
+            border-radius: 0.5rem !important;
+            outline: none !important;
+            box-shadow: 0 0 0 2px #3b82f6 !important;
         }
         .ts-control input {
             color: #f4f4f5 !important;
@@ -35,8 +86,8 @@
             color: #18181b !important;
             text-shadow: none !important;
         }
-        .ts-dropdown .option {
-            padding: 0.75rem 1rem !important;
+        .ts-dropdown .option, .tomselect-dark .ts-dropdown .option {
+            padding: 0.4rem 1rem !important;
             font-size: 1rem !important;
             text-shadow: none !important;
         }
@@ -60,11 +111,6 @@
         .ts-wrapper.single .ts-control:after {
             border-color: #f59e42 transparent transparent transparent !important;
         }
-        label {
-            color: #f4f4f5 !important;
-            font-weight: 700 !important;
-            letter-spacing: 0.01em !important;
-        }
         .tomselect-dark.ts-wrapper,
         .tomselect-dark.ts-wrapper *,
         .tomselect-dark .ts-control,
@@ -82,8 +128,8 @@
         .tomselect-dark .ts-dropdown {
             background: #23232b !important;
         }
-        .tomselect-dark .ts-dropdown .active {
-            background: #f59e42 !important;
+        .tomselect-dark .ts-dropdown .active, .tomselect-dark .ts-dropdown .option.active, .tomselect-dark .ts-dropdown .option:focus, .tomselect-dark .ts-dropdown .option:hover {
+            background: #a5c9fa !important;
             color: #18181b !important;
         }
         .tomselect-dark .ts-control .item {
@@ -110,6 +156,21 @@
             font-size: 1rem !important;
             font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
             min-height: 44px !important;
+        }
+        select, option {
+            background: #18181b !important;
+            color: #f4f4f5 !important;
+            border: 1px solid #27272a !important;
+            border-radius: 0.5rem !important;
+            font-size: 1rem !important;
+            font-family: 'Inter', 'Roboto', Arial, sans-serif !important;
+            min-height: 44px !important;
+        }
+        select:focus {
+            border: 1.5px solid #3b82f6 !important;
+            border-radius: 0.5rem !important;
+            outline: none !important;
+            box-shadow: 0 0 0 2px #3b82f6 !important;
         }
     </style>
 @endpush
@@ -156,7 +217,6 @@
                 if (window.TomSelect) {
                     ["#cliente", "#projeto", "#servico"].forEach(function(id) {
                         let el = document.querySelector(id);
-                        // Forçar o tema escuro no select original antes de inicializar o Tom Select
                         forceTomSelectDarkStyles(null, el);
                         if (el && el.tomselect) {
                             el.tomselect.destroy();
@@ -185,7 +245,6 @@
                                     el.dispatchEvent(new Event('change', { bubbles: true }));
                                 }
                             });
-                            // MutationObserver para garantir a classe customizada
                             const observer = new MutationObserver(function() {
                                 if (!tom.wrapper.classList.contains('tomselect-dark')) {
                                     tom.wrapper.classList.add('tomselect-dark');
