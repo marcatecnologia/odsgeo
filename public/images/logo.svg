@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="50" viewBox="0 0 200 50" xmlns="http://www.w3.org/2000/svg">
+    <!-- Fundo do logo -->
+    <rect x="10" y="10" width="30" height="30" rx="5" fill="#1e40af"/>
+    
+    <!-- Letra O -->
+    <circle cx="25" cy="25" r="12" fill="none" stroke="white" stroke-width="2"/>
+    
+    <!-- Letra D -->
+    <path d="M45 13 L45 37 L55 37 C60 37 65 32 65 25 C65 18 60 13 55 13 Z" fill="none" stroke="white" stroke-width="2"/>
+    
+    <!-- Letra S -->
+    <path d="M75 13 C80 13 85 18 85 25 C85 32 80 37 75 37 C70 37 65 32 65 25" fill="none" stroke="white" stroke-width="2"/>
+    
+    <!-- Texto Geo -->
+    <text x="95" y="30" font-family="Arial" font-size="20" font-weight="bold" fill="#1e40af">Geo</text>
+</svg> 
