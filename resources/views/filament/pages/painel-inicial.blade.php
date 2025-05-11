@@ -176,7 +176,11 @@
 @endpush
 
 <x-filament-panels::page>
-    @livewire('painel-seleca')
+    <div class="mb-6">
+        @livewire('selecionar-diretorio-button')
+    </div>
+    
+    {{-- Sistema antigo removido --}}
 </x-filament-panels::page>
 
 @push('scripts')
