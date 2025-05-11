@@ -127,9 +127,9 @@ class CoordinateResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListCoordinates::route('/'),
-            'create' => Pages\CreateCoordinate::route('/create'),
-            'edit' => Pages\EditCoordinate::route('/{record}/edit'),
+            'index' => Pages\ListarCoordenadas::route('/'),
+            'create' => Pages\CriarCoordenada::route('/create'),
+            'edit' => Pages\EditarCoordenada::route('/{record}/edit'),
         ];
     }
 

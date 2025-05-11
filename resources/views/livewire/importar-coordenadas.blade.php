@@ -18,7 +18,7 @@
             <form wire:submit="import">
                 <div class="space-y-4">
                     <x-filament::input.wrapper>
-                        <x-filament::input.file
+                        <x-filament::input.file-upload
                             wire:model="file"
                             label="Arquivo CSV/TXT"
                             accept=".csv,.txt"

@@ -3,9 +3,9 @@
 namespace App\Filament\Resources\CoordinateResource\Pages;
 
 use App\Filament\Resources\CoordinateResource;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\CreateRecord;
 
-class EditCoordinate extends EditRecord
+class CriarCoordenada extends CreateRecord
 {
     protected static string $resource = CoordinateResource::class;
 } 

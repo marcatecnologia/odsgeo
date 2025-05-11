@@ -9,7 +9,7 @@ use Livewire\WithFileUploads;
 use League\Csv\Reader;
 use League\Csv\Writer;
 
-class ImportCoordinates extends Component
+class ImportarCoordenadas extends Component
 {
     use WithFileUploads;
 
@@ -56,7 +56,7 @@ class ImportCoordinates extends Component
 
         $this->showModal = false;
         $this->reset(['file']);
-        $this->dispatch('coordinates-imported');
+        $this->dispatch('coordenadas-importadas');
     }
 
     protected function processRecord($record)
@@ -199,6 +199,6 @@ class ImportCoordinates extends Component
 
     public function render()
     {
-        return view('livewire.import-coordinates');
+        return view('livewire.importar-coordenadas');
     }
 } 

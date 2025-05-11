@@ -6,7 +6,7 @@ use App\Filament\Resources\CoordinateResource;
 use Filament\Resources\Pages\ListRecords;
 use Livewire\Livewire;
 
-class ListCoordinates extends ListRecords
+class ListarCoordenadas extends ListRecords
 {
     protected static string $resource = CoordinateResource::class;
 
@@ -24,7 +24,7 @@ class ListCoordinates extends ListRecords
                 ->label('Importar Coordenadas')
                 ->icon('heroicon-o-arrow-up-tray')
                 ->action(function () {
-                    Livewire::mount('import-coordinates');
+                    Livewire::mount('importar-coordenadas');
                 }),
         ];
     }
