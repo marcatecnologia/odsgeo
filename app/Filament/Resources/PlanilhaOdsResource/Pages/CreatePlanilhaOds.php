@@ -9,4 +9,9 @@ use Filament\Resources\Pages\CreateRecord;
 class CreatePlanilhaOds extends CreateRecord
 {
     protected static string $resource = PlanilhaOdsResource::class;
+
+    protected function getCreatedNotificationRedirectUrl(): ?string
+    {
+        return static::getResource()::getUrl('index');
+    }
 } 

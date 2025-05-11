@@ -69,7 +69,6 @@ class PlanilhaOdsResource extends Resource
                         Forms\Components\TextInput::make('rt_cpf')
                             ->required()
                             ->maxLength(14)
-                            ->mask('000.000.000-00')
                             ->placeholder('000.000.000-00')
                             ->rules(['cpf']),
                         Forms\Components\TextInput::make('rt_crea_cau')
@@ -105,7 +104,6 @@ class PlanilhaOdsResource extends Resource
                             ->label(fn (Forms\Get $get) => $get('tipo_documento') === 'cpf' ? 'CPF' : 'CNPJ')
                             ->required()
                             ->maxLength(18)
-                            ->mask(fn (Forms\Get $get) => $get('tipo_documento') === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00')
                             ->placeholder(fn (Forms\Get $get) => $get('tipo_documento') === 'cpf' ? '000.000.000-00' : '00.000.000/0000-00')
                             ->rules(fn (Forms\Get $get) => $get('tipo_documento') === 'cpf' ? ['cpf'] : ['cnpj']),
                         Forms\Components\Textarea::make('proprietario_endereco')
