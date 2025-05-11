@@ -10,9 +10,25 @@ class EnsureServiceSelected
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Permitir acesso ao login e logout do Filament e ao painel inicial
+        $allowedRoutes = [
+            'filament.admin.auth.login',
+            'filament.admin.auth.logout',
+            'filament.admin.pages.painel-inicial',
+        ];
+
+        // Permitir acesso a todas as rotas de clientes, projetos e serviços
+        $routeName = $request->route()->getName();
+        if (
+            str_starts_with($routeName, 'filament.admin.resources.clientes') ||
+            str_starts_with($routeName, 'filament.admin.resources.projetos') ||
+            str_starts_with($routeName, 'filament.admin.resources.servicos')
+        ) {
+            return $next($request);
+        }
+
         if (!session()->has('current_service_id')) {
-            // Se não houver serviço selecionado, redireciona para o painel inicial
-            if ($request->route()->getName() !== 'filament.admin.pages.painel-inicial') {
+            if (!in_array($request->route()->getName(), $allowedRoutes)) {
                 return redirect()->route('filament.admin.pages.painel-inicial');
             }
         }

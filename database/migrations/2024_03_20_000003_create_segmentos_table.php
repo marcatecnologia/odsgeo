@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('segmentos', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('planilha_ods_id')->constrained()->onDelete('cascade');
+            $table->foreignId('planilha_ods_id')->references('id')->on('planilhas_ods')->onDelete('cascade');
             $table->foreignId('vertice_inicial_id')->constrained('vertices')->onDelete('cascade');
             $table->foreignId('vertice_final_id')->constrained('vertices')->onDelete('cascade');
             $table->decimal('azimute', 10, 6);

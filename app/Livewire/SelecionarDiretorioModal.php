@@ -93,6 +93,34 @@ class SelecionarDiretorioModal extends Component
         $this->dispatch('diretorio-atualizado');
     }
 
+    public function atualizarClientes()
+    {
+        $this->clientes = \App\Models\Cliente::orderBy('nome')->get();
+    }
+
+    public function atualizarProjetos()
+    {
+        if ($this->cliente_id) {
+            $this->projetos = \App\Models\Projeto::where('cliente_id', $this->cliente_id)->orderBy('nome')->get();
+        }
+    }
+
+    public function atualizarServicos()
+    {
+        if ($this->projeto_id) {
+            $this->servicos = \App\Models\Servico::where('projeto_id', $this->projeto_id)->orderBy('nome')->get();
+        }
+    }
+
+    protected $listeners = ['atualizarTodos' => 'atualizarTudo'];
+
+    public function atualizarTudo()
+    {
+        $this->atualizarClientes();
+        $this->atualizarProjetos();
+        $this->atualizarServicos();
+    }
+
     public function render()
     {
         return view('livewire.selecionar-diretorio-modal');

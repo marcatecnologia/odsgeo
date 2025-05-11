@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('vertices', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('planilha_ods_id')->constrained()->onDelete('cascade');
+            $table->foreignId('planilha_ods_id')->references('id')->on('planilhas_ods')->onDelete('cascade');
             $table->string('nome_ponto');
             $table->decimal('coordenada_x', 15, 6);
             $table->decimal('coordenada_y', 15, 6);
