@@ -22,9 +22,6 @@
                 </select>
                 <a href="/admin/clientes/create" target="_blank" class="px-3 py-2 rounded bg-primary-600 text-white hover:bg-primary-700 transition" title="Novo Cliente">+
                 </a>
-                <button type="button" wire:click="atualizarClientes" class="px-3 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 transition" title="Recarregar Clientes">
-                    &#x21bb;
-                </button>
             </div>
         </div>
 
@@ -47,9 +44,6 @@
                 </select>
                 <a href="/admin/projetos/create" target="_blank" class="px-3 py-2 rounded bg-primary-600 text-white hover:bg-primary-700 transition" title="Novo Projeto">+
                 </a>
-                <button type="button" wire:click="atualizarProjetos" class="px-3 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 transition" title="Recarregar Projetos">
-                    &#x21bb;
-                </button>
             </div>
         </div>
 
@@ -72,9 +66,6 @@
                 </select>
                 <a href="/admin/servicos/create" target="_blank" class="px-3 py-2 rounded bg-primary-600 text-white hover:bg-primary-700 transition" title="Novo Serviço">+
                 </a>
-                <button type="button" wire:click="atualizarServicos" class="px-3 py-2 rounded bg-gray-600 text-white hover:bg-gray-700 transition" title="Recarregar Serviços">
-                    &#x21bb;
-                </button>
             </div>
         </div>
     </div>
