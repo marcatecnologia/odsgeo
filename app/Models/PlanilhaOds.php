@@ -29,6 +29,7 @@ class PlanilhaOds extends Model
         'rt_telefone',
         'rt_email',
         'proprietario_nome',
+        'tipo_documento',
         'proprietario_cpf_cnpj',
         'proprietario_endereco',
         'proprietario_percentual',
@@ -63,6 +64,59 @@ class PlanilhaOds extends Model
     public function exportarOds()
     {
         try {
+            // Validar dados obrigatórios
+            if (empty($this->nome_imovel)) {
+                throw new \Exception('O nome do imóvel é obrigatório.');
+            }
+
+            if (empty($this->municipio)) {
+                throw new \Exception('O município é obrigatório.');
+            }
+
+            if (empty($this->uf)) {
+                throw new \Exception('A UF é obrigatória.');
+            }
+
+            if (empty($this->tipo_imovel)) {
+                throw new \Exception('O tipo de imóvel é obrigatório.');
+            }
+
+            if (empty($this->area_imovel)) {
+                throw new \Exception('A área do imóvel é obrigatória.');
+            }
+
+            if (empty($this->rt_nome)) {
+                throw new \Exception('O nome do responsável técnico é obrigatório.');
+            }
+
+            if (empty($this->rt_cpf)) {
+                throw new \Exception('O CPF do responsável técnico é obrigatório.');
+            }
+
+            if (empty($this->rt_crea_cau)) {
+                throw new \Exception('O CREA/CAU do responsável técnico é obrigatório.');
+            }
+
+            if (empty($this->proprietario_nome)) {
+                throw new \Exception('O nome do proprietário é obrigatório.');
+            }
+
+            if (empty($this->proprietario_cpf_cnpj)) {
+                throw new \Exception('O CPF/CNPJ do proprietário é obrigatório.');
+            }
+
+            if (empty($this->data_medicao)) {
+                throw new \Exception('A data da medição é obrigatória.');
+            }
+
+            if (empty($this->metodo_utilizado)) {
+                throw new \Exception('O método utilizado é obrigatório.');
+            }
+
+            if (empty($this->tipo_equipamento)) {
+                throw new \Exception('O tipo de equipamento é obrigatório.');
+            }
+
             $service = app(PlanilhaOdsService::class);
             $path = $service->exportar($this);
 
@@ -79,6 +133,8 @@ class PlanilhaOds extends Model
                 ->body('Erro ao exportar planilha ODS: ' . $e->getMessage())
                 ->danger()
                 ->send();
+
+            throw $e;
         }
     }
 } 
