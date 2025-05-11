@@ -34,5 +34,35 @@
             </main>
         </div>
         @livewireScripts
+        <script>
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('button[data-message]');
+            if (btn) {
+                e.stopPropagation();
+                try {
+                    const data = btn.getAttribute('data-message');
+                    if (!data) {
+                        alert('Atributo data-message vazio!');
+                        return;
+                    }
+                    const message = atob(data);
+                    navigator.clipboard.writeText(message).then(function() {
+                        if (window.Filament && Filament.Notifications) {
+                            Filament.Notifications.Notification.make()
+                                .title('Mensagem copiada!')
+                                .success()
+                                .send();
+                        } else {
+                            alert('Mensagem copiada!');
+                        }
+                    }, function(err) {
+                        alert('Erro ao copiar: ' + err);
+                    });
+                } catch (e) {
+                    alert('Erro JS: ' + e.message);
+                }
+            }
+        });
+        </script>
     </body>
 </html>

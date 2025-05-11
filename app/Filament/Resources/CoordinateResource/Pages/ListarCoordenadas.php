@@ -4,7 +4,7 @@ namespace App\Filament\Resources\CoordinateResource\Pages;
 
 use App\Filament\Resources\CoordinateResource;
 use Filament\Resources\Pages\ListRecords;
-use Livewire\Livewire;
+use Filament\Actions\Action;
 
 class ListarCoordenadas extends ListRecords
 {
@@ -20,12 +20,10 @@ class ListarCoordenadas extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            \Filament\Actions\Action::make('import')
+            Action::make('import')
                 ->label('Importar Coordenadas')
                 ->icon('heroicon-o-arrow-up-tray')
-                ->action(function () {
-                    Livewire::mount('importar-coordenadas');
-                }),
+                ->modalContent(view('livewire.importar-coordenadas')),
         ];
     }
 } 

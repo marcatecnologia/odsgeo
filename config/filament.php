@@ -18,7 +18,11 @@ return [
     'resources' => [
         'namespace' => 'App\\Filament\\Resources',
         'path' => app_path('Filament/Resources'),
-        'register' => [],
+        'register' => [
+            \App\Filament\Resources\ServiceResource::class,
+            \App\Filament\Resources\CoordinateResource::class,
+            \App\Filament\Resources\LogResource::class,
+        ],
     ],
     'widgets' => [
         'namespace' => 'App\\Filament\\Widgets',

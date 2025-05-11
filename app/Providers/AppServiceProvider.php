@@ -19,6 +19,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Registrar componente Livewire para importação de coordenadas
+        \Livewire\Livewire::component('importar-coordenadas', \App\Livewire\ImportarCoordenadas::class);
+
         // Registrar regra de validação para CPF
         \Illuminate\Support\Facades\Validator::extend('cpf', function ($attribute, $value, $parameters, $validator) {
             $value = preg_replace('/[^0-9]/', '', $value);

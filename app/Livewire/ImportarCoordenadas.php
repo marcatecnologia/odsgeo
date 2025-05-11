@@ -8,6 +8,7 @@ use Livewire\Component;
 use Livewire\WithFileUploads;
 use League\Csv\Reader;
 use League\Csv\Writer;
+use Filament\Notifications\Notification;
 
 class ImportarCoordenadas extends Component
 {
@@ -42,21 +43,40 @@ class ImportarCoordenadas extends Component
         $this->validate();
 
         if (!session()->has('current_service_id')) {
-            $this->addError('service', 'Nenhum serviço selecionado.');
+            Notification::make()
+                ->title('Erro')
+                ->body('Nenhum serviço selecionado.')
+                ->danger()
+                ->send();
             return;
         }
 
-        $csv = Reader::createFromPath($this->file->getRealPath());
-        $csv->setDelimiter($this->detectDelimiter($this->file->getRealPath()));
-        $records = $csv->getRecords();
+        try {
+            $csv = Reader::createFromPath($this->file->getRealPath());
+            $csv->setDelimiter($this->detectDelimiter($this->file->getRealPath()));
+            $records = $csv->getRecords();
 
-        foreach ($records as $record) {
-            $this->processRecord($record);
+            $total = 0;
+            foreach ($records as $record) {
+                $this->processRecord($record);
+                $total++;
+            }
+
+            Notification::make()
+                ->title('Sucesso')
+                ->body("{$total} coordenadas importadas com sucesso.")
+                ->success()
+                ->send();
+
+            $this->reset(['file']);
+            $this->dispatch('close-modal');
+        } catch (\Exception $e) {
+            Notification::make()
+                ->title('Erro')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
         }
-
-        $this->showModal = false;
-        $this->reset(['file']);
-        $this->dispatch('coordenadas-importadas');
     }
 
     protected function processRecord($record)
