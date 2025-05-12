@@ -9,8 +9,11 @@ class Kernel extends ConsoleKernel
 {
     protected function schedule(Schedule $schedule): void
     {
-        // Limpar planilhas ODS antigas diariamente às 3h da manhã
-        $schedule->command('planilhas:limpar --dias=7')->dailyAt('03:00');
+        // Sincroniza as camadas WMS diariamente às 3h da manhã
+        $schedule->command('sigef:sincronizar-camadas-wms')
+            ->dailyAt('03:00')
+            ->withoutOverlapping()
+            ->runInBackground();
     }
 
     protected function commands(): void

@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Services\SigefWfsService;
+use GuzzleHttp\Client;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -11,7 +13,24 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->singleton(SigefWfsService::class, function ($app) {
+            $client = new Client([
+                'verify' => storage_path('certs/sigef.pem'),
+                'timeout' => 10,
+                'connect_timeout' => 5,
+                'curl' => [
+                    CURLOPT_SSL_VERIFYPEER => true,
+                    CURLOPT_SSL_VERIFYHOST => 2,
+                    CURLOPT_CAINFO => storage_path('certs/sigef.pem'),
+                ],
+                'headers' => [
+                    'User-Agent' => 'ODSGeo/1.0',
+                    'Accept' => 'application/json',
+                ],
+            ]);
+
+            return new SigefWfsService($client);
+        });
     }
 
     /**

@@ -10,8 +10,10 @@
         "doctrine/dbal": "^4.2",
         "filament/filament": "^3.2",
         "laravel/framework": "^12.0",
+        "laravel/sanctum": "^4.1",
         "laravel/tinker": "^2.10.1",
-        "proj4php/proj4php": "^2.0"
+        "proj4php/proj4php": "^2.0",
+        "spatie/laravel-permission": "^6.17"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
