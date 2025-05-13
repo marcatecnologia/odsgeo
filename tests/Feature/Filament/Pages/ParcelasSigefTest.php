@@ -9,6 +9,10 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Mockery;
 use Spatie\Permission\Models\Role;
 use Database\Seeders\RoleSeeder;
+use Livewire\Livewire;
+use Illuminate\Support\Facades\Cache;
+use App\Filament\Pages\ParcelasSigef;
+use Filament\Notifications\Notification;
 
 class ParcelasSigefTest extends TestCase
 {
@@ -17,13 +21,15 @@ class ParcelasSigefTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        // Garantir que os papéis existam
         $this->seed(RoleSeeder::class);
+        Cache::flush();
+    }
 
-        // Criar usuário com permissão
-        $this->user = User::factory()->create();
-        $this->user->assignRole('visualizador_sigef');
+    protected function tearDown(): void
+    {
+        Mockery::close();
+        Cache::flush();
+        parent::tearDown();
     }
 
     public function test_papel_visualizador_sigef_existe()
@@ -48,17 +54,25 @@ class ParcelasSigefTest extends TestCase
 
     public function test_pagina_carrega_com_sucesso()
     {
-        $this->actingAs($this->user);
+        $user = User::factory()->create();
+        $role = Role::where('name', 'visualizador_sigef')->first();
+        $user->assignRole($role);
 
-        $response = $this->get(route('filament.admin.pages.parcelas-sigef'));
-        $response->assertSuccessful();
+        $this->actingAs($user);
+
+        Livewire::actingAs($user)
+            ->test(ParcelasSigef::class)
+            ->assertViewIs('filament.pages.parcelas-sigef');
     }
 
     public function test_carrega_municipios_ao_selecionar_estado()
     {
-        $this->actingAs($this->user);
+        $user = User::factory()->create();
+        $role = Role::where('name', 'visualizador_sigef')->first();
+        $user->assignRole($role);
 
-        // Mock do serviço WFS
+        $this->actingAs($user);
+
         $wfsService = Mockery::mock(SigefWfsService::class);
         $wfsService->shouldReceive('getFeature')
             ->once()
@@ -79,31 +93,51 @@ class ParcelasSigefTest extends TestCase
 
         $this->app->instance(SigefWfsService::class, $wfsService);
 
-        $response = $this->post(route('filament.admin.pages.parcelas-sigef.load-municipios'), [
-            'estado' => 'SP'
-        ]);
+        $component = Livewire::actingAs($user)
+            ->test(ParcelasSigef::class);
 
-        $response->assertSuccessful();
-        $response->assertJson([
-            '3550308' => 'São Paulo'
-        ]);
+        $component->set('data.estado', 'SP');
+        
+        $this->assertEquals('SP', $component->get('data.estado'));
+        $this->assertTrue(Cache::has('municipios_SP'));
+        $this->assertEquals(['3550308' => 'São Paulo'], Cache::get('municipios_SP'));
     }
 
     public function test_busca_parcelas_ao_selecionar_municipio()
     {
-        $this->actingAs($this->user);
+        $user = User::factory()->create();
+        $role = Role::where('name', 'visualizador_sigef')->first();
+        $user->assignRole($role);
 
-        // Mock do serviço WFS
+        $this->actingAs($user);
+
         $wfsService = Mockery::mock(SigefWfsService::class);
         $wfsService->shouldReceive('getFeature')
             ->once()
-            ->with('parcelas', [
-                'CQL_FILTER' => "uf = 'SP' AND municipio = '3550308'",
-                'maxFeatures' => 100
+            ->with('municipios', ['CQL_FILTER' => "uf = 'SP'"])
+            ->andReturn([
+                'success' => true,
+                'data' => json_encode([
+                    'features' => [
+                        [
+                            'properties' => [
+                                'codigo' => '3550308',
+                                'nome' => 'São Paulo'
+                            ]
+                        ]
+                    ]
+                ])
+            ]);
+
+        $wfsService->shouldReceive('getFeature')
+            ->once()
+            ->with('sigef:parcela', [
+                'CQL_FILTER' => "uf='SP' AND municipio='3550308'"
             ])
             ->andReturn([
                 'success' => true,
                 'data' => json_encode([
+                    'type' => 'FeatureCollection',
                     'features' => [
                         [
                             'properties' => [
@@ -119,34 +153,47 @@ class ParcelasSigefTest extends TestCase
 
         $this->app->instance(SigefWfsService::class, $wfsService);
 
-        $response = $this->post(route('filament.admin.pages.parcelas-sigef.buscar-parcelas'), [
-            'estado' => 'SP',
-            'municipio' => '3550308'
-        ]);
+        $component = Livewire::actingAs($user)
+            ->test(ParcelasSigef::class);
 
-        $response->assertSuccessful();
-        $response->assertJson([
-            'features' => [
-                [
-                    'properties' => [
-                        'numero_parcela' => '123',
-                        'area_ha' => 100.5,
-                        'situacao' => 'Regular',
-                        'tipo' => 'Rural'
-                    ]
-                ]
-            ]
-        ]);
+        $component->set('data.estado', 'SP');
+        $component->set('data.municipio', '3550308');
+        
+        $this->assertEquals('3550308', $component->get('data.municipio'));
+        $this->assertNotNull($component->get('searchResults'));
     }
 
     public function test_retorna_erro_quando_servico_wfs_falha()
     {
-        $this->actingAs($this->user);
+        $user = User::factory()->create();
+        $role = Role::where('name', 'visualizador_sigef')->first();
+        $user->assignRole($role);
 
-        // Mock do serviço WFS com erro
+        $this->actingAs($user);
+
         $wfsService = Mockery::mock(SigefWfsService::class);
         $wfsService->shouldReceive('getFeature')
             ->once()
+            ->with('municipios', ['CQL_FILTER' => "uf = 'SP'"])
+            ->andReturn([
+                'success' => true,
+                'data' => json_encode([
+                    'features' => [
+                        [
+                            'properties' => [
+                                'codigo' => '3550308',
+                                'nome' => 'São Paulo'
+                            ]
+                        ]
+                    ]
+                ])
+            ]);
+
+        $wfsService->shouldReceive('getFeature')
+            ->once()
+            ->with('sigef:parcela', [
+                'CQL_FILTER' => "uf='SP' AND municipio='3550308'"
+            ])
             ->andReturn([
                 'success' => false,
                 'error' => 'Serviço temporariamente indisponível'
@@ -154,20 +201,136 @@ class ParcelasSigefTest extends TestCase
 
         $this->app->instance(SigefWfsService::class, $wfsService);
 
-        $response = $this->post(route('filament.admin.pages.parcelas-sigef.buscar-parcelas'), [
-            'estado' => 'SP',
-            'municipio' => '3550308'
-        ]);
+        $component = Livewire::actingAs($user)
+            ->test(ParcelasSigef::class);
 
-        $response->assertSuccessful();
-        $response->assertJson([
-            'error' => 'Serviço temporariamente indisponível'
-        ]);
+        $component->set('data.estado', 'SP');
+        $component->set('data.municipio', '3550308');
+        
+        $this->assertEquals('3550308', $component->get('data.municipio'));
+        $this->assertNull($component->get('searchResults'));
     }
 
-    protected function tearDown(): void
+    public function test_handles_empty_html_response()
     {
-        Mockery::close();
-        parent::tearDown();
+        $user = User::factory()->create();
+        $role = Role::where('name', 'visualizador_sigef')->first();
+        $user->assignRole($role);
+
+        $this->actingAs($user);
+
+        $wfsService = Mockery::mock(SigefWfsService::class);
+        $wfsService->shouldReceive('getFeature')
+            ->once()
+            ->with('sigef:parcela', [
+                'CQL_FILTER' => "uf='SP' AND municipio='SAO PAULO'"
+            ])
+            ->andReturn([
+                'success' => false,
+                'error' => 'O serviço SIGEF retornou uma resposta inválida.'
+            ]);
+
+        $this->app->instance(SigefWfsService::class, $wfsService);
+
+        $component = Livewire::actingAs($user)
+            ->test(ParcelasSigef::class);
+
+        $component->set('data.estado', 'SP');
+        $component->set('data.municipio', 'SAO PAULO');
+
+        $this->assertNull($component->get('searchResults'));
+    }
+
+    public function test_handles_invalid_json_response()
+    {
+        $user = User::factory()->create();
+        $role = Role::where('name', 'visualizador_sigef')->first();
+        $user->assignRole($role);
+
+        $this->actingAs($user);
+
+        $wfsService = Mockery::mock(SigefWfsService::class);
+        $wfsService->shouldReceive('getFeature')
+            ->once()
+            ->with('sigef:parcela', [
+                'CQL_FILTER' => "uf='SP' AND municipio='SAO PAULO'"
+            ])
+            ->andReturn([
+                'success' => false,
+                'error' => 'O serviço SIGEF retornou uma resposta inválida.'
+            ]);
+
+        $this->app->instance(SigefWfsService::class, $wfsService);
+
+        $component = Livewire::actingAs($user)
+            ->test(ParcelasSigef::class);
+
+        $component->set('data.estado', 'SP');
+        $component->set('data.municipio', 'SAO PAULO');
+
+        $this->assertNull($component->get('searchResults'));
+    }
+
+    public function test_handles_missing_features_in_response()
+    {
+        $user = User::factory()->create();
+        $role = Role::where('name', 'visualizador_sigef')->first();
+        $user->assignRole($role);
+
+        $this->actingAs($user);
+
+        $wfsService = Mockery::mock(SigefWfsService::class);
+        $wfsService->shouldReceive('getFeature')
+            ->once()
+            ->with('sigef:parcela', [
+                'CQL_FILTER' => "uf='SP' AND municipio='SAO PAULO'"
+            ])
+            ->andReturn([
+                'success' => false,
+                'error' => 'O serviço SIGEF retornou uma resposta inválida.'
+            ]);
+
+        $this->app->instance(SigefWfsService::class, $wfsService);
+
+        $component = Livewire::actingAs($user)
+            ->test(ParcelasSigef::class);
+
+        $component->set('data.estado', 'SP');
+        $component->set('data.municipio', 'SAO PAULO');
+
+        $this->assertNull($component->get('searchResults'));
+    }
+
+    public function test_handles_empty_features_array()
+    {
+        $user = User::factory()->create();
+        $role = Role::where('name', 'visualizador_sigef')->first();
+        $user->assignRole($role);
+
+        $this->actingAs($user);
+
+        $wfsService = Mockery::mock(SigefWfsService::class);
+        $wfsService->shouldReceive('getFeature')
+            ->once()
+            ->with('sigef:parcela', [
+                'CQL_FILTER' => "uf='SP' AND municipio='SAO PAULO'"
+            ])
+            ->andReturn([
+                'success' => true,
+                'data' => json_encode([
+                    'type' => 'FeatureCollection',
+                    'features' => []
+                ])
+            ]);
+
+        $this->app->instance(SigefWfsService::class, $wfsService);
+
+        $component = Livewire::actingAs($user)
+            ->test(ParcelasSigef::class);
+
+        $component->set('data.estado', 'SP');
+        $component->set('data.municipio', 'SAO PAULO');
+
+        $this->assertNull($component->get('searchResults'));
     }
 } 

@@ -26,6 +26,8 @@ class RoleSeeder extends Seeder
             'manage_sigef' => 'Gerenciar Parcelas SIGEF',
         ];
 
+        $permissionNames = array_keys($permissions);
+
         foreach ($permissions as $name => $description) {
             Permission::findOrCreate($name, 'web');
         }
@@ -34,7 +36,7 @@ class RoleSeeder extends Seeder
         $adminRole = Role::findByName('admin', 'web');
         $visualizadorRole = Role::findByName('visualizador_sigef', 'web');
 
-        $adminRole->givePermissionTo($permissions);
+        $adminRole->givePermissionTo($permissionNames);
         $visualizadorRole->givePermissionTo(['view_sigef']);
     }
 } 

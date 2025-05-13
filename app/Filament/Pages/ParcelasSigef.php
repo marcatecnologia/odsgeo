@@ -9,25 +9,33 @@ use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use App\Services\SigefWfsService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 
 class ParcelasSigef extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-map';
     protected static ?string $navigationLabel = 'Parcelas SIGEF';
-    protected static ?string $title = 'Consulta de Parcelas SIGEF';
-    protected static ?int $navigationSort = 2;
+    protected static ?string $title = 'Buscar Parcelas SIGEF';
+    protected static ?int $navigationSort = 3;
     protected static string $view = 'filament.pages.parcelas-sigef';
+    protected static ?string $slug = 'parcelas-sigef';
 
     public ?array $data = [];
     public ?array $searchResults = null;
+    public ?array $geojson = null;
     public bool $isSearching = false;
 
     protected SigefWfsService $wfsService;
 
-    public function mount(SigefWfsService $wfsService): void
+    public function boot(SigefWfsService $wfsService): void
     {
         $this->wfsService = $wfsService;
+    }
+
+    public function mount(): void
+    {
         $this->form->fill();
     }
 
@@ -109,13 +117,33 @@ class ParcelasSigef extends Page
                 ]);
 
                 if ($response['success']) {
-                    $municipios = collect(json_decode($response['data'], true)['features'])
-                        ->pluck('properties.nome', 'properties.codigo')
-                        ->toArray();
+                    $data = json_decode($response['data'], true);
                     
-                    Cache::put($cacheKey, $municipios, 3600);
+                    if (isset($data['features']) && is_array($data['features'])) {
+                        $municipios = collect($data['features'])
+                            ->pluck('properties.nome', 'properties.codigo')
+                            ->toArray();
+                        
+                        Cache::put($cacheKey, $municipios, 3600);
+                    } else {
+                        Log::error('Formato de resposta inválido para municípios', [
+                            'estado' => $estado,
+                            'response' => $response['data']
+                        ]);
+                        
+                        Notification::make()
+                            ->title('Erro ao carregar municípios')
+                            ->body('Formato de resposta inválido do serviço.')
+                            ->danger()
+                            ->send();
+                    }
                 }
             } catch (\Exception $e) {
+                Log::error('Erro ao carregar municípios', [
+                    'estado' => $estado,
+                    'error' => $e->getMessage()
+                ]);
+
                 Notification::make()
                     ->title('Erro ao carregar municípios')
                     ->body('Não foi possível carregar a lista de municípios. Tente novamente em alguns minutos.')
@@ -131,47 +159,39 @@ class ParcelasSigef extends Page
         return Cache::get($cacheKey, []);
     }
 
-    public function buscarParcelas(): void
+    public function buscarParcelas()
     {
-        if (empty($this->data['estado']) || empty($this->data['municipio'])) {
-            return;
-        }
-
-        $this->isSearching = true;
-        $this->searchResults = null;
+        $this->validate([
+            'data.estado' => 'required|string|size:2',
+            'data.municipio' => 'required|string|size:7'
+        ]);
 
         try {
-            $estado = $this->data['estado'];
-            $municipio = $this->data['municipio'];
+            $result = $this->wfsService->getParcelasPorMunicipio($this->data['estado'], $this->data['municipio']);
 
-            $response = $this->wfsService->getFeature('parcelas', [
-                'CQL_FILTER' => "uf = '{$estado}' AND municipio = '{$municipio}'",
-                'maxFeatures' => 100
+            if (!$result['success']) {
+                $this->addError('sigef', $result['error']);
+                $this->geojson = null;
+                return;
+            }
+
+            if (!$result['has_data']) {
+                $this->geojson = null;
+                $this->addError('sigef', 'Nenhuma parcela encontrada para este município.');
+                return;
+            }
+
+            $this->geojson = $result['data'];
+            $this->dispatch('parcelasRecebidas', $this->geojson);
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar parcelas', [
+                'error' => $e->getMessage(),
+                'estado' => $this->data['estado'],
+                'municipio' => $this->data['municipio']
             ]);
 
-            if ($response['success']) {
-                $this->searchResults = json_decode($response['data'], true);
-                
-                Notification::make()
-                    ->title('Busca realizada com sucesso')
-                    ->body('Parcelas encontradas: ' . count($this->searchResults['features']))
-                    ->success()
-                    ->send();
-            } else {
-                Notification::make()
-                    ->title('Erro na busca')
-                    ->body('Não foi possível realizar a busca. Tente novamente em alguns minutos.')
-                    ->danger()
-                    ->send();
-            }
-        } catch (\Exception $e) {
-            Notification::make()
-                ->title('Erro na busca')
-                ->body('Ocorreu um erro ao buscar as parcelas. Tente novamente em alguns minutos.')
-                ->danger()
-                ->send();
-        } finally {
-            $this->isSearching = false;
+            $this->addError('sigef', 'Ocorreu um erro ao buscar as parcelas. Tente novamente mais tarde.');
+            $this->geojson = null;
         }
     }
 

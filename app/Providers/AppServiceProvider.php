@@ -40,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Registrar componente Livewire para importação de coordenadas
         \Livewire\Livewire::component('importar-coordenadas', \App\Livewire\ImportarCoordenadas::class);
+        \Livewire\Livewire::component('sigef-parcelas', \App\Livewire\SigefParcelas::class);
 
         // Registrar regra de validação para CPF
         \Illuminate\Support\Facades\Validator::extend('cpf', function ($attribute, $value, $parameters, $validator) {
