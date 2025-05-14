@@ -21,3 +21,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+public/geojson/limites/municipios.geojson
+storage/app/geojson/municipios.geojson
+Documentos de referência do SIGEF/*
