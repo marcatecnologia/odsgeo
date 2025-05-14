@@ -19,24 +19,46 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label for="estado" class="block text-sm font-medium text-gray-700">Estado</label>
-                    <select wire:model="estado" id="estado" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">Selecione...</option>
-                        @foreach($estados as $uf => $nome)
-                            <option value="{{ $uf }}">{{ $nome }}</option>
-                        @endforeach
+                    <select wire:model.live="estado" id="estado" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">Selecione um estado</option>
+                        <option value="AC">Acre</option>
+                        <option value="AL">Alagoas</option>
+                        <option value="AP">Amapá</option>
+                        <option value="AM">Amazonas</option>
+                        <option value="BA">Bahia</option>
+                        <option value="CE">Ceará</option>
+                        <option value="DF">Distrito Federal</option>
+                        <option value="ES">Espírito Santo</option>
+                        <option value="GO">Goiás</option>
+                        <option value="MA">Maranhão</option>
+                        <option value="MT">Mato Grosso</option>
+                        <option value="MS">Mato Grosso do Sul</option>
+                        <option value="MG">Minas Gerais</option>
+                        <option value="PA">Pará</option>
+                        <option value="PB">Paraíba</option>
+                        <option value="PR">Paraná</option>
+                        <option value="PE">Pernambuco</option>
+                        <option value="PI">Piauí</option>
+                        <option value="RJ">Rio de Janeiro</option>
+                        <option value="RN">Rio Grande do Norte</option>
+                        <option value="RS">Rio Grande do Sul</option>
+                        <option value="RO">Rondônia</option>
+                        <option value="RR">Roraima</option>
+                        <option value="SC">Santa Catarina</option>
+                        <option value="SP">São Paulo</option>
+                        <option value="SE">Sergipe</option>
+                        <option value="TO">Tocantins</option>
                     </select>
-                    @error('estado') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
                     <label for="municipio" class="block text-sm font-medium text-gray-700">Município</label>
-                    <select wire:model="municipio" id="municipio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">Selecione...</option>
-                        @foreach($municipios as $codigo => $nome)
-                            <option value="{{ $codigo }}">{{ $nome }}</option>
+                    <select wire:model.live="municipio" id="municipio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500" {{ empty($municipios) ? 'disabled' : '' }}>
+                        <option value="">Selecione um município</option>
+                        @foreach($municipios as $mun)
+                            <option value="{{ $mun['codigo'] }}">{{ $mun['nome'] }}</option>
                         @endforeach
                     </select>
-                    @error('municipio') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -59,17 +81,6 @@
         <!-- Formulário de busca por coordenada -->
         <div x-show="$wire.activeTab === 'coordenada'" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="estado_coord" class="block text-sm font-medium text-gray-700">Estado</label>
-                    <select wire:model="estado" id="estado_coord" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
-                        <option value="">Selecione...</option>
-                        @foreach($estados as $uf => $nome)
-                            <option value="{{ $uf }}">{{ $nome }}</option>
-                        @endforeach
-                    </select>
-                    @error('estado') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
-                </div>
-
                 <div>
                     <label for="raio" class="block text-sm font-medium text-gray-700">Raio de Busca (metros)</label>
                     <input type="number" wire:model="raio" id="raio" min="100" max="10000" step="100"
@@ -129,79 +140,31 @@
             </div>
         @endif
 
-        <div id="map" class="h-[600px] rounded-lg shadow-lg"></div>
+        <div class="h-[600px] rounded-lg overflow-hidden border border-gray-300">
+            <div id="map" class="w-full h-full"></div>
+        </div>
     </div>
 
     @push('scripts')
     <script>
         document.addEventListener('livewire:initialized', function () {
-            let map = L.map('map').setView([-15.7801, -47.9292], 4);
+            // Inicializa o mapa
+            const map = L.map('map').setView([-15.7801, -47.9292], 4);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
 
-            let geojsonLayer = null;
-            let centerMarker = null;
-            let searchCircle = null;
-
-            // Evento de clique no mapa
-            map.on('click', function(e) {
-                if ($wire.activeTab === 'coordenada') {
-                    $wire.atualizarCoordenadas(e.latlng.lat, e.latlng.lng);
-                    $wire.buscarParcelasPorCoordenada();
-                }
+            // Escuta eventos do Livewire
+            Livewire.on('centralizar-mapa', (data) => {
+                map.setView([data.lat, data.lng], data.zoom);
             });
 
-            Livewire.on('parcelasRecebidas', (geojson) => {
-                if (geojsonLayer) {
-                    map.removeLayer(geojsonLayer);
+            // Adiciona camada GeoJSON quando disponível
+            Livewire.on('geojson-atualizado', (data) => {
+                if (window.geojsonLayer) {
+                    map.removeLayer(window.geojsonLayer);
                 }
-                if (centerMarker) {
-                    map.removeLayer(centerMarker);
-                }
-                if (searchCircle) {
-                    map.removeLayer(searchCircle);
-                }
-
-                geojsonLayer = L.geoJSON(JSON.parse(geojson), {
-                    style: {
-                        color: '#FFD700',
-                        weight: 2,
-                        opacity: 0.8,
-                        fillOpacity: 0.3
-                    },
-                    onEachFeature: function(feature, layer) {
-                        if (feature.properties) {
-                            let popupContent = '<div class="text-sm">';
-                            for (let prop in feature.properties) {
-                                popupContent += `<strong>${prop}:</strong> ${feature.properties[prop]}<br>`;
-                            }
-                            popupContent += '</div>';
-                            layer.bindPopup(popupContent);
-                        }
-                    }
-                }).addTo(map);
-
-                // Adiciona marcador central e círculo de busca se houver coordenada central
-                if ($wire.coordenadaCentral) {
-                    centerMarker = L.marker([$wire.coordenadaCentral.lat, $wire.coordenadaCentral.lon], {
-                        icon: L.divIcon({
-                            className: 'custom-div-icon',
-                            html: `<div style="background-color: #FF0000; width: 10px; height: 10px; border-radius: 50%; border: 2px solid white;"></div>`,
-                            iconSize: [10, 10],
-                            iconAnchor: [5, 5]
-                        })
-                    }).addTo(map);
-
-                    searchCircle = L.circle([$wire.coordenadaCentral.lat, $wire.coordenadaCentral.lon], {
-                        radius: $wire.raio,
-                        color: '#FF0000',
-                        fillColor: '#FF0000',
-                        fillOpacity: 0.1
-                    }).addTo(map);
-                }
-
-                map.fitBounds(geojsonLayer.getBounds());
+                window.geojsonLayer = L.geoJSON(data).addTo(map);
             });
         });
     </script>

@@ -126,7 +126,9 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
     let map, marker, circle, parcelasLayer;
-    let municipioCentroides = @json($municipioCentroides ?? []);
+    let municipioLayer = null;
+    let estadoLayer = null;
+    let centroides = {};
 
     function setMapViewToMunicipio(centroide) {
         if (map && centroide) {
@@ -163,6 +165,46 @@
         }
     }
 
+    // Função para desenhar o limite do estado
+    function desenharLimiteEstado(uf) {
+        fetch('/geojson/limites/estados.geojson')
+            .then(res => res.json())
+            .then(geojson => {
+                if (estadoLayer) map.removeLayer(estadoLayer);
+                // Ajuste o campo conforme o seu GeoJSON, geralmente SIGLA_UF ou UF
+                const feature = geojson.features.find(f => 
+                    f.properties.SIGLA_UF === uf || f.properties.UF === uf
+                );
+                if (feature) {
+                    estadoLayer = L.geoJSON(feature, {
+                        style: { color: '#00BFFF', weight: 3, fillOpacity: 0 }
+                    }).addTo(map);
+                    map.fitBounds(estadoLayer.getBounds());
+                }
+            });
+    }
+
+    // Função para desenhar o limite do município
+    function desenharLimiteMunicipio(codigo_ibge) {
+        fetch('/geojson/limites/municipios.geojson')
+            .then(res => res.json())
+            .then(geojson => {
+                if (municipioLayer) map.removeLayer(municipioLayer);
+                // Ajuste o campo conforme o seu GeoJSON, geralmente CD_MUN, CODIGO_IBGE ou similar
+                const feature = geojson.features.find(f => 
+                    f.properties.CD_MUN == codigo_ibge || 
+                    f.properties.CODIGO_IBGE == codigo_ibge || 
+                    f.properties.cod_ibge == codigo_ibge
+                );
+                if (feature) {
+                    municipioLayer = L.geoJSON(feature, {
+                        style: { color: '#FFD700', weight: 2, fillOpacity: 0.1 }
+                    }).addTo(map);
+                    map.fitBounds(municipioLayer.getBounds());
+                }
+            });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         if (!map) {
             map = L.map('map').setView([-15.77972, -47.92972], 4);
@@ -178,26 +220,10 @@
             window.livewire.find(document.querySelector('[wire\:id]').getAttribute('wire:id')).set('longitude', lng.toFixed(6));
             drawMarkerAndCircle(lat, lng, document.getElementById('raio').value || 1000);
         });
-    });
 
-    // Atualiza marcador/círculo ao alterar campos
-    document.addEventListener('input', function(e) {
-        if (['latitude','longitude','raio'].includes(e.target.id)) {
-            const lat = parseFloat(document.getElementById('latitude').value);
-            const lng = parseFloat(document.getElementById('longitude').value);
-            const raio = parseFloat(document.getElementById('raio').value) || 1000;
-            if (!isNaN(lat) && !isNaN(lng)) {
-                drawMarkerAndCircle(lat, lng, raio);
-            }
-        }
-    });
-
-    // Carregamento de municípios via JS puro
-    document.addEventListener('DOMContentLoaded', function () {
+        // Carregamento de municípios via JS puro
         const estadoSelect = document.getElementById('estado-select');
         const municipioSelect = document.getElementById('municipio-select');
-        let centroides = {};
-
         estadoSelect.addEventListener('change', function () {
             const uf = this.value;
             municipioSelect.innerHTML = '<option value="">Carregando municípios...</option>';
@@ -207,6 +233,8 @@
                 municipioSelect.disabled = true;
                 return;
             }
+            // Desenhar limite do estado
+            desenharLimiteEstado(uf);
             // ATENÇÃO: Os arquivos devem estar em public/municipios/UF.json
             fetch(`/municipios/${uf}.json`)
                 .then(response => response.json())
@@ -233,7 +261,21 @@
             // Atualiza o campo hidden do Livewire
             window.livewire.find(document.querySelector('[wire\:id]').getAttribute('wire:id')).set('municipio', codigo);
             window.livewire.find(document.querySelector('[wire\:id]').getAttribute('wire:id')).set('estado', estadoSelect.value);
+            // Desenhar limite do município
+            desenharLimiteMunicipio(codigo);
         });
+    });
+
+    // Atualiza marcador/círculo ao alterar campos
+    document.addEventListener('input', function(e) {
+        if (['latitude','longitude','raio'].includes(e.target.id)) {
+            const lat = parseFloat(document.getElementById('latitude').value);
+            const lng = parseFloat(document.getElementById('longitude').value);
+            const raio = parseFloat(document.getElementById('raio').value) || 1000;
+            if (!isNaN(lat) && !isNaN(lng)) {
+                drawMarkerAndCircle(lat, lng, raio);
+            }
+        }
     });
 
     // Renderiza parcelas ao receber GeoJSON

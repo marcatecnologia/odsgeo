@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  workspace:
+    image: laradock/workspace:latest
+    container_name: odsgeo-workspace
+    restart: unless-stopped
+    environment:
+      - PHP_VERSION=${PHP_VERSION}
+      - INSTALL_XDEBUG=${WORKSPACE_INSTALL_XDEBUG}
+      - INSTALL_PG_CLIENT=${WORKSPACE_INSTALL_PG_CLIENT}
+      - INSTALL_POSTGIS=${WORKSPACE_INSTALL_POSTGIS}
+    volumes:
+      - ../:/var/www
+    networks:
+      - ${NETWORK_NAME}
+
+  postgres:
+    image: postgis/postgis:${POSTGRES_VERSION}-3.3
+    container_name: odsgeo-postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ${NETWORK_NAME}
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: odsgeo-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "${PGADMIN_PORT}:80"
+    depends_on:
+      - postgres
+    networks:
+      - ${NETWORK_NAME}
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  ${NETWORK_NAME}:
+    driver: bridge 

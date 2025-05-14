@@ -1,0 +1,3872 @@
+[
+    {
+        "codigo_ibge": null,
+        "nome": "Adamantina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Adolfo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Aguaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Águas da Prata",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Águas de Lindóia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Águas de Santa Bárbara",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Águas de São Pedro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Agudos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alambari",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alfredo Marcondes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Altair",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Altinópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alto Alegre",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alumínio",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Álvares Florence",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Álvares Machado",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Álvaro de Carvalho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alvinlândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Americana",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Américo Brasiliense",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Américo de Campos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Amparo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Analândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Andradina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Angatuba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Anhembi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Anhumas",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Aparecida",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Aparecida d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Apiaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Araçariguama",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Araçatuba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Araçoiaba da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Aramina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Arandu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Arapeí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Araraquara",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Araras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Arco-Íris",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Arealva",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Areias",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Areiópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ariranha",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Artur Nogueira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Arujá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Aspásia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Assis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Atibaia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Auriflama",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Avaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Avanhandava",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Avaré",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bady Bassitt",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Balbinos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bálsamo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bananal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barão de Antonina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barbosa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bariri",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barra Bonita",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barra do Chapéu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barra do Turvo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barretos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barrinha",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barueri",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bastos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Batatais",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bauru",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bebedouro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bento de Abreu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bernardino de Campos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bertioga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bilac",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Birigui",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Biritiba-Mirim",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Boa Esperança do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bocaina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bofete",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Boituva",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bom Jesus dos Perdões",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bom Sucesso de Itararé",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Borá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Boracéia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Borborema",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Borebi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Botucatu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bragança Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Braúna",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Brejo Alegre",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Brodowski",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Brotas",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Buri",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Buritama",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Buritizal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cabrália Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cabreúva",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Caçapava",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cachoeira Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Caconde",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cafelândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Caiabu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Caieiras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Caiuá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cajamar",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cajati",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cajobi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cajuru",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Campina do Monte Alegre",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Campinas",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Campo Limpo Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Campos do Jordão",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Campos Novos Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cananéia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Canas",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cândido Mota",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cândido Rodrigues",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Canitar",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Capão Bonito",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Capela do Alto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Capivari",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Caraguatatuba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Carapicuíba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cardoso",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Casa Branca",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cássia dos Coqueiros",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Castilho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Catanduva",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Catiguá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cedral",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cerqueira César",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cerquilho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cesário Lange",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Charqueada",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Chavantes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Clementina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Colina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Colômbia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Conchal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Conchas",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cordeirópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Coroados",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Coronel Macedo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Corumbataí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cosmópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cosmorama",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cotia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cravinhos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cristais Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cruzália",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cruzeiro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cubatão",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cunha",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Descalvado",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Diadema",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Dirce Reis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Divinolândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Dobrada",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Dois Córregos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Dolcinópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Dourado",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Dracena",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Duartina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Dumont",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Echaporã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Eldorado",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Elias Fausto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Elisiário",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Embaúba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Embu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Embu-Guaçu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Emilianópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Engenheiro Coelho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Espírito Santo do Pinhal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Espírito Santo do Turvo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Estiva Gerbi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Estrela d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Estrela do Norte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Euclides da Cunha Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Fartura",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Fernando Prestes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Fernandópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Fernão",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ferraz de Vasconcelos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Flora Rica",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Floreal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Florínia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Flórida Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Franca",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Francisco Morato",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Franco da Rocha",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Gabriel Monteiro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Gália",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Garça",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Gastão Vidigal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Gavião Peixoto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "General Salgado",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Getulina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Glicério",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guaiçara",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guaimbê",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guaíra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guapiaçu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guapiara",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guará",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guaraçaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guaraci",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guarani d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guarantã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guararapes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guararema",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guaratinguetá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guareí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guariba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guarujá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guarulhos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guatapará",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guzolândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Herculândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Holambra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Hortolândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Iacanga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Iacri",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Iaras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ibaté",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ibirá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ibirarema",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ibitinga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ibiúna",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Icém",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Iepê",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Igaraçu do Tietê",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Igarapava",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Igaratá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Iguape",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ilha Comprida",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ilha Solteira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ilhabela",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Indaiatuba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Indiana",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Indiaporã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Inúbia Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ipauçu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Iperó",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ipeúna",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ipiguá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Iporanga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ipuã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Iracemápolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Irapuã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Irapuru",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itaberá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itajobi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itaju",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itanhaém",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itaóca",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itapecerica da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itapetininga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itapeva",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itapevi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itapira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itapirapuã Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itápolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itaporanga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itapuí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itapura",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itaquaquecetuba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itararé",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itariri",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itatiba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itatinga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itirapina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itirapuã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itobi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itupeva",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ituverava",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jaborandi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jaboticabal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jacareí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jaci",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jacupiranga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jaguariúna",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jales",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jambeiro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jandira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jardinópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jarinu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jaú",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jeriquara",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Joanópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "João Ramalho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "José Bonifácio",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Júlio Mesquita",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jumirim",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jundiaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Junqueirópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Juquiá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Juquitiba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lagoinha",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Laranjal Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lavínia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lavrinhas",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Leme",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lençóis Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Limeira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lindóia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lins",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lorena",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lourdes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Louveira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lucélia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lucianópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Luís Antônio",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Luiziânia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lupércio",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lutécia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Macatuba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Macaubal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Macedônia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Magda",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mairinque",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mairiporã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Manduri",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Marabá Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Maracaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Marapoama",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mariápolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Marília",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Marinópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Martinópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Matão",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mauá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mendonça",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Meridiano",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mesópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Miguelópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mineiros do Tietê",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mira Estrela",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Miracatu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mirandópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mirante do Paranapanema",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mirassol",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mirassolândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mococa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mogi das Cruzes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mogi-Guaçu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mogi-Mirim",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mombuca",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Monções",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mongaguá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Monte Alegre do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Monte Alto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Monte Aprazível",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Monte Azul Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Monte Castelo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Monte Mor",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Monteiro Lobato",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Morro Agudo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Morungaba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Motuca",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Murutinga do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nantes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Narandiba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Natividade da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nazaré Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Neves Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nhandeara",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nipoã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Aliança",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Campina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Canaã Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Castilho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Europa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Granada",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Guataporanga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Independência",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Luzitânia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Odessa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Novais",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Novo Horizonte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nuporanga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ocauçu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Óleo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Olímpia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Onda Verde",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Oriente",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Orindiúva",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Orlândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Osasco",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Oscar Bressane",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Osvaldo Cruz",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ourinhos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ouro Verde",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ouroeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pacaembu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Palestina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Palmares Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Palmeira d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Palmital",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Panorama",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paraguaçu Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paraibuna",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paraíso",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paranapanema",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paranapuã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Parapuã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pardinho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pariquera-Açu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Parisi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Patrocínio Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paulicéia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paulínia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paulistânia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paulo de Faria",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pederneiras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pedra Bela",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pedranópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pedregulho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pedreira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pedrinhas Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pedro de Toledo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Penápolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pereira Barreto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pereiras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Peruíbe",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Piacatu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Piedade",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pilar do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pindamonhangaba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pindorama",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pinhalzinho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Piquerobi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Piquete",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Piracaia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Piracicaba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Piraju",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pirajuí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pirangi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pirapora do Bom Jesus",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pirapozinho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pirassununga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Piratininga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pitangueiras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Planalto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Platina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Poá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Poloni",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pompéia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pongaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pontal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pontalinda",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pontes Gestal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Populina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Porangaba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Porto Feliz",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Porto Ferreira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Potim",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Potirendaba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pracinha",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pradópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Praia Grande",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pratânia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Presidente Alves",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Presidente Bernardes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Presidente Epitácio",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Presidente Prudente",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Presidente Venceslau",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Promissão",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Quadra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Quatá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Queiroz",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Queluz",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Quintana",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rafard",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rancharia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Redenção da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Regente Feijó",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Reginópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Registro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Restinga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirão Bonito",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirão Branco",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirão Corrente",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirão do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirão dos Índios",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirão Grande",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirão Pires",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirão Preto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rifaina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rincão",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rinópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rio Claro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rio das Pedras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rio Grande da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Riolândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Riversul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rosana",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Roseira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rubiácea",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rubinéia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sabino",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sagres",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sales",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sales Oliveira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Salesópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Salmourão",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Saltinho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Salto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Salto de Pirapora",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Salto Grande",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sandovalina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Adélia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Albertina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Bárbara d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Branca",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Clara d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Cruz da Conceição",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Cruz da Esperança",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Cruz das Palmeiras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Cruz do Rio Pardo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Ernestina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Fé do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Gertrudes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Isabel",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Lúcia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Maria da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Mercedes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Rita d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Rita do Passa Quatro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Rosa de Viterbo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Salete",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santana da Ponte Pensa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santana de Parnaíba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Anastácio",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo André",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Antônio da Alegria",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Antônio de Posse",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Antônio do Aracanguá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Antônio do Jardim",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Antônio do Pinhal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Expedito",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santópolis do Aguapeí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Bento do Sapucaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Bernardo do Campo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Caetano do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Carlos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Francisco",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São João da Boa Vista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São João das Duas Pontes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São João de Iracema",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São João do Pau d'Alho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Joaquim da Barra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São José da Bela Vista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São José do Barreiro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São José do Rio Pardo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São José do Rio Preto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São José dos Campos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Lourenço da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Luís do Paraitinga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Manuel",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Miguel Arcanjo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Paulo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Pedro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Pedro do Turvo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Roque",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Sebastião",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Sebastião da Grama",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Simão",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Vicente",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sarapuí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sarutaiá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sebastianópolis do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Serra Azul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Serra Negra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Serrana",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sertãozinho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sete Barras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Severínia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Silveiras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Socorro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sorocaba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sud Mennucci",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sumaré",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Suzanápolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Suzano",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tabapuã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tabatinga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taboão da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taciba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taguaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taiaçu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taiúva",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tambaú",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tanabi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tapiraí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tapiratiba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taquaral",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taquaritinga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taquarituba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taquarivaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tarabai",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tarumã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tatuí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Taubaté",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tejupá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Teodoro Sampaio",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Terra Roxa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tietê",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Timburi",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Torre de Pedra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Torrinha",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Trabiju",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tremembé",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Três Fronteiras",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tuiuti",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tupã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tupi Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Turiúba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Turmalina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ubarana",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ubatuba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ubirajara",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Uchoa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "União Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Urânia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Uru",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Urupês",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Valentim Gentil",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Valinhos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Valparaíso",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vargem",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vargem Grande do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vargem Grande Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Várzea Paulista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vera Cruz",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vinhedo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Viradouro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vista Alegre do Alto",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vitória Brasil",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Votorantim",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Votuporanga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Zacarias",
+        "lat": null,
+        "lng": null
+    }
+]

@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('datum');
             $table->integer('utm_zone')->nullable();
             $table->string('central_meridian')->nullable();
-            $table->foreignId('service_id')->constrained()->onDelete('cascade');
+            $table->foreignId('service_id')->constrained('servicos')->onDelete('cascade');
             $table->timestamps();
         });
     }

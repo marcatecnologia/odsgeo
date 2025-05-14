@@ -17,14 +17,17 @@ class DatabaseSeeder extends Seeder
         // Criar papéis e permissões primeiro
         $this->call([
             RoleSeeder::class,
+            ProjetoSeeder::class,
+            ServicoSeeder::class,
+            DadosFicticiosSeeder::class,
         ]);
 
         // Criar ou atualizar usuário de teste com papel de admin
         $user = User::firstOrCreate(
-            ['email' => 'test@example.com'],
+            ['email' => 'marcos@grupomarca.org'],
             [
-                'name' => 'Test User',
-                'password' => Hash::make('password'),
+                'name' => 'Marcos',
+                'password' => Hash::make('33121201'),
                 'email_verified_at' => now(),
             ]
         );

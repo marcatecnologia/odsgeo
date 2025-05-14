@@ -5,11 +5,13 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Services\SigefWfsService;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
 
 class ParcelasSigef extends Component
 {
     public $estado = '';
     public $municipio = '';
+    public $municipios = [];
     public $latitude = null;
     public $longitude = null;
     public $raio = 1000;
@@ -17,6 +19,8 @@ class ParcelasSigef extends Component
     public $coordenadaCentral = null;
     public $sigef = null;
     public $geojson = null;
+    public $centroide = null;
+    public $erro = null;
 
     protected $rules = [
         'estado' => 'required|string|size:2',
@@ -28,47 +32,114 @@ class ParcelasSigef extends Component
 
     public function mount()
     {
-        $this->estados = [
-            'AC' => 'Acre',
-            'AL' => 'Alagoas',
-            'AP' => 'Amapá',
-            'AM' => 'Amazonas',
-            'BA' => 'Bahia',
-            'CE' => 'Ceará',
-            'DF' => 'Distrito Federal',
-            'ES' => 'Espírito Santo',
-            'GO' => 'Goiás',
-            'MA' => 'Maranhão',
-            'MT' => 'Mato Grosso',
-            'MS' => 'Mato Grosso do Sul',
-            'MG' => 'Minas Gerais',
-            'PA' => 'Pará',
-            'PB' => 'Paraíba',
-            'PR' => 'Paraná',
-            'PE' => 'Pernambuco',
-            'PI' => 'Piauí',
-            'RJ' => 'Rio de Janeiro',
-            'RN' => 'Rio Grande do Norte',
-            'RS' => 'Rio Grande do Sul',
-            'RO' => 'Rondônia',
-            'RR' => 'Roraima',
-            'SC' => 'Santa Catarina',
-            'SP' => 'São Paulo',
-            'SE' => 'Sergipe',
-            'TO' => 'Tocantins'
-        ];
-
         $this->municipios = [];
     }
 
     public function updatedEstado($value)
     {
-        if (strlen($value) === 2) {
-            $this->municipios = $this->getMunicipios($value);
-        } else {
+        $this->municipio = '';
+        $this->municipios = [];
+        $this->geojson = null;
+        $this->centroide = null;
+        $this->erro = null;
+
+        if ($value) {
+            $this->carregarMunicipios($value);
+        }
+    }
+
+    public function updatedMunicipio($value)
+    {
+        if ($value && $this->geojson) {
+            $this->centralizarMunicipio($value);
+        }
+    }
+
+    protected function carregarMunicipios($uf)
+    {
+        try {
+            // Carrega GeoJSON do estado
+            $geojsonPath = base_path("database/geojson/municipios/municipios_{$uf}.geojson");
+            if (!file_exists($geojsonPath)) {
+                throw new \Exception("Arquivo GeoJSON não encontrado para {$uf}");
+            }
+
+            $this->geojson = json_decode(file_get_contents($geojsonPath), true);
+            
+            // Extrai lista de municípios
+            $this->municipios = collect($this->geojson['features'])
+                ->map(function ($feature) {
+                    return [
+                        'codigo' => $feature['properties']['codigo_ibge'],
+                        'nome' => $feature['properties']['nome']
+                    ];
+                })
+                ->sortBy('nome')
+                ->values()
+                ->toArray();
+
+            // Calcula centroide do estado
+            $this->calcularCentroideEstado();
+
+        } catch (\Exception $e) {
+            $this->erro = "Erro ao carregar municípios: " . $e->getMessage();
             $this->municipios = [];
         }
-        $this->municipio = '';
+    }
+
+    protected function calcularCentroideEstado()
+    {
+        if (!$this->geojson) return;
+
+        $bounds = [PHP_FLOAT_MAX, PHP_FLOAT_MAX, PHP_FLOAT_MIN, PHP_FLOAT_MIN];
+        
+        foreach ($this->geojson['features'] as $feature) {
+            $coordinates = $feature['geometry']['coordinates'][0];
+            foreach ($coordinates as $coord) {
+                $bounds[0] = min($bounds[0], $coord[0]);
+                $bounds[1] = min($bounds[1], $coord[1]);
+                $bounds[2] = max($bounds[2], $coord[0]);
+                $bounds[3] = max($bounds[3], $coord[1]);
+            }
+        }
+
+        $this->centroide = [
+            'lat' => ($bounds[1] + $bounds[3]) / 2,
+            'lng' => ($bounds[0] + $bounds[2]) / 2
+        ];
+    }
+
+    protected function centralizarMunicipio($codigoMunicipio)
+    {
+        if (!$this->geojson) return;
+
+        $municipio = collect($this->geojson['features'])
+            ->first(function ($feature) use ($codigoMunicipio) {
+                return $feature['properties']['codigo_ibge'] == $codigoMunicipio;
+            });
+
+        if ($municipio) {
+            $coordinates = $municipio['geometry']['coordinates'][0];
+            $bounds = [PHP_FLOAT_MAX, PHP_FLOAT_MAX, PHP_FLOAT_MIN, PHP_FLOAT_MIN];
+            
+            foreach ($coordinates as $coord) {
+                $bounds[0] = min($bounds[0], $coord[0]);
+                $bounds[1] = min($bounds[1], $coord[1]);
+                $bounds[2] = max($bounds[2], $coord[0]);
+                $bounds[3] = max($bounds[3], $coord[1]);
+            }
+
+            $centroide = [
+                'lat' => ($bounds[1] + $bounds[3]) / 2,
+                'lng' => ($bounds[0] + $bounds[2]) / 2
+            ];
+
+            $this->dispatch('centralizar-mapa', [
+                'lat' => $centroide['lat'],
+                'lng' => $centroide['lng'],
+                'zoom' => 11
+            ]);
+        }
     }
 
     public function buscarParcelas()
@@ -149,13 +220,6 @@ class ParcelasSigef extends Component
     {
         $this->latitude = $lat;
         $this->longitude = $lon;
-    }
-
-    private function getMunicipios($uf)
-    {
-        // Aqui você pode implementar a lógica para buscar os municípios do estado
-        // Por enquanto, retornando um array vazio
-        return [];
     }
 
     public function render()

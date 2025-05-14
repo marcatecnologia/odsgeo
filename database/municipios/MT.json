@@ -1,0 +1,836 @@
+[
+    {
+        "codigo_ibge": null,
+        "nome": "Acorizal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Água Boa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alta Floresta",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alto Araguaia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alto Boa Vista",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alto Garças",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alto Paraguai",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Alto Taquari",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Apiacás",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Araguaiana",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Araguainha",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Araputanga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Arenápolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Aripuanã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barão de Melgaço",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barra do Bugres",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Barra do Garças",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Bom Jesus do Araguaia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Brasnorte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cáceres",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Campinápolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Campo Novo do Parecis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Campo Verde",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Campos de Júlio",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Canabrava do Norte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Canarana",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Carlinda",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Castanheira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Chapada dos Guimarães",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cláudia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cocalinho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Colíder",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Colniza",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Comodoro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Confresa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Conquista d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cotriguaçu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Curvelândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Cuiabá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Denise",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Diamantino",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Dom Aquino",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Feliz Natal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Figueirópolis d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Gaúcha do Norte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "General Carneiro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Glória d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guarantã do Norte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Guiratinga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Indiavaí",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itaúba",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Itiquira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jaciara",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jangada",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Jauru",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Juara",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Juína",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Juruena",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Juscimeira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lambari d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Lucas do Rio Verde",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Luciára",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Marcelândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Matupá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Mirassol d'Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nobres",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nortelândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nossa Senhora do Livramento",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Bandeirantes",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Brasilândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Canãa do Norte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Guarita",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Lacerda",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Marilândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Maringá",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Monte Verde",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Mutum",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Nazaré",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Olímpia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Santa Helena",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Ubiratã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Nova Xavantina",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Novo Horizonte do Norte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Novo Mundo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Novo Santo Antônio",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Novo São Joaquim",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paranaíta",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Paranatinga",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pedra Preta",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Peixoto de Azevedo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Planalto da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Poconé",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pontal do Araguaia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ponte Branca",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Pontes e Lacerda",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Porto Alegre do Norte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Porto dos Gaúchos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Porto Esperidião",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Porto Estrela",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Poxoréo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Primavera do Leste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Querência",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Reserva do Cabaçal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirão Cascalheira",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Ribeirãozinho",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rio Branco",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rondolândia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rondonópolis",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Rosário Oeste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Salto do Céu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Carmem",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Cruz do Xingu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Rita do Trivelato",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santa Terezinha",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Afonso",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Antônio do Leste",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Santo Antônio do Leverger",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Félix do Araguaia",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São José do Povo",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São José do Rio Claro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São José do Xingu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São José dos Quatro Marcos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "São Pedro da Cipa",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sapezal",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Serra Nova Dourada",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sinop",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Sorriso",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tabaporã",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tangará da Serra",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tapurah",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Terra Nova do Norte",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Tesouro",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Torixoréu",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "União do Sul",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vale de São Domingos",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Várzea Grande",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vera",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vila Bela da Santíssima Trindade",
+        "lat": null,
+        "lng": null
+    },
+    {
+        "codigo_ibge": null,
+        "nome": "Vila Rica",
+        "lat": null,
+        "lng": null
+    }
+]

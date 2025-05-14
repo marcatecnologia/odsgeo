@@ -7,6 +7,14 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
 {
+    protected $commands = [
+        Commands\SyncLogs::class,
+        Commands\AtualizarMunicipios::class,
+        Commands\AtualizarMunicipiosRapido::class,
+        Commands\DividirGeoJSONMunicipios::class,
+        Commands\BaixarGeoJSONMunicipios::class,
+    ];
+
     protected function schedule(Schedule $schedule): void
     {
         // Sincroniza as camadas WMS diariamente às 3h da manhã
@@ -22,8 +30,4 @@ class Kernel extends ConsoleKernel
 
         require base_path('routes/console.php');
     }
-
-    protected $commands = [
-        Commands\SyncLogs::class,
-    ];
 } 
