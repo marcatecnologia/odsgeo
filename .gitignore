@@ -24,3 +24,6 @@ yarn-error.log
 public/geojson/limites/municipios.geojson
 storage/app/geojson/municipios.geojson
 Documentos de referência do SIGEF/*
+# Arquivos grandes
+Documentos de referência do SIGEF/BR_Municipios_2024.zip
+Documentos de referência do SIGEF/BR_Municipios_2024/BR_Municipios_2024.shp
