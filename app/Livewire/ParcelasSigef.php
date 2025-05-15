@@ -20,27 +20,31 @@ class ParcelasSigef extends Component
     public $erro;
     public $centroide;
     public $zoom = 4;
-    public $geoserver;
-    public $sigefWfs;
+    public $loading = false;
+    public $codigoImovel;
+    public $matriculaSigef;
+    public $ultimaAtualizacao;
+    public $activeTab = 'municipio';
 
     protected $rules = [
         'estado' => 'required|string|size:2',
         'municipio' => 'required|string|size:7',
         'latitude' => 'required|numeric|between:-90,90',
         'longitude' => 'required|numeric|between:-180,180',
-        'raio' => 'required|numeric|min:100|max:10000'
+        'raio' => 'required|numeric|min:100|max:10000',
+        'codigoImovel' => 'nullable|string|max:20',
+        'matriculaSigef' => 'nullable|string|max:20'
     ];
 
-    public function mount(GeoServerService $geoserver, SigefWfsService $sigefWfs)
+    public function mount()
     {
-        $this->geoserver = $geoserver;
-        $this->sigefWfs = $sigefWfs;
+        $this->activeTab = 'municipio';
     }
 
     public function updatedEstado($value)
     {
         if ($value) {
-            $this->carregarMunicipios($value);
+            $this->carregarMunicipios($value, app(GeoServerService::class));
         }
     }
 
@@ -48,7 +52,7 @@ class ParcelasSigef extends Component
     {
         \Log::info('updatedMunicipio chamado', ['municipio' => $value]);
         if ($value) {
-            $this->centralizarMunicipio($value);
+            $this->centralizarMunicipio($value, app(GeoServerService::class));
             if ($this->centroide) {
                 \Log::info('Disparando evento centroideAtualizado', $this->centroide);
                 $this->dispatch('centroideAtualizado', [
@@ -60,10 +64,10 @@ class ParcelasSigef extends Component
         }
     }
 
-    public function carregarMunicipios($uf)
+    public function carregarMunicipios($uf, GeoServerService $geoserver)
     {
         try {
-            $response = $this->geoserver->getMunicipiosByUF($uf);
+            $response = $geoserver->getMunicipiosByUF($uf);
             
             if (isset($response['features'])) {
                 $this->municipios = collect($response['features'])->map(function ($feature) {
@@ -116,11 +120,11 @@ class ParcelasSigef extends Component
         return null;
     }
 
-    public function centralizarMunicipio($codigo)
+    public function centralizarMunicipio($codigo, GeoServerService $geoserver)
     {
         try {
             \Log::info('centralizarMunicipio chamado', ['codigo' => $codigo]);
-            $response = $this->geoserver->getMunicipioByCodigo($codigo);
+            $response = $geoserver->getMunicipioByCodigo($codigo);
             
             if (isset($response['features'][0]['geometry']['coordinates'])) {
                 $coords = $response['features'][0]['geometry']['coordinates'][0][0];
@@ -149,7 +153,7 @@ class ParcelasSigef extends Component
         }
     }
 
-    public function buscarParcelas()
+    public function buscarParcelas(SigefWfsService $sigefWfs)
     {
         $this->reset(['parcelas', 'erro']);
 
@@ -159,7 +163,7 @@ class ParcelasSigef extends Component
         }
 
         try {
-            $response = $this->sigefWfs->getParcelasByMunicipio($this->municipio);
+            $response = $sigefWfs->getParcelasByMunicipio($this->municipio);
             
             if (isset($response['features'])) {
                 $this->parcelas = $response['features'];
@@ -172,7 +176,7 @@ class ParcelasSigef extends Component
         }
     }
 
-    public function buscarParcelasPorCoordenada()
+    public function buscarParcelasPorCoordenada(SigefWfsService $sigefWfs)
     {
         $this->reset(['parcelas', 'erro']);
 
@@ -182,7 +186,7 @@ class ParcelasSigef extends Component
         }
 
         try {
-            $response = $this->sigefWfs->getParcelasByCoordenada(
+            $response = $sigefWfs->getParcelasByCoordenada(
                 $this->latitude,
                 $this->longitude,
                 $this->raio
@@ -197,6 +201,92 @@ class ParcelasSigef extends Component
             $this->erro = 'Erro ao buscar parcelas: ' . $e->getMessage();
             Log::error('Erro ao buscar parcelas', ['error' => $e->getMessage()]);
         }
+    }
+
+    public function recarregarMunicipios(GeoServerService $geoserver)
+    {
+        $this->loading = true;
+        Cache::forget("municipios_{$this->estado}");
+        $this->carregarMunicipios($this->estado, $geoserver);
+        $this->loading = false;
+    }
+
+    public function recarregarParcelas(SigefWfsService $sigefWfs)
+    {
+        $this->loading = true;
+        Cache::forget("parcelas_{$this->municipio}");
+        $this->buscarParcelas($sigefWfs);
+        $this->loading = false;
+    }
+
+    public function buscarPorCodigo(SigefWfsService $sigefWfs)
+    {
+        $this->loading = true;
+        $this->reset(['parcelas', 'erro']);
+
+        try {
+            $response = $sigefWfs->getParcelasByCodigo(
+                $this->codigoImovel,
+                $this->matriculaSigef
+            );
+            
+            if (isset($response['features']) && !empty($response['features'])) {
+                $this->parcelas = $response['features'];
+                $this->centralizarParcela($response['features'][0]);
+            } else {
+                $this->erro = 'Nenhuma parcela encontrada com os critérios informados';
+            }
+        } catch (\Exception $e) {
+            $this->erro = 'Erro ao buscar parcela: ' . $e->getMessage();
+            Log::error('Erro ao buscar parcela por código', [
+                'error' => $e->getMessage(),
+                'codigo' => $this->codigoImovel,
+                'matricula' => $this->matriculaSigef
+            ]);
+        }
+
+        $this->loading = false;
+    }
+
+    protected function centralizarParcela($parcela)
+    {
+        if (isset($parcela['geometry']['coordinates'])) {
+            $coords = $parcela['geometry']['coordinates'][0][0];
+            $somaLat = 0;
+            $somaLon = 0;
+            $count = 0;
+
+            foreach ($coords as $coord) {
+                $somaLon += $coord[0];
+                $somaLat += $coord[1];
+                $count++;
+            }
+
+            if ($count > 0) {
+                $this->centroide = [
+                    'lat' => $somaLat / $count,
+                    'lon' => $somaLon / $count
+                ];
+                $this->zoom = 15;
+                $this->dispatch('centroideAtualizado', [
+                    'lat' => $this->centroide['lat'],
+                    'lon' => $this->centroide['lon'],
+                    'zoom' => $this->zoom
+                ]);
+            }
+        }
+    }
+
+    public function novaBusca()
+    {
+        $this->reset([
+            'parcelas',
+            'erro',
+            'codigoImovel',
+            'matriculaSigef',
+            'latitude',
+            'longitude'
+        ]);
     }
 
     public function render()

@@ -838,4 +838,125 @@ class SigefWfsService
             return ['features' => []];
         }
     }
+
+    public function getParcelasByCodigo(?string $codigoImovel = null, ?string $matriculaSigef = null): array
+    {
+        try {
+            Log::debug('Buscando parcela SIGEF por código', [
+                'codigo_imovel' => $codigoImovel,
+                'matricula_sigef' => $matriculaSigef
+            ]);
+
+            if (!$codigoImovel && !$matriculaSigef) {
+                return [
+                    'success' => false,
+                    'has_data' => false,
+                    'error' => 'Informe o código do imóvel ou a matrícula SIGEF'
+                ];
+            }
+
+            if (!$this->abrirSessao()) {
+                return [
+                    'success' => false,
+                    'has_data' => false,
+                    'error' => 'Não foi possível estabelecer conexão com o SIGEF'
+                ];
+            }
+
+            $cqlFilter = [];
+            if ($codigoImovel) {
+                $cqlFilter[] = "codigo_imovel = '{$codigoImovel}'";
+            }
+            if ($matriculaSigef) {
+                $cqlFilter[] = "matricula_sigef = '{$matriculaSigef}'";
+            }
+
+            $params = [
+                'CQL_FILTER' => implode(' OR ', $cqlFilter),
+                'outputFormat' => 'application/json',
+                'srsName' => 'EPSG:4326',
+                'maxFeatures' => self::MAX_FEATURES
+            ];
+
+            $startTime = microtime(true);
+            $response = Http::withOptions([
+                'verify' => false,
+                'timeout' => self::SESSION_TIMEOUT,
+                'connect_timeout' => self::CONNECT_TIMEOUT,
+                'curl' => [
+                    CURLOPT_SSL_VERIFYPEER => false,
+                    CURLOPT_SSL_VERIFYHOST => false,
+                    CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
+                    CURLOPT_TCP_KEEPALIVE => 1,
+                    CURLOPT_TCP_KEEPIDLE => 60,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_MAXREDIRS => 5,
+                    CURLOPT_DNS_CACHE_TIMEOUT => 600,
+                    CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
+                    CURLOPT_TIMEOUT => self::SESSION_TIMEOUT
+                ]
+            ])
+            ->withHeaders([
+                'Accept' => 'application/json',
+                'User-Agent' => 'ODSGEO/1.0 (SIGEF Integration)',
+                'Cache-Control' => 'no-cache',
+                'Pragma' => 'no-cache'
+            ])
+            ->withCookies($this->cookies, '.incra.gov.br')
+            ->retry(2, 3000)
+            ->get($this->baseUrl, $params);
+
+            $endTime = microtime(true);
+            $responseTime = round(($endTime - $startTime) * 1000, 2);
+
+            Log::info('Resposta da busca por código SIGEF', [
+                'status' => $response->status(),
+                'response_time' => $responseTime,
+                'params' => $params
+            ]);
+
+            if (!$response->successful()) {
+                Log::error('Erro na requisição WFS por código', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'response_time' => $responseTime
+                ]);
+                return [
+                    'success' => false,
+                    'has_data' => false,
+                    'error' => 'Erro ao consultar o serviço SIGEF'
+                ];
+            }
+
+            $data = $response->json();
+            
+            if (empty($data['features'])) {
+                return [
+                    'success' => true,
+                    'has_data' => false,
+                    'data' => $response->body()
+                ];
+            }
+
+            return [
+                'success' => true,
+                'has_data' => true,
+                'data' => $response->body()
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar parcela SIGEF por código', [
+                'error' => $e->getMessage(),
+                'codigo_imovel' => $codigoImovel,
+                'matricula_sigef' => $matriculaSigef,
+                'type' => get_class($e)
+            ]);
+
+            return [
+                'success' => false,
+                'has_data' => false,
+                'error' => 'Ocorreu um erro ao buscar a parcela'
+            ];
+        }
+    }
 } 
