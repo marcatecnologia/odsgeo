@@ -7,6 +7,7 @@ use App\Services\GeoServerService;
 use App\Services\SigefWfsService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
+use Filament\Notifications\Notification;
 
 class ParcelasSigef extends Component
 {
@@ -15,7 +16,7 @@ class ParcelasSigef extends Component
     public $municipios = [];
     public $latitude;
     public $longitude;
-    public $raio = 1000;
+    public $raio;
     public $parcelas = [];
     public $erro;
     public $centroide;
@@ -25,6 +26,11 @@ class ParcelasSigef extends Component
     public $matriculaSigef;
     public $ultimaAtualizacao;
     public $activeTab = 'municipio';
+    public $currentPage = 1;
+    public $totalPages = 1;
+    public $totalParcelas = 0;
+    public $areaMinima;
+    public $areaMaxima;
 
     protected $rules = [
         'estado' => 'required|string|size:2',
@@ -33,12 +39,35 @@ class ParcelasSigef extends Component
         'longitude' => 'required|numeric|between:-180,180',
         'raio' => 'required|numeric|min:100|max:10000',
         'codigoImovel' => 'nullable|string|max:20',
-        'matriculaSigef' => 'nullable|string|max:20'
+        'matriculaSigef' => 'nullable|string|max:20',
+        'areaMinima' => 'nullable|numeric|min:0',
+        'areaMaxima' => 'nullable|numeric|min:0|gt:areaMinima'
+    ];
+
+    protected $messages = [
+        'estado.required' => 'Selecione o estado',
+        'municipio.required' => 'Selecione o município',
+        'latitude.required' => 'A latitude é obrigatória',
+        'latitude.numeric' => 'A latitude deve ser um número',
+        'latitude.between' => 'A latitude deve estar entre -90 e 90',
+        'longitude.required' => 'A longitude é obrigatória',
+        'longitude.numeric' => 'A longitude deve ser um número',
+        'longitude.between' => 'A longitude deve estar entre -180 e 180',
+        'raio.required' => 'O raio é obrigatório',
+        'raio.numeric' => 'O raio deve ser um número',
+        'raio.min' => 'O raio mínimo é 100 metros',
+        'raio.max' => 'O raio máximo é 10.000 metros',
+        'areaMinima.numeric' => 'A área mínima deve ser um número',
+        'areaMinima.min' => 'A área mínima não pode ser negativa',
+        'areaMaxima.numeric' => 'A área máxima deve ser um número',
+        'areaMaxima.min' => 'A área máxima não pode ser negativa',
+        'areaMaxima.gt' => 'A área máxima deve ser maior que a área mínima'
     ];
 
     public function mount()
     {
         $this->activeTab = 'municipio';
+        $this->raio = config('sigef.coordenada.raio_padrao', 1000);
     }
 
     public function updatedEstado($value)
@@ -50,11 +79,9 @@ class ParcelasSigef extends Component
 
     public function updatedMunicipio($value)
     {
-        \Log::info('updatedMunicipio chamado', ['municipio' => $value]);
         if ($value) {
             $this->centralizarMunicipio($value, app(GeoServerService::class));
             if ($this->centroide) {
-                \Log::info('Disparando evento centroideAtualizado', $this->centroide);
                 $this->dispatch('centroideAtualizado', [
                     'lat' => $this->centroide['lat'],
                     'lon' => $this->centroide['lon'],
@@ -155,51 +182,198 @@ class ParcelasSigef extends Component
 
     public function buscarParcelas(SigefWfsService $sigefWfs)
     {
-        $this->reset(['parcelas', 'erro']);
+        $this->validate([
+            'estado' => 'required|string|size:2',
+            'municipio' => 'required|string|size:7',
+            'areaMinima' => 'nullable|numeric|min:0',
+            'areaMaxima' => 'nullable|numeric|min:0|gt:areaMinima'
+        ]);
 
-        if (!$this->municipio) {
-            $this->erro = 'Selecione um município';
-            return;
-        }
+        $this->reset(['parcelas', 'erro', 'currentPage']);
+        $this->loading = true;
 
         try {
-            $response = $sigefWfs->getParcelasByMunicipio($this->municipio);
-            
-            if (isset($response['features'])) {
-                $this->parcelas = $response['features'];
-            } else {
-                $this->erro = 'Nenhuma parcela encontrada';
+            $result = $sigefWfs->getParcelasPorMunicipio(
+                $this->estado,
+                $this->municipio,
+                $this->currentPage
+            );
+
+            if (!$result['success']) {
+                $this->erro = $result['error'];
+                return;
             }
+
+            if (!$result['has_data']) {
+                $this->erro = 'Nenhuma parcela encontrada para este município.';
+                return;
+            }
+
+            $this->parcelas = json_decode($result['data'], true)['features'] ?? [];
+            $this->totalParcelas = $result['pagination']['total'] ?? 0;
+            $this->totalPages = ceil($this->totalParcelas / config('sigef.pagination.per_page', 50));
+
+            // Filtra por área se necessário
+            if ($this->areaMinima || $this->areaMaxima) {
+                $this->parcelas = collect($this->parcelas)->filter(function ($parcela) {
+                    $area = $parcela['properties']['area_ha'] ?? 0;
+                    if ($this->areaMinima && $area < $this->areaMinima) {
+                        return false;
+                    }
+                    if ($this->areaMaxima && $area > $this->areaMaxima) {
+                        return false;
+                    }
+                    return true;
+                })->values()->toArray();
+            }
+
+            $this->dispatch('parcelasRecebidas', [
+                'parcelas' => $this->parcelas,
+                'pagination' => [
+                    'current_page' => $this->currentPage,
+                    'total_pages' => $this->totalPages,
+                    'total' => $this->totalParcelas
+                ]
+            ]);
+
         } catch (\Exception $e) {
             $this->erro = 'Erro ao buscar parcelas: ' . $e->getMessage();
-            Log::error('Erro ao buscar parcelas', ['error' => $e->getMessage()]);
+            Log::error('Erro ao buscar parcelas', [
+                'error' => $e->getMessage(),
+                'estado' => $this->estado,
+                'municipio' => $this->municipio
+            ]);
+        } finally {
+            $this->loading = false;
         }
     }
 
     public function buscarParcelasPorCoordenada(SigefWfsService $sigefWfs)
     {
-        $this->reset(['parcelas', 'erro']);
+        $this->validate([
+            'latitude' => 'required|numeric|between:-90,90',
+            'longitude' => 'required|numeric|between:-180,180',
+            'raio' => 'required|numeric|min:100|max:10000',
+            'estado' => 'required|string|size:2'
+        ]);
 
-        if (!$this->latitude || !$this->longitude) {
-            $this->erro = 'Informe a latitude e longitude';
-            return;
-        }
+        $this->reset(['parcelas', 'erro']);
+        $this->loading = true;
 
         try {
-            $response = $sigefWfs->getParcelasByCoordenada(
-                $this->latitude,
-                $this->longitude,
-                $this->raio
+            $result = $sigefWfs->buscarParcelasPorCoordenada(
+                floatval($this->latitude),
+                floatval($this->longitude),
+                floatval($this->raio),
+                $this->estado
             );
-            
-            if (isset($response['features'])) {
-                $this->parcelas = $response['features'];
-            } else {
-                $this->erro = 'Nenhuma parcela encontrada';
+
+            if (!$result['success']) {
+                $this->erro = $result['error'];
+                return;
             }
+
+            if (!$result['has_data']) {
+                $this->erro = 'Nenhuma parcela encontrada para os parâmetros informados.';
+                return;
+            }
+
+            $this->parcelas = json_decode($result['data'], true)['features'] ?? [];
+            
+            // Filtra por área se necessário
+            if ($this->areaMinima || $this->areaMaxima) {
+                $this->parcelas = collect($this->parcelas)->filter(function ($parcela) {
+                    $area = $parcela['properties']['area_ha'] ?? 0;
+                    if ($this->areaMinima && $area < $this->areaMinima) {
+                        return false;
+                    }
+                    if ($this->areaMaxima && $area > $this->areaMaxima) {
+                        return false;
+                    }
+                    return true;
+                })->values()->toArray();
+            }
+
+            $this->dispatch('parcelasRecebidas', [
+                'parcelas' => $this->parcelas,
+                'bbox' => $result['bbox']
+            ]);
+
         } catch (\Exception $e) {
             $this->erro = 'Erro ao buscar parcelas: ' . $e->getMessage();
-            Log::error('Erro ao buscar parcelas', ['error' => $e->getMessage()]);
+            Log::error('Erro ao buscar parcelas por coordenada', [
+                'error' => $e->getMessage(),
+                'latitude' => $this->latitude,
+                'longitude' => $this->longitude,
+                'raio' => $this->raio
+            ]);
+        } finally {
+            $this->loading = false;
+        }
+    }
+
+    public function buscarPorCodigo(SigefWfsService $sigefWfs)
+    {
+        $this->validate([
+            'codigoImovel' => 'required_without:matriculaSigef|string|max:20',
+            'matriculaSigef' => 'required_without:codigoImovel|string|max:20'
+        ]);
+
+        $this->reset(['parcelas', 'erro']);
+        $this->loading = true;
+
+        try {
+            $result = $sigefWfs->getParcelasByCodigo(
+                $this->codigoImovel,
+                $this->matriculaSigef
+            );
+
+            if (!$result['success']) {
+                $this->erro = $result['error'];
+                return;
+            }
+
+            if (!$result['has_data']) {
+                $this->erro = 'Nenhuma parcela encontrada com os critérios informados.';
+                return;
+            }
+
+            $this->parcelas = json_decode($result['data'], true)['features'] ?? [];
+            $this->centralizarParcela($this->parcelas[0] ?? null);
+
+        } catch (\Exception $e) {
+            $this->erro = 'Erro ao buscar parcela: ' . $e->getMessage();
+            Log::error('Erro ao buscar parcela por código', [
+                'error' => $e->getMessage(),
+                'codigo' => $this->codigoImovel,
+                'matricula' => $this->matriculaSigef
+            ]);
+        } finally {
+            $this->loading = false;
+        }
+    }
+
+    public function nextPage()
+    {
+        if ($this->currentPage < $this->totalPages) {
+            $this->currentPage++;
+            $this->buscarParcelas(app(SigefWfsService::class));
+        }
+    }
+
+    public function previousPage()
+    {
+        if ($this->currentPage > 1) {
+            $this->currentPage--;
+            $this->buscarParcelas(app(SigefWfsService::class));
+        }
+    }
+
+    public function gotoPage($page)
+    {
+        if ($page >= 1 && $page <= $this->totalPages) {
+            $this->currentPage = $page;
+            $this->buscarParcelas(app(SigefWfsService::class));
         }
     }
 
@@ -216,35 +390,6 @@ class ParcelasSigef extends Component
         $this->loading = true;
         Cache::forget("parcelas_{$this->municipio}");
         $this->buscarParcelas($sigefWfs);
-        $this->loading = false;
-    }
-
-    public function buscarPorCodigo(SigefWfsService $sigefWfs)
-    {
-        $this->loading = true;
-        $this->reset(['parcelas', 'erro']);
-
-        try {
-            $response = $sigefWfs->getParcelasByCodigo(
-                $this->codigoImovel,
-                $this->matriculaSigef
-            );
-            
-            if (isset($response['features']) && !empty($response['features'])) {
-                $this->parcelas = $response['features'];
-                $this->centralizarParcela($response['features'][0]);
-            } else {
-                $this->erro = 'Nenhuma parcela encontrada com os critérios informados';
-            }
-        } catch (\Exception $e) {
-            $this->erro = 'Erro ao buscar parcela: ' . $e->getMessage();
-            Log::error('Erro ao buscar parcela por código', [
-                'error' => $e->getMessage(),
-                'codigo' => $this->codigoImovel,
-                'matricula' => $this->matriculaSigef
-            ]);
-        }
-
         $this->loading = false;
     }
 
@@ -285,7 +430,10 @@ class ParcelasSigef extends Component
             'codigoImovel',
             'matriculaSigef',
             'latitude',
-            'longitude'
+            'longitude',
+            'areaMinima',
+            'areaMaxima',
+            'currentPage'
         ]);
     }
 

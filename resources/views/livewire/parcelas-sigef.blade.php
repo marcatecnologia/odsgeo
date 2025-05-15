@@ -3,218 +3,342 @@
         <h2 class="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-100">Consulta de Parcelas SiGEF</h2>
 
         <!-- Tabs -->
-        <div class="mb-6">
-            <div class="border-b border-gray-200 dark:border-gray-700">
-                <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <div class="mb-4 border-b border-gray-200">
+            <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
+                <li class="mr-2">
                     <button wire:click="$set('activeTab', 'municipio')" 
-                            class="py-4 px-1 border-b-2 font-medium text-sm {{ $activeTab === 'municipio' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600' }}">
+                            class="inline-block p-4 {{ $activeTab === 'municipio' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
                         Buscar por Município
                     </button>
+                </li>
+                <li class="mr-2">
                     <button wire:click="$set('activeTab', 'coordenada')"
-                            class="py-4 px-1 border-b-2 font-medium text-sm {{ $activeTab === 'coordenada' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600' }}">
+                            class="inline-block p-4 {{ $activeTab === 'coordenada' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
                         Buscar por Coordenada
                     </button>
+                </li>
+                <li class="mr-2">
                     <button wire:click="$set('activeTab', 'codigo')"
-                            class="py-4 px-1 border-b-2 font-medium text-sm {{ $activeTab === 'codigo' ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400' : 'border-transparent text-gray-500 dark:text-gray-300 hover:text-gray-700 dark:hover:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600' }}">
+                            class="inline-block p-4 {{ $activeTab === 'codigo' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500 hover:text-gray-700' }}">
                         Buscar por Código
                     </button>
-                </nav>
-            </div>
+                </li>
+            </ul>
         </div>
 
-        <!-- Loading Overlay -->
+        <!-- Loading Indicator -->
         @if($loading)
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
-                <div class="bg-white dark:bg-gray-900 p-4 rounded-lg shadow-lg flex items-center space-x-3">
-                    <svg class="animate-spin h-5 w-5 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span class="text-gray-700 dark:text-gray-200">Carregando...</span>
-                </div>
+            <div class="flex justify-center items-center p-4">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span class="ml-2">Carregando...</span>
             </div>
         @endif
 
-        <!-- Formulário de Busca por Município -->
-        <div x-show="$wire.activeTab === 'municipio'" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="estado" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Estado</label>
-                    <select wire:model.live="estado" id="estado" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                        <option value="">Selecione um estado</option>
-                        <option value="AC">Acre</option>
-                        <option value="AL">Alagoas</option>
-                        <option value="AP">Amapá</option>
-                        <option value="AM">Amazonas</option>
-                        <option value="BA">Bahia</option>
-                        <option value="CE">Ceará</option>
-                        <option value="DF">Distrito Federal</option>
-                        <option value="ES">Espírito Santo</option>
-                        <option value="GO">Goiás</option>
-                        <option value="MA">Maranhão</option>
-                        <option value="MT">Mato Grosso</option>
-                        <option value="MS">Mato Grosso do Sul</option>
-                        <option value="MG">Minas Gerais</option>
-                        <option value="PA">Pará</option>
-                        <option value="PB">Paraíba</option>
-                        <option value="PR">Paraná</option>
-                        <option value="PE">Pernambuco</option>
-                        <option value="PI">Piauí</option>
-                        <option value="RJ">Rio de Janeiro</option>
-                        <option value="RN">Rio Grande do Norte</option>
-                        <option value="RS">Rio Grande do Sul</option>
-                        <option value="RO">Rondônia</option>
-                        <option value="RR">Roraima</option>
-                        <option value="SC">Santa Catarina</option>
-                        <option value="SP">São Paulo</option>
-                        <option value="SE">Sergipe</option>
-                        <option value="TO">Tocantins</option>
-                    </select>
-                </div>
+        <!-- Error Message -->
+        @if($erro)
+            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+                <span class="block sm:inline">{{ $erro }}</span>
+            </div>
+        @endif
 
-                <div>
-                    <label for="municipio" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Município</label>
-                    <div class="flex gap-2">
-                        <select wire:model.live="municipio" id="municipio" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                            <option value="">Selecione um município</option>
-                            @foreach($municipios as $mun)
-                                <option value="{{ $mun['codigo'] }}">{{ $mun['nome'] }}</option>
-                            @endforeach
-                        </select>
-                        <button wire:click="recarregarMunicipios" class="mt-1 px-3 py-2 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Search Forms -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            @if($activeTab === 'municipio')
+                <form wire:submit.prevent="buscarParcelas">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Estado</label>
+                            <select wire:model="estado" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">Selecione...</option>
+                                <option value="AC">Acre</option>
+                                <option value="AL">Alagoas</option>
+                                <option value="AP">Amapá</option>
+                                <option value="AM">Amazonas</option>
+                                <option value="BA">Bahia</option>
+                                <option value="CE">Ceará</option>
+                                <option value="DF">Distrito Federal</option>
+                                <option value="ES">Espírito Santo</option>
+                                <option value="GO">Goiás</option>
+                                <option value="MA">Maranhão</option>
+                                <option value="MT">Mato Grosso</option>
+                                <option value="MS">Mato Grosso do Sul</option>
+                                <option value="MG">Minas Gerais</option>
+                                <option value="PA">Pará</option>
+                                <option value="PB">Paraíba</option>
+                                <option value="PR">Paraná</option>
+                                <option value="PE">Pernambuco</option>
+                                <option value="PI">Piauí</option>
+                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="RN">Rio Grande do Norte</option>
+                                <option value="RS">Rio Grande do Sul</option>
+                                <option value="RO">Rondônia</option>
+                                <option value="RR">Roraima</option>
+                                <option value="SC">Santa Catarina</option>
+                                <option value="SP">São Paulo</option>
+                                <option value="SE">Sergipe</option>
+                                <option value="TO">Tocantins</option>
+                            </select>
+                            @error('estado') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Município</label>
+                            <select wire:model="municipio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">Selecione...</option>
+                                @foreach($municipios as $mun)
+                                    <option value="{{ $mun['codigo'] }}">{{ $mun['nome'] }}</option>
+                                @endforeach
+                            </select>
+                            @error('municipio') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Área Mínima (ha)</label>
+                            <input type="number" wire:model="areaMinima" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('areaMinima') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Área Máxima (ha)</label>
+                            <input type="number" wire:model="areaMaxima" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('areaMaxima') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" wire:click="recarregarMunicipios" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
+                            Recarregar Municípios
+                        </button>
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Buscar Parcelas
                         </button>
                     </div>
-                </div>
-            </div>
+                </form>
+            @elseif($activeTab === 'coordenada')
+                <form wire:submit.prevent="buscarParcelasPorCoordenada">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Estado</label>
+                            <select wire:model="estado" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                <option value="">Selecione...</option>
+                                <option value="AC">Acre</option>
+                                <option value="AL">Alagoas</option>
+                                <option value="AP">Amapá</option>
+                                <option value="AM">Amazonas</option>
+                                <option value="BA">Bahia</option>
+                                <option value="CE">Ceará</option>
+                                <option value="DF">Distrito Federal</option>
+                                <option value="ES">Espírito Santo</option>
+                                <option value="GO">Goiás</option>
+                                <option value="MA">Maranhão</option>
+                                <option value="MT">Mato Grosso</option>
+                                <option value="MS">Mato Grosso do Sul</option>
+                                <option value="MG">Minas Gerais</option>
+                                <option value="PA">Pará</option>
+                                <option value="PB">Paraíba</option>
+                                <option value="PR">Paraná</option>
+                                <option value="PE">Pernambuco</option>
+                                <option value="PI">Piauí</option>
+                                <option value="RJ">Rio de Janeiro</option>
+                                <option value="RN">Rio Grande do Norte</option>
+                                <option value="RS">Rio Grande do Sul</option>
+                                <option value="RO">Rondônia</option>
+                                <option value="RR">Roraima</option>
+                                <option value="SC">Santa Catarina</option>
+                                <option value="SP">São Paulo</option>
+                                <option value="SE">Sergipe</option>
+                                <option value="TO">Tocantins</option>
+                            </select>
+                            @error('estado') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-            <div class="flex justify-end">
-                <button wire:click="buscarParcelas" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Buscar Parcelas
-                </button>
-            </div>
-        </div>
-
-        <!-- Formulário de Busca por Coordenada -->
-        <div x-show="$wire.activeTab === 'coordenada'" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                    <label for="latitude" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Latitude</label>
-                    <input type="number" step="any" wire:model="latitude" id="latitude" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                </div>
-
-                <div>
-                    <label for="longitude" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Longitude</label>
-                    <input type="number" step="any" wire:model="longitude" id="longitude" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                </div>
-
-                <div>
-                    <label for="raio" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Raio (metros)</label>
-                    <input type="number" wire:model="raio" id="raio" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                </div>
-            </div>
-
-            <div class="flex justify-end">
-                <button wire:click="buscarParcelasPorCoordenada" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Buscar Parcelas
-                </button>
-            </div>
-        </div>
-
-        <!-- Formulário de Busca por Código -->
-        <div x-show="$wire.activeTab === 'codigo'" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <label for="codigoImovel" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Código do Imóvel</label>
-                    <input type="text" wire:model="codigoImovel" id="codigoImovel" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                </div>
-
-                <div>
-                    <label for="matriculaSigef" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Matrícula SIGEF</label>
-                    <input type="text" wire:model="matriculaSigef" id="matriculaSigef" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-                </div>
-            </div>
-
-            <div class="flex justify-end">
-                <button wire:click="buscarPorCodigo" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    Buscar Parcela
-                </button>
-            </div>
-        </div>
-
-        <!-- Mapa -->
-        <div class="mt-6">
-            <div id="map" class="w-full h-96 rounded-lg bg-gray-100 dark:bg-gray-800"></div>
-        </div>
-
-        <!-- Mensagens de Erro e Feedback -->
-        @if($erro)
-            <div class="mt-4 p-4 bg-red-50 dark:bg-red-900 border border-red-200 dark:border-red-700 rounded-md">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-red-400 dark:text-red-200" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                        </svg>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Raio (metros)</label>
+                            <input type="number" wire:model="raio" min="100" max="10000" step="100" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('raio') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
                     </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-red-700 dark:text-red-200">{{ $erro }}</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Latitude</label>
+                            <input type="number" wire:model="latitude" step="any" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('latitude') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Longitude</label>
+                            <input type="number" wire:model="longitude" step="any" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('longitude') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
                     </div>
-                    <div class="ml-auto pl-3">
-                        <button wire:click="novaBusca" class="text-sm font-medium text-red-600 dark:text-red-300 hover:text-red-500 dark:hover:text-red-400">
-                            Nova Busca
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Área Mínima (ha)</label>
+                            <input type="number" wire:model="areaMinima" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('areaMinima') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Área Máxima (ha)</label>
+                            <input type="number" wire:model="areaMaxima" step="0.01" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('areaMaxima') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Buscar Parcelas
                         </button>
                     </div>
-                </div>
-            </div>
-        @endif
+                </form>
+            @else
+                <form wire:submit.prevent="buscarPorCodigo">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Código do Imóvel</label>
+                            <input type="text" wire:model="codigoImovel" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('codigoImovel') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
 
-        <!-- Resultados -->
-        @if(count($parcelas) > 0)
-            <div class="mt-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Matrícula SIGEF</label>
+                            <input type="text" wire:model="matriculaSigef" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            @error('matriculaSigef') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            Buscar Parcela
+                        </button>
+                    </div>
+                </form>
+            @endif
+        </div>
+
+        <!-- Results -->
+        @if(!empty($parcelas))
+            <div class="bg-white rounded-lg shadow-md p-6">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100">Parcelas Encontradas</h3>
-                    <button wire:click="recarregarParcelas" class="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <h3 class="text-lg font-medium text-gray-900">
+                        Resultados ({{ count($parcelas) }} parcelas)
+                    </h3>
+                    <button wire:click="novaBusca" class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <svg class="h-5 w-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                         </svg>
-                        Recarregar
+                        Nova Busca
                     </button>
                 </div>
-                <div class="bg-white dark:bg-gray-900 shadow overflow-hidden sm:rounded-md">
-                    <ul class="divide-y divide-gray-200 dark:divide-gray-700">
-                        @foreach($parcelas as $parcela)
-                            <li class="px-6 py-4">
-                                <div class="flex items-center justify-between">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                        Parcela {{ $parcela['properties']['numero_parcela'] ?? 'N/A' }}
-                                    </div>
-                                    <div class="text-sm text-gray-500 dark:text-gray-300">
-                                        Área: {{ number_format($parcela['properties']['area_ha'] ?? 0, 2) }} ha
-                                    </div>
-                                </div>
-                            </li>
-                        @endforeach
-                    </ul>
+
+                <!-- Pagination -->
+                @if($totalPages > 1)
+                    <div class="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
+                        <div class="flex flex-1 justify-between sm:hidden">
+                            <button wire:click="previousPage" @if($currentPage === 1) disabled @endif class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Anterior
+                            </button>
+                            <button wire:click="nextPage" @if($currentPage === $totalPages) disabled @endif class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                                Próxima
+                            </button>
+                        </div>
+                        <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
+                            <div>
+                                <p class="text-sm text-gray-700">
+                                    Mostrando
+                                    <span class="font-medium">{{ ($currentPage - 1) * config('sigef.pagination.per_page', 50) + 1 }}</span>
+                                    até
+                                    <span class="font-medium">{{ min($currentPage * config('sigef.pagination.per_page', 50), $totalParcelas) }}</span>
+                                    de
+                                    <span class="font-medium">{{ $totalParcelas }}</span>
+                                    resultados
+                                </p>
+                            </div>
+                            <div>
+                                <nav class="isolate inline-flex -space-x-px rounded-md shadow-sm" aria-label="Pagination">
+                                    <button wire:click="previousPage" @if($currentPage === 1) disabled @endif class="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                        <span class="sr-only">Anterior</span>
+                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                    @for($i = 1; $i <= $totalPages; $i++)
+                                        <button wire:click="gotoPage({{ $i }})" class="relative inline-flex items-center px-4 py-2 text-sm font-semibold {{ $i === $currentPage ? 'bg-blue-600 text-white' : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50' }} focus:z-20 focus:outline-offset-0">
+                                            {{ $i }}
+                                        </button>
+                                    @endfor
+                                    <button wire:click="nextPage" @if($currentPage === $totalPages) disabled @endif class="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus:z-20 focus:outline-offset-0">
+                                        <span class="sr-only">Próxima</span>
+                                        <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M7.21 14.77a.75.75 0 01.02-1.06L11.168 10 7.23 6.29a.75.75 0 111.04-1.08l4.5 4.25a.75.75 0 010 1.08l-4.5 4.25a.75.75 0 01-1.06-.02z" clip-rule="evenodd" />
+                                        </svg>
+                                    </button>
+                                </nav>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Map -->
+                <div class="mt-4">
+                    <div id="map" class="w-full h-96 rounded-lg"></div>
                 </div>
-            </div>
-        @elseif(!$loading && !$erro)
-            <div class="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-yellow-700">Nenhuma parcela encontrada</p>
-                    </div>
-                    <div class="ml-auto pl-3">
-                        <button wire:click="novaBusca" class="text-sm font-medium text-yellow-600 hover:text-yellow-500">
-                            Nova Busca
-                        </button>
-                    </div>
+
+                <!-- Results Table -->
+                <div class="mt-4 overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-300">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-0">Código</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Matrícula</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Área (ha)</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Situação</th>
+                                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            @foreach($parcelas as $parcela)
+                                <tr>
+                                    <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-0">
+                                        {{ $parcela['properties']['codigo_imovel'] ?? '-' }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        {{ $parcela['properties']['matricula_sigef'] ?? '-' }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        {{ number_format($parcela['properties']['area_ha'] ?? 0, 2, ',', '.') }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        {{ $parcela['properties']['situacao'] ?? '-' }}
+                                    </td>
+                                    <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                        <button onclick="centralizarParcela({{ json_encode($parcela) }})" class="text-blue-600 hover:text-blue-900">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         @endif
@@ -223,43 +347,93 @@
 
 @push('scripts')
 <script>
-document.addEventListener('livewire:initialized', function () {
-    let map = null;
-    let parcelasLayer = null;
+    let map;
+    let markers = [];
+    let parcelasLayer;
 
-    // Inicializa o mapa
     function initMap() {
-        if (map) return;
-
         map = L.map('map').setView([-15.7801, -47.9292], 4);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
-        // Adiciona marcador para o centroide
-        let marker = null;
-
-        // Escuta mudanças no centroide
-        Livewire.on('centroideAtualizado', (data) => {
-            if (marker) {
-                map.removeLayer(marker);
+        parcelasLayer = L.geoJSON(null, {
+            style: function(feature) {
+                return {
+                    color: '#3388ff',
+                    weight: 2,
+                    opacity: 0.7,
+                    fillOpacity: 0.2
+                };
+            },
+            onEachFeature: function(feature, layer) {
+                layer.bindPopup(`
+                    <strong>Código:</strong> ${feature.properties.codigo_imovel || '-'}<br>
+                    <strong>Matrícula:</strong> ${feature.properties.matricula_sigef || '-'}<br>
+                    <strong>Área:</strong> ${(feature.properties.area_ha || 0).toFixed(2)} ha<br>
+                    <strong>Situação:</strong> ${feature.properties.situacao || '-'}
+                `);
             }
-            
-            if (data.lat && data.lon) {
-                marker = L.marker([data.lat, data.lon]).addTo(map);
-                map.setView([data.lat, data.lon], data.zoom || 10);
-            }
-        });
-
-        // Escuta cliques no mapa
-        map.on('click', function(e) {
-            @this.set('latitude', e.latlng.lat);
-            @this.set('longitude', e.latlng.lng);
-        });
+        }).addTo(map);
     }
 
-    // Inicializa o mapa quando o componente é montado
-    initMap();
-});
+    function centralizarParcela(parcela) {
+        if (parcela && parcela.geometry) {
+            const coords = parcela.geometry.coordinates[0][0];
+            let somaLat = 0;
+            let somaLon = 0;
+            let count = 0;
+
+            coords.forEach(coord => {
+                somaLon += coord[0];
+                somaLat += coord[1];
+                count++;
+            });
+
+            if (count > 0) {
+                const lat = somaLat / count;
+                const lon = somaLon / count;
+                map.setView([lat, lon], 15);
+            }
+        }
+    }
+
+    document.addEventListener('livewire:load', function () {
+        initMap();
+
+        Livewire.on('parcelasRecebidas', data => {
+            // Limpa marcadores anteriores
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+
+            // Limpa layer de parcelas
+            parcelasLayer.clearLayers();
+
+            if (data.parcelas && data.parcelas.length > 0) {
+                // Adiciona novas parcelas
+                parcelasLayer.addData({
+                    type: 'FeatureCollection',
+                    features: data.parcelas
+                });
+
+                // Ajusta o zoom para mostrar todas as parcelas
+                if (data.bbox) {
+                    map.fitBounds([
+                        [data.bbox[1], data.bbox[0]],
+                        [data.bbox[3], data.bbox[2]]
+                    ]);
+                } else {
+                    const bounds = parcelasLayer.getBounds();
+                    if (bounds.isValid()) {
+                        map.fitBounds(bounds);
+                    }
+                }
+            }
+        });
+
+        Livewire.on('centroideAtualizado', data => {
+            map.setView([data.lat, data.lon], data.zoom);
+        });
+    });
 </script>
 @endpush 

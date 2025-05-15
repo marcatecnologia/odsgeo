@@ -7,6 +7,8 @@ use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Str;
 
 class SigefWfsService
 {
@@ -36,10 +38,10 @@ class SigefWfsService
     public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->baseUrl = config('services.sigef.wfs_url', 'https://acervofundiario.incra.gov.br/i3geo/ogc.php');
-        $this->maxRetries = 3;
+        $this->baseUrl = config('sigef.wfs_url');
+        $this->maxRetries = config('sigef.retry.max_attempts', 3);
         $this->retryDelays = [5, 10, 15];
-        $this->connectTimeout = 5;
+        $this->connectTimeout = config('sigef.retry.delay', 5);
         $this->responseTimeout = 15;
         $this->workspace = config('geoserver.workspace');
         $this->layer = 'parcelas_sigef';
@@ -136,19 +138,40 @@ class SigefWfsService
         return false;
     }
 
-    public function getParcelasPorMunicipio(string $uf, string $codigoIbge): array
+    /**
+     * Busca parcelas por município com cache e paginação
+     */
+    public function getParcelasPorMunicipio(string $uf, string $codigoIbge, int $page = 1): array
     {
         try {
-            Log::debug('Buscando parcelas SIGEF', [
-                'estado' => $uf,
-                'municipio' => $codigoIbge
-            ]);
+            // Verifica throttle
+            if (!$this->checkThrottle('municipio')) {
+                return [
+                    'success' => false,
+                    'has_data' => false,
+                    'error' => 'Limite de requisições excedido. Tente novamente em alguns instantes.'
+                ];
+            }
+
+            // Gera chave de cache
+            $cacheKey = "sigef_parcelas_municipio_{$uf}_{$codigoIbge}_page_{$page}";
+            
+            // Tenta recuperar do cache
+            if (config('sigef.cache.enabled')) {
+                $cached = Cache::get($cacheKey);
+                if ($cached) {
+                    Log::info('Cache hit para parcelas por município', [
+                        'uf' => $uf,
+                        'municipio' => $codigoIbge,
+                        'page' => $page
+                    ]);
+                    return $cached;
+                }
+            }
 
             // Validação do código IBGE
             if (!preg_match('/^\d{7}$/', $codigoIbge)) {
-                Log::error('Código IBGE inválido', [
-                    'codigo' => $codigoIbge
-                ]);
+                Log::error('Código IBGE inválido', ['codigo' => $codigoIbge]);
                 return [
                     'success' => false,
                     'has_data' => false,
@@ -165,11 +188,14 @@ class SigefWfsService
             }
 
             $typeName = 'parcelageo_' . strtolower($uf);
+            $startIndex = ($page - 1) * config('sigef.pagination.per_page', 50);
+            
             $params = [
                 'CQL_FILTER' => "municipio_ibge = '{$codigoIbge}'",
                 'outputFormat' => 'application/json',
                 'srsName' => 'EPSG:4326',
-                'maxFeatures' => self::MAX_FEATURES
+                'startIndex' => $startIndex,
+                'maxFeatures' => config('sigef.pagination.per_page', 50)
             ];
 
             Log::debug('Parâmetros da requisição SIGEF', [
@@ -177,60 +203,40 @@ class SigefWfsService
                 'params' => $params
             ]);
 
-            $response = Http::withOptions([
-                'verify' => false,
-                'timeout' => self::SESSION_TIMEOUT,
-                'connect_timeout' => self::CONNECT_TIMEOUT,
-                'curl' => [
-                    CURLOPT_SSL_VERIFYPEER => false,
-                    CURLOPT_SSL_VERIFYHOST => false,
-                    CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
-                    CURLOPT_TCP_KEEPALIVE => 1,
-                    CURLOPT_TCP_KEEPIDLE => 60,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_MAXREDIRS => 5,
-                    CURLOPT_DNS_CACHE_TIMEOUT => 600,
-                    CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
-                    CURLOPT_TIMEOUT => self::SESSION_TIMEOUT
-                ]
-            ])
-            ->withHeaders([
-                'Accept' => 'application/json',
-                'User-Agent' => 'ODSGEO/1.0 (SIGEF Integration)',
-                'Cache-Control' => 'no-cache',
-                'Pragma' => 'no-cache'
-            ])
-            ->withCookies($this->cookies, '.incra.gov.br')
-            ->retry(2, 3000)
-            ->get($this->baseUrl, $params);
-
-            if (!$response->successful()) {
-                Log::error('Erro na requisição WFS', [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-                return [
-                    'success' => false,
-                    'has_data' => false,
-                    'error' => 'Erro ao consultar o serviço SIGEF. Tente novamente mais tarde.'
-                ];
-            }
-
-            $data = $response->json();
+            $response = $this->makeRequest($typeName, $params);
             
-            if (empty($data['features'])) {
-                return [
-                    'success' => true,
-                    'has_data' => false,
-                    'data' => $response->body()
-                ];
+            if (!$response['success']) {
+                return $response;
             }
 
-            return [
+            $data = json_decode($response['data'], true);
+            
+            // Simplifica geometrias se necessário
+            if (isset($data['features'])) {
+                $data['features'] = $this->simplifyGeometries($data['features']);
+            }
+
+            $result = [
                 'success' => true,
-                'has_data' => true,
-                'data' => $response->body()
+                'has_data' => !empty($data['features']),
+                'data' => json_encode($data),
+                'pagination' => [
+                    'current_page' => $page,
+                    'per_page' => config('sigef.pagination.per_page', 50),
+                    'total' => $data['totalFeatures'] ?? 0
+                ]
             ];
+
+            // Armazena em cache
+            if (config('sigef.cache.enabled')) {
+                Cache::put(
+                    $cacheKey,
+                    $result,
+                    now()->addSeconds(config('sigef.cache.ttl.parcelas', 86400))
+                );
+            }
+
+            return $result;
 
         } catch (\Exception $e) {
             Log::error('Erro ao buscar parcelas SIGEF', [
@@ -248,9 +254,271 @@ class SigefWfsService
         }
     }
 
-    protected function establishSession(): void
+    /**
+     * Busca parcelas por coordenada com cache e otimizações
+     */
+    public function buscarParcelasPorCoordenada(float $lat, float $lon, float $raio, string $uf): array
     {
-        $this->abrirSessao();
+        try {
+            // Verifica throttle
+            if (!$this->checkThrottle('coordenada')) {
+                return [
+                    'success' => false,
+                    'has_data' => false,
+                    'error' => 'Limite de requisições excedido. Tente novamente em alguns instantes.'
+                ];
+            }
+
+            // Valida raio
+            $raioMin = config('sigef.coordenada.raio_min', 100);
+            $raioMax = config('sigef.coordenada.raio_max', 10000);
+            
+            if ($raio < $raioMin || $raio > $raioMax) {
+                return [
+                    'success' => false,
+                    'has_data' => false,
+                    'error' => "O raio deve estar entre {$raioMin} e {$raioMax} metros."
+                ];
+            }
+
+            // Gera chave de cache
+            $cacheKey = "sigef_parcelas_coordenada_{$lat}_{$lon}_{$raio}_{$uf}";
+            
+            // Tenta recuperar do cache
+            if (config('sigef.cache.enabled')) {
+                $cached = Cache::get($cacheKey);
+                if ($cached) {
+                    Log::info('Cache hit para parcelas por coordenada', [
+                        'lat' => $lat,
+                        'lon' => $lon,
+                        'raio' => $raio,
+                        'uf' => $uf
+                    ]);
+                    return $cached;
+                }
+            }
+
+            if (!$this->abrirSessao()) {
+                return [
+                    'success' => false,
+                    'has_data' => false,
+                    'error' => 'Não foi possível estabelecer conexão com o SIGEF. Tente novamente mais tarde.'
+                ];
+            }
+
+            $bbox = $this->calcularBoundingBox($lat, $lon, $raio);
+            
+            Log::debug('Bounding box calculada', [
+                'bbox' => $bbox,
+                'raio_original' => $raio
+            ]);
+
+            $typeName = 'parcelageo_' . strtolower($uf);
+            $params = [
+                'CQL_FILTER' => "BBOX(geom, {$bbox['minLon']}, {$bbox['minLat']}, {$bbox['maxLon']}, {$bbox['maxLat']})",
+                'outputFormat' => 'application/json',
+                'srsName' => 'EPSG:4326',
+                'maxFeatures' => config('sigef.pagination.per_page', 50)
+            ];
+
+            Log::debug('Parâmetros da requisição SIGEF', [
+                'typeName' => $typeName,
+                'params' => $params
+            ]);
+
+            $response = $this->makeRequest($typeName, $params);
+            
+            if (!$response['success']) {
+                return $response;
+            }
+
+            $data = json_decode($response['data'], true);
+            
+            // Simplifica geometrias se necessário
+            if (isset($data['features'])) {
+                $data['features'] = $this->simplifyGeometries($data['features']);
+            }
+
+            $result = [
+                'success' => true,
+                'has_data' => !empty($data['features']),
+                'data' => json_encode($data),
+                'bbox' => $bbox
+            ];
+
+            // Armazena em cache
+            if (config('sigef.cache.enabled')) {
+                Cache::put(
+                    $cacheKey,
+                    $result,
+                    now()->addSeconds(config('sigef.cache.ttl.coordenadas', 86400))
+                );
+            }
+
+            return $result;
+
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar parcelas SIGEF por coordenada', [
+                'error' => $e->getMessage(),
+                'lat' => $lat,
+                'lon' => $lon,
+                'raio' => $raio,
+                'uf' => $uf,
+                'type' => get_class($e)
+            ]);
+
+            return [
+                'success' => false,
+                'has_data' => false,
+                'error' => 'Ocorreu um erro ao buscar as parcelas. Tente novamente mais tarde.'
+            ];
+        }
+    }
+
+    /**
+     * Verifica e aplica throttle nas requisições
+     */
+    protected function checkThrottle(string $type): bool
+    {
+        if (!config('sigef.throttle.enabled')) {
+            return true;
+        }
+
+        $key = "sigef_throttle_{$type}_" . auth()->id();
+        $maxRequests = config('sigef.throttle.max_requests', 100);
+        $decayMinutes = config('sigef.throttle.decay_minutes', 1);
+
+        return RateLimiter::attempt(
+            $key,
+            $maxRequests,
+            function() {},
+            $decayMinutes * 60
+        );
+    }
+
+    /**
+     * Simplifica geometrias para melhor performance
+     */
+    protected function simplifyGeometries(array $features): array
+    {
+        if (!config('sigef.geometry.simplify_tolerance')) {
+            return $features;
+        }
+
+        $maxPoints = config('sigef.geometry.max_points', 1000);
+        $tolerance = config('sigef.geometry.simplify_tolerance', 0.0001);
+
+        foreach ($features as &$feature) {
+            if (isset($feature['geometry']['coordinates'])) {
+                $coords = $feature['geometry']['coordinates'];
+                
+                // Simplifica apenas se exceder o número máximo de pontos
+                if (count($coords[0]) > $maxPoints) {
+                    $feature['geometry']['coordinates'] = $this->simplifyPolygon($coords[0], $tolerance);
+                }
+            }
+        }
+
+        return $features;
+    }
+
+    /**
+     * Simplifica um polígono usando o algoritmo de Douglas-Peucker
+     */
+    protected function simplifyPolygon(array $points, float $tolerance): array
+    {
+        // Implementação do algoritmo de Douglas-Peucker
+        // Retorna os pontos simplificados
+        return $points; // TODO: Implementar simplificação real
+    }
+
+    /**
+     * Faz uma requisição com retry
+     */
+    protected function makeRequest(string $typeName, array $params): array
+    {
+        $attempts = 0;
+        $lastException = null;
+
+        while ($attempts < $this->maxRetries) {
+            try {
+                $response = Http::withHeaders([
+                    'Cookie' => $this->getCookiesString()
+                ])
+                ->timeout($this->timeout)
+                ->get($this->baseUrl, array_merge([
+                    'service' => 'WFS',
+                    'version' => '1.1.0',
+                    'request' => 'GetFeature',
+                    'typeName' => $typeName
+                ], $params));
+
+                if ($response->successful()) {
+                    return [
+                        'success' => true,
+                        'data' => $response->body()
+                    ];
+                }
+
+                $lastException = new \Exception('Erro na resposta: ' . $response->status());
+
+            } catch (\Exception $e) {
+                $lastException = $e;
+                Log::warning('Tentativa de requisição falhou', [
+                    'error' => $e->getMessage(),
+                    'attempt' => $attempts + 1
+                ]);
+            }
+
+            $attempts++;
+            if ($attempts < $this->maxRetries) {
+                usleep($this->retryDelays[$attempts - 1] * 1000);
+            }
+        }
+
+        return [
+            'success' => false,
+            'error' => $lastException ? $lastException->getMessage() : 'Erro desconhecido'
+        ];
+    }
+
+    protected function getCookiesString(): string
+    {
+        $cookies = [];
+        foreach ($this->cookies as $name => $value) {
+            $cookies[] = "{$name}={$value}";
+        }
+        return implode('; ', $cookies);
+    }
+
+    protected function calcularBoundingBox(float $lat, float $lon, float $raio): array
+    {
+        // Adiciona margem de segurança de 20%
+        $raio = $raio * 1.2;
+
+        // Converte raio de metros para graus (aproximação)
+        $raioGraus = $raio / self::DEGREE_TO_METERS;
+
+        // Calcula os limites da bounding box
+        $minLat = $lat - $raioGraus;
+        $maxLat = $lat + $raioGraus;
+        
+        // Ajusta o raio em longitude baseado na latitude
+        $raioGrausLon = $raioGraus / cos(deg2rad($lat));
+        $minLon = $lon - $raioGrausLon;
+        $maxLon = $lon + $raioGrausLon;
+
+        return [
+            'minLat' => $minLat,
+            'maxLat' => $maxLat,
+            'minLon' => $minLon,
+            'maxLon' => $maxLon,
+            'center' => [
+                'lat' => $lat,
+                'lon' => $lon
+            ],
+            'raio' => $raio
+        ];
     }
 
     public function getFeature(string $type, array $params = []): array
@@ -538,149 +806,6 @@ class SigefWfsService
         }
     }
 
-    public function buscarParcelasPorCoordenada(float $lat, float $lon, float $raio, string $uf): array
-    {
-        try {
-            Log::debug('Buscando parcelas SIGEF por coordenada', [
-                'lat' => $lat,
-                'lon' => $lon,
-                'raio' => $raio,
-                'uf' => $uf
-            ]);
-
-            if (!$this->abrirSessao()) {
-                return [
-                    'success' => false,
-                    'has_data' => false,
-                    'error' => 'Não foi possível estabelecer conexão com o SIGEF. Tente novamente mais tarde.'
-                ];
-            }
-
-            $bbox = $this->calcularBoundingBox($lat, $lon, $raio);
-            
-            Log::debug('Bounding box calculada', [
-                'bbox' => $bbox,
-                'raio_original' => $raio
-            ]);
-
-            $typeName = 'parcelageo_' . strtolower($uf);
-            $params = [
-                'CQL_FILTER' => "BBOX(geom, {$bbox['minLon']}, {$bbox['minLat']}, {$bbox['maxLon']}, {$bbox['maxLat']})",
-                'outputFormat' => 'application/json',
-                'srsName' => 'EPSG:4326',
-                'maxFeatures' => self::MAX_FEATURES
-            ];
-
-            Log::debug('Parâmetros da requisição SIGEF', [
-                'typeName' => $typeName,
-                'params' => $params
-            ]);
-
-            $response = Http::withOptions([
-                'verify' => false,
-                'timeout' => self::SESSION_TIMEOUT,
-                'connect_timeout' => self::CONNECT_TIMEOUT,
-                'curl' => [
-                    CURLOPT_SSL_VERIFYPEER => false,
-                    CURLOPT_SSL_VERIFYHOST => false,
-                    CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
-                    CURLOPT_TCP_KEEPALIVE => 1,
-                    CURLOPT_TCP_KEEPIDLE => 60,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_MAXREDIRS => 5,
-                    CURLOPT_DNS_CACHE_TIMEOUT => 600,
-                    CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
-                    CURLOPT_TIMEOUT => self::SESSION_TIMEOUT
-                ]
-            ])
-            ->withHeaders([
-                'Accept' => 'application/json',
-                'User-Agent' => 'ODSGEO/1.0 (SIGEF Integration)',
-                'Cache-Control' => 'no-cache',
-                'Pragma' => 'no-cache'
-            ])
-            ->withCookies($this->cookies, '.incra.gov.br')
-            ->retry(2, 3000)
-            ->get($this->baseUrl, $params);
-
-            if (!$response->successful()) {
-                Log::error('Erro na requisição WFS', [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-                return [
-                    'success' => false,
-                    'has_data' => false,
-                    'error' => 'Erro ao consultar o serviço SIGEF. Tente novamente mais tarde.'
-                ];
-            }
-
-            $data = $response->json();
-            
-            if (empty($data['features'])) {
-                return [
-                    'success' => true,
-                    'has_data' => false,
-                    'data' => $response->body(),
-                    'bbox' => $bbox
-                ];
-            }
-
-            return [
-                'success' => true,
-                'has_data' => true,
-                'data' => $response->body(),
-                'bbox' => $bbox
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Erro ao buscar parcelas SIGEF por coordenada', [
-                'error' => $e->getMessage(),
-                'lat' => $lat,
-                'lon' => $lon,
-                'raio' => $raio,
-                'uf' => $uf,
-                'type' => get_class($e)
-            ]);
-
-            return [
-                'success' => false,
-                'has_data' => false,
-                'error' => 'Ocorreu um erro ao buscar as parcelas. Tente novamente mais tarde.'
-            ];
-        }
-    }
-
-    protected function calcularBoundingBox(float $lat, float $lon, float $raio): array
-    {
-        // Adiciona margem de segurança de 20%
-        $raio = $raio * 1.2;
-
-        // Converte raio de metros para graus (aproximação)
-        $raioGraus = $raio / self::DEGREE_TO_METERS;
-
-        // Calcula os limites da bounding box
-        $minLat = $lat - $raioGraus;
-        $maxLat = $lat + $raioGraus;
-        
-        // Ajusta o raio em longitude baseado na latitude
-        $raioGrausLon = $raioGraus / cos(deg2rad($lat));
-        $minLon = $lon - $raioGrausLon;
-        $maxLon = $lon + $raioGrausLon;
-
-        return [
-            'minLat' => $minLat,
-            'maxLat' => $maxLat,
-            'minLon' => $minLon,
-            'maxLon' => $maxLon,
-            'center' => [
-                'lat' => $lat,
-                'lon' => $lon
-            ],
-            'raio' => $raio
-        ];
-    }
-
     public function getParcelasPorCoordenada($latitude, $longitude, $raio)
     {
         try {
@@ -958,5 +1083,10 @@ class SigefWfsService
                 'error' => 'Ocorreu um erro ao buscar a parcela'
             ];
         }
+    }
+
+    protected function establishSession(): void
+    {
+        $this->abrirSessao();
     }
 } 
