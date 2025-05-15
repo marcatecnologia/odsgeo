@@ -4,6 +4,7 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
 
 class GeoServerService
 {
@@ -14,47 +15,82 @@ class GeoServerService
 
     public function __construct()
     {
-        $this->baseUrl = config('geoserver.url');
-        $this->workspace = config('geoserver.workspace');
-        $this->username = config('geoserver.username');
-        $this->password = config('geoserver.password');
+        $this->baseUrl = config('geoserver.url', 'http://localhost:8082/geoserver');
+        $this->workspace = config('geoserver.workspace', 'odsgeo');
+        $this->username = config('geoserver.username', 'admin');
+        $this->password = config('geoserver.password', 'geoserver');
     }
 
-    public function getMunicipiosByUF($uf)
+    public function getMunicipiosByUF(string $uf): array
+    {
+        $cacheKey = "municipios_uf_{$uf}";
+        
+        return Cache::remember($cacheKey, 3600, function () use ($uf) {
+            try {
+                $response = Http::withBasicAuth($this->username, $this->password)
+                    ->get("{$this->baseUrl}/{$this->workspace}/ows", [
+                        'service' => 'WFS',
+                        'version' => '2.0.0',
+                        'request' => 'GetFeature',
+                        'typeName' => 'municipios_simplificado',
+                        'outputFormat' => 'application/json',
+                        'CQL_FILTER' => "uf = '{$uf}'"
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Erro ao buscar municípios no GeoServer', [
+                    'uf' => $uf,
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+
+                return ['features' => []];
+            } catch (\Exception $e) {
+                Log::error('Exceção ao buscar municípios no GeoServer', [
+                    'uf' => $uf,
+                    'error' => $e->getMessage()
+                ]);
+
+                return ['features' => []];
+            }
+        });
+    }
+
+    public function getMunicipioByCodigo(string $codigoIbge): ?array
     {
         try {
             $response = Http::withBasicAuth($this->username, $this->password)
-                ->timeout(config('geoserver.timeout'))
-                ->retry(config('geoserver.retry_attempts'), config('geoserver.retry_delay'))
                 ->get("{$this->baseUrl}/{$this->workspace}/ows", [
                     'service' => 'WFS',
                     'version' => '2.0.0',
                     'request' => 'GetFeature',
                     'typeName' => 'municipios_simplificado',
                     'outputFormat' => 'application/json',
-                    'CQL_FILTER' => "uf='{$uf}'",
-                    'srsName' => 'EPSG:4326',
-                    'propertyName' => 'codigo_ibge,nome,uf,centroide,geom_simplificado'
+                    'CQL_FILTER' => "codigo_ibge = '{$codigoIbge}'"
                 ]);
 
             if ($response->successful()) {
-                return $response->json();
+                $data = $response->json();
+                return $data['features'][0] ?? null;
             }
 
-            Log::error('Erro ao buscar municípios no GeoServer', [
-                'uf' => $uf,
+            Log::error('Erro ao buscar município no GeoServer', [
+                'codigo_ibge' => $codigoIbge,
                 'status' => $response->status(),
                 'response' => $response->body()
             ]);
 
-            throw new \Exception('Erro ao buscar municípios no GeoServer: ' . $response->status());
+            return null;
         } catch (\Exception $e) {
-            Log::error('Exceção ao buscar municípios no GeoServer', [
-                'uf' => $uf,
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+            Log::error('Exceção ao buscar município no GeoServer', [
+                'codigo_ibge' => $codigoIbge,
+                'error' => $e->getMessage()
             ]);
-            throw $e;
+
+            return null;
         }
     }
 

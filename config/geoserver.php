@@ -10,7 +10,7 @@ return [
     |
     */
 
-    'url' => env('GEOSERVER_URL', 'http://localhost:8080/geoserver'),
+    'url' => env('GEOSERVER_URL', 'http://localhost:8082/geoserver'),
     
     'workspace' => env('GEOSERVER_WORKSPACE', 'odsgeo'),
     

@@ -1,0 +1,19 @@
+# GeoServer Security Configuration
+# This file contains the security settings for GeoServer
+
+# Enable WFS
+wfs.enabled=true
+wfs.service=true
+wfs.transaction=true
+wfs.transaction.insert=true
+wfs.transaction.update=true
+wfs.transaction.delete=true
+
+# Enable CORS
+cors.enabled=true
+cors.allowedOrigins=*
+cors.allowedMethods=GET,POST,PUT,DELETE,HEAD,OPTIONS
+cors.allowedHeaders=Content-Type,X-Requested-With,accept,Origin,Access-Control-Request-Method,Access-Control-Request-Headers,Authorization
+cors.exposedHeaders=Access-Control-Allow-Origin,Access-Control-Allow-Credentials
+cors.supportCredentials=true
+cors.preflightMaxAge=3600 

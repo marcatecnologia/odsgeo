@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<featureType>
+  <name>municipios_simplificado</name>
+  <nativeName>municipios_simplificado</nativeName>
+  <namespace>
+    <name>odsgeo</name>
+  </namespace>
+  <title>Municípios Simplificados</title>
+  <srs>EPSG:4326</srs>
+  <nativeBoundingBox>
+    <minx>-74.0</minx>
+    <maxx>-34.0</maxx>
+    <miny>-33.0</miny>
+    <maxy>5.0</maxy>
+    <crs>EPSG:4326</crs>
+  </nativeBoundingBox>
+  <latLonBoundingBox>
+    <minx>-74.0</minx>
+    <maxx>-34.0</maxx>
+    <miny>-33.0</miny>
+    <maxy>5.0</maxy>
+    <crs>EPSG:4326</crs>
+  </latLonBoundingBox>
+  <projectionPolicy>FORCE_DECLARED</projectionPolicy>
+  <enabled>true</enabled>
+  <metadata>
+    <entry key="cachingEnabled">false</entry>
+  </metadata>
+  <store class="postgis">
+    <name>odsgeo</name>
+  </store>
+  <maxFeatures>0</maxFeatures>
+  <numDecimals value="0"/>
+  <responseSRS>
+    <string>EPSG:4326</string>
+  </responseSRS>
+  <overridingServiceSRS>false</overridingServiceSRS>
+  <skipNumberMatched>true</skipNumberMatched>
+  <circularArcPresent>false</circularArcPresent>
+  <attributes>
+    <attribute>
+      <name>id</name>
+      <minOccurs>0</minOccurs>
+      <maxOccurs>1</maxOccurs>
+      <nillable>true</nillable>
+      <binding>java.lang.Integer</binding>
+    </attribute>
+    <attribute>
+      <name>codigo_ibge</name>
+      <minOccurs>0</minOccurs>
+      <maxOccurs>1</maxOccurs>
+      <nillable>true</nillable>
+      <binding>java.lang.String</binding>
+    </attribute>
+    <attribute>
+      <name>nome</name>
+      <minOccurs>0</minOccurs>
+      <maxOccurs>1</maxOccurs>
+      <nillable>true</nillable>
+      <binding>java.lang.String</binding>
+    </attribute>
+    <attribute>
+      <name>uf</name>
+      <minOccurs>0</minOccurs>
+      <maxOccurs>1</maxOccurs>
+      <nillable>true</nillable>
+      <binding>java.lang.String</binding>
+    </attribute>
+    <attribute>
+      <name>geometry</name>
+      <minOccurs>0</minOccurs>
+      <maxOccurs>1</maxOccurs>
+      <nillable>true</nillable>
+      <binding>org.locationtech.jts.geom.MultiPolygon</binding>
+    </attribute>
+  </attributes>
+</featureType> 

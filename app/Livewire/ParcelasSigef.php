@@ -3,24 +3,25 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use App\Services\GeoServerService;
 use App\Services\SigefWfsService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Cache;
 
 class ParcelasSigef extends Component
 {
-    public $estado = '';
-    public $municipio = '';
+    public $estado;
+    public $municipio;
     public $municipios = [];
-    public $latitude = null;
-    public $longitude = null;
+    public $latitude;
+    public $longitude;
     public $raio = 1000;
-    public $activeTab = 'municipio';
-    public $coordenadaCentral = null;
-    public $sigef = null;
-    public $geojson = null;
-    public $centroide = null;
-    public $erro = null;
+    public $parcelas = [];
+    public $erro;
+    public $centroide;
+    public $zoom = 4;
+    public $geoserver;
+    public $sigefWfs;
 
     protected $rules = [
         'estado' => 'required|string|size:2',
@@ -30,19 +31,14 @@ class ParcelasSigef extends Component
         'raio' => 'required|numeric|min:100|max:10000'
     ];
 
-    public function mount()
+    public function mount(GeoServerService $geoserver, SigefWfsService $sigefWfs)
     {
-        $this->municipios = [];
+        $this->geoserver = $geoserver;
+        $this->sigefWfs = $sigefWfs;
     }
 
     public function updatedEstado($value)
     {
-        $this->municipio = '';
-        $this->municipios = [];
-        $this->geojson = null;
-        $this->centroide = null;
-        $this->erro = null;
-
         if ($value) {
             $this->carregarMunicipios($value);
         }
@@ -50,176 +46,157 @@ class ParcelasSigef extends Component
 
     public function updatedMunicipio($value)
     {
-        if ($value && $this->geojson) {
+        \Log::info('updatedMunicipio chamado', ['municipio' => $value]);
+        if ($value) {
             $this->centralizarMunicipio($value);
+            if ($this->centroide) {
+                \Log::info('Disparando evento centroideAtualizado', $this->centroide);
+                $this->dispatch('centroideAtualizado', [
+                    'lat' => $this->centroide['lat'],
+                    'lon' => $this->centroide['lon'],
+                    'zoom' => $this->zoom
+                ]);
+            }
         }
     }
 
-    protected function carregarMunicipios($uf)
+    public function carregarMunicipios($uf)
     {
         try {
-            // Carrega GeoJSON do estado
-            $geojsonPath = base_path("database/geojson/municipios/municipios_{$uf}.geojson");
-            if (!file_exists($geojsonPath)) {
-                throw new \Exception("Arquivo GeoJSON não encontrado para {$uf}");
-            }
-
-            $this->geojson = json_decode(file_get_contents($geojsonPath), true);
+            $response = $this->geoserver->getMunicipiosByUF($uf);
             
-            // Extrai lista de municípios
-            $this->municipios = collect($this->geojson['features'])
-                ->map(function ($feature) {
+            if (isset($response['features'])) {
+                $this->municipios = collect($response['features'])->map(function ($feature) {
                     return [
                         'codigo' => $feature['properties']['codigo_ibge'],
                         'nome' => $feature['properties']['nome']
                     ];
-                })
-                ->sortBy('nome')
-                ->values()
-                ->toArray();
-
-            // Calcula centroide do estado
-            $this->calcularCentroideEstado();
-
+                })->sortBy('nome')->values()->toArray();
+                
+                $this->centroide = $this->calcularCentroideEstado($response['features']);
+                $this->zoom = 6;
+            } else {
+                $this->erro = 'Erro ao carregar municípios';
+                Log::error('Erro ao carregar municípios', ['response' => $response]);
+            }
         } catch (\Exception $e) {
-            $this->erro = "Erro ao carregar municípios: " . $e->getMessage();
-            $this->municipios = [];
+            $this->erro = 'Erro ao carregar municípios: ' . $e->getMessage();
+            Log::error('Erro ao carregar municípios', ['error' => $e->getMessage()]);
         }
     }
 
-    protected function calcularCentroideEstado()
+    public function calcularCentroideEstado($features)
     {
-        if (!$this->geojson) return;
+        if (empty($features)) {
+            return null;
+        }
 
-        $bounds = [PHP_FLOAT_MAX, PHP_FLOAT_MAX, PHP_FLOAT_MIN, PHP_FLOAT_MIN];
-        
-        foreach ($this->geojson['features'] as $feature) {
-            $coordinates = $feature['geometry']['coordinates'][0];
-            foreach ($coordinates as $coord) {
-                $bounds[0] = min($bounds[0], $coord[0]);
-                $bounds[1] = min($bounds[1], $coord[1]);
-                $bounds[2] = max($bounds[2], $coord[0]);
-                $bounds[3] = max($bounds[3], $coord[1]);
+        $somaLat = 0;
+        $somaLon = 0;
+        $count = 0;
+
+        foreach ($features as $feature) {
+            if (isset($feature['geometry']['coordinates'])) {
+                $coords = $feature['geometry']['coordinates'][0][0];
+                foreach ($coords as $coord) {
+                    $somaLon += $coord[0];
+                    $somaLat += $coord[1];
+                    $count++;
+                }
             }
         }
 
-        $this->centroide = [
-            'lat' => ($bounds[1] + $bounds[3]) / 2,
-            'lng' => ($bounds[0] + $bounds[2]) / 2
-        ];
-    }
-
-    protected function centralizarMunicipio($codigoMunicipio)
-    {
-        if (!$this->geojson) return;
-
-        $municipio = collect($this->geojson['features'])
-            ->first(function ($feature) use ($codigoMunicipio) {
-                return $feature['properties']['codigo_ibge'] == $codigoMunicipio;
-            });
-
-        if ($municipio) {
-            $coordinates = $municipio['geometry']['coordinates'][0];
-            $bounds = [PHP_FLOAT_MAX, PHP_FLOAT_MAX, PHP_FLOAT_MIN, PHP_FLOAT_MIN];
-            
-            foreach ($coordinates as $coord) {
-                $bounds[0] = min($bounds[0], $coord[0]);
-                $bounds[1] = min($bounds[1], $coord[1]);
-                $bounds[2] = max($bounds[2], $coord[0]);
-                $bounds[3] = max($bounds[3], $coord[1]);
-            }
-
-            $centroide = [
-                'lat' => ($bounds[1] + $bounds[3]) / 2,
-                'lng' => ($bounds[0] + $bounds[2]) / 2
+        if ($count > 0) {
+            return [
+                'lat' => $somaLat / $count,
+                'lon' => $somaLon / $count
             ];
+        }
 
-            $this->dispatch('centralizar-mapa', [
-                'lat' => $centroide['lat'],
-                'lng' => $centroide['lng'],
-                'zoom' => 11
-            ]);
+        return null;
+    }
+
+    public function centralizarMunicipio($codigo)
+    {
+        try {
+            \Log::info('centralizarMunicipio chamado', ['codigo' => $codigo]);
+            $response = $this->geoserver->getMunicipioByCodigo($codigo);
+            
+            if (isset($response['features'][0]['geometry']['coordinates'])) {
+                $coords = $response['features'][0]['geometry']['coordinates'][0][0];
+                $somaLat = 0;
+                $somaLon = 0;
+                $count = 0;
+
+                foreach ($coords as $coord) {
+                    $somaLon += $coord[0];
+                    $somaLat += $coord[1];
+                    $count++;
+                }
+
+                if ($count > 0) {
+                    $this->centroide = [
+                        'lat' => $somaLat / $count,
+                        'lon' => $somaLon / $count
+                    ];
+                    $this->zoom = 10;
+                    \Log::info('Centroide calculado', $this->centroide);
+                }
+            }
+        } catch (\Exception $e) {
+            $this->erro = 'Erro ao centralizar município: ' . $e->getMessage();
+            \Log::error('Erro ao centralizar município', ['error' => $e->getMessage()]);
         }
     }
 
     public function buscarParcelas()
     {
-        $this->validate([
-            'estado' => 'required|string|size:2',
-            'municipio' => 'required|string|size:7'
-        ]);
+        $this->reset(['parcelas', 'erro']);
+
+        if (!$this->municipio) {
+            $this->erro = 'Selecione um município';
+            return;
+        }
 
         try {
-            $sigefService = app(SigefWfsService::class);
-            $response = $sigefService->getParcelasPorMunicipio($this->municipio);
-
-            if ($response['success']) {
-                $this->geojson = $response['data'];
-                $this->sigef = null;
-                $this->dispatch('parcelasRecebidas', $this->geojson);
+            $response = $this->sigefWfs->getParcelasByMunicipio($this->municipio);
+            
+            if (isset($response['features'])) {
+                $this->parcelas = $response['features'];
             } else {
-                $this->sigef = $response['message'];
-                $this->geojson = null;
+                $this->erro = 'Nenhuma parcela encontrada';
             }
         } catch (\Exception $e) {
-            Log::error('Erro ao buscar parcelas por município', [
-                'error' => $e->getMessage(),
-                'estado' => $this->estado,
-                'municipio' => $this->municipio
-            ]);
-            $this->sigef = 'Erro ao buscar parcelas. Por favor, tente novamente.';
-            $this->geojson = null;
+            $this->erro = 'Erro ao buscar parcelas: ' . $e->getMessage();
+            Log::error('Erro ao buscar parcelas', ['error' => $e->getMessage()]);
         }
     }
 
     public function buscarParcelasPorCoordenada()
     {
-        $this->validate([
-            'estado' => 'required|string|size:2',
-            'latitude' => 'required|numeric|between:-90,90',
-            'longitude' => 'required|numeric|between:-180,180',
-            'raio' => 'required|numeric|min:100|max:10000'
-        ]);
+        $this->reset(['parcelas', 'erro']);
+
+        if (!$this->latitude || !$this->longitude) {
+            $this->erro = 'Informe a latitude e longitude';
+            return;
+        }
 
         try {
-            $sigefService = app(SigefWfsService::class);
-            $response = $sigefService->getParcelasPorCoordenada(
+            $response = $this->sigefWfs->getParcelasByCoordenada(
                 $this->latitude,
                 $this->longitude,
                 $this->raio
             );
-
-            if ($response['success']) {
-                $this->geojson = $response['data'];
-                $this->sigef = null;
-                $this->coordenadaCentral = [
-                    'lat' => $this->latitude,
-                    'lon' => $this->longitude
-                ];
-                $this->dispatch('parcelasRecebidas', $this->geojson);
+            
+            if (isset($response['features'])) {
+                $this->parcelas = $response['features'];
             } else {
-                $this->sigef = $response['message'];
-                $this->geojson = null;
-                $this->coordenadaCentral = null;
+                $this->erro = 'Nenhuma parcela encontrada';
             }
         } catch (\Exception $e) {
-            Log::error('Erro ao buscar parcelas por coordenada', [
-                'error' => $e->getMessage(),
-                'estado' => $this->estado,
-                'latitude' => $this->latitude,
-                'longitude' => $this->longitude,
-                'raio' => $this->raio
-            ]);
-            $this->sigef = 'Erro ao buscar parcelas. Por favor, tente novamente.';
-            $this->geojson = null;
-            $this->coordenadaCentral = null;
+            $this->erro = 'Erro ao buscar parcelas: ' . $e->getMessage();
+            Log::error('Erro ao buscar parcelas', ['error' => $e->getMessage()]);
         }
-    }
-
-    public function atualizarCoordenadas($lat, $lon)
-    {
-        $this->latitude = $lat;
-        $this->longitude = $lon;
     }
 
     public function render()

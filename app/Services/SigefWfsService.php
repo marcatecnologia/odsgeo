@@ -29,6 +29,9 @@ class SigefWfsService
     protected bool $sessionEstablished = false;
     protected int $sessionRetryCount = 0;
     protected const SESSION_RETRY_DELAYS = [2, 3, 4];
+    protected $workspace;
+    protected $layer;
+    protected $timeout;
 
     public function __construct(Client $client)
     {
@@ -38,6 +41,9 @@ class SigefWfsService
         $this->retryDelays = [5, 10, 15];
         $this->connectTimeout = 5;
         $this->responseTimeout = 15;
+        $this->workspace = config('geoserver.workspace');
+        $this->layer = 'parcelas_sigef';
+        $this->timeout = config('geoserver.timeout', 30);
     }
 
     protected function abrirSessao(): bool
@@ -750,6 +756,86 @@ class SigefWfsService
                 'success' => false,
                 'message' => 'Erro ao buscar parcelas. Por favor, tente novamente.'
             ];
+        }
+    }
+
+    public function getParcelasByMunicipio($codigoMunicipio)
+    {
+        try {
+            $cacheKey = "sigef_parcelas_municipio_{$codigoMunicipio}";
+            
+            return Cache::remember($cacheKey, 3600, function () use ($codigoMunicipio) {
+                $response = Http::timeout($this->timeout)
+                    ->get("{$this->baseUrl}/{$this->workspace}/wfs", [
+                        'service' => 'WFS',
+                        'version' => '2.0.0',
+                        'request' => 'GetFeature',
+                        'typeName' => "{$this->workspace}:{$this->layer}",
+                        'outputFormat' => 'application/json',
+                        'CQL_FILTER' => "codigo_municipio='{$codigoMunicipio}'"
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Erro ao buscar parcelas por município', [
+                    'codigo_municipio' => $codigoMunicipio,
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+
+                return ['features' => []];
+            });
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar parcelas por município', [
+                'codigo_municipio' => $codigoMunicipio,
+                'error' => $e->getMessage()
+            ]);
+
+            return ['features' => []];
+        }
+    }
+
+    public function getParcelasByCoordenada($latitude, $longitude, $raio)
+    {
+        try {
+            $cacheKey = "sigef_parcelas_coordenada_{$latitude}_{$longitude}_{$raio}";
+            
+            return Cache::remember($cacheKey, 3600, function () use ($latitude, $longitude, $raio) {
+                $response = Http::timeout($this->timeout)
+                    ->get("{$this->baseUrl}/{$this->workspace}/wfs", [
+                        'service' => 'WFS',
+                        'version' => '2.0.0',
+                        'request' => 'GetFeature',
+                        'typeName' => "{$this->workspace}:{$this->layer}",
+                        'outputFormat' => 'application/json',
+                        'CQL_FILTER' => "DWITHIN(geometry,POINT({$longitude} {$latitude}),{$raio},meters)"
+                    ]);
+
+                if ($response->successful()) {
+                    return $response->json();
+                }
+
+                Log::error('Erro ao buscar parcelas por coordenada', [
+                    'latitude' => $latitude,
+                    'longitude' => $longitude,
+                    'raio' => $raio,
+                    'status' => $response->status(),
+                    'response' => $response->body()
+                ]);
+
+                return ['features' => []];
+            });
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar parcelas por coordenada', [
+                'latitude' => $latitude,
+                'longitude' => $longitude,
+                'raio' => $raio,
+                'error' => $e->getMessage()
+            ]);
+
+            return ['features' => []];
         }
     }
 } 
