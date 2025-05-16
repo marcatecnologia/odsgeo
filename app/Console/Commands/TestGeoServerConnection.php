@@ -11,91 +11,113 @@ class TestGeoServerConnection extends Command
     protected $signature = 'geoserver:test-connection';
     protected $description = 'Testa a conexão com o GeoServer';
 
-    protected $baseUrl;
-    protected $username;
-    protected $password;
-    protected $workspace;
-
-    public function __construct()
-    {
-        parent::__construct();
-        $this->baseUrl = config('geoserver.url');
-        $this->username = config('geoserver.username');
-        $this->password = config('geoserver.password');
-        $this->workspace = config('geoserver.workspace');
-    }
-
     public function handle()
     {
-        $this->info('Testando conexão com o GeoServer...');
+        $baseUrl = config('geoserver.url');
+        $username = config('geoserver.username');
+        $password = config('geoserver.password');
+        $workspace = config('geoserver.workspace');
+
+        $this->info("Testando conexão com o GeoServer...");
+        $this->info("URL: {$baseUrl}");
+        $this->info("Workspace: {$workspace}");
 
         try {
-            // 1. Testar conexão básica
-            $this->testBasicConnection();
+            // Testa a conexão básica
+            $this->info("\nTestando conexão básica...");
+            $response = Http::withBasicAuth($username, $password)
+                ->timeout(30)
+                ->get("{$baseUrl}/rest/about/version");
 
-            // 2. Testar workspace
-            $this->testWorkspace();
+            if ($response->successful()) {
+                $data = $response->json();
+                if (isset($data['about']['resource'][0]['version'])) {
+                    $this->info("✅ Conexão básica estabelecida com sucesso!");
+                    $this->info("Versão do GeoServer: " . $data['about']['resource'][0]['version']);
+                } else {
+                    $this->warn("⚠️ Resposta do GeoServer não contém informações de versão");
+                    $this->info("Resposta recebida: " . json_encode($data, JSON_PRETTY_PRINT));
+                }
+            } else {
+                $this->warn("⚠️ Não foi possível obter a versão do GeoServer");
+                $this->info("Status: " . $response->status());
+                $this->info("Resposta: " . $response->body());
+            }
 
-            // 3. Testar WFS
-            $this->testWFS();
+            // Testa o acesso ao workspace
+            $this->info("\nTestando acesso ao workspace...");
+            $response = Http::withBasicAuth($username, $password)
+                ->timeout(30)
+                ->get("{$baseUrl}/rest/workspaces/{$workspace}");
 
-            $this->info('Testes concluídos com sucesso!');
-        } catch (\Exception $e) {
-            $this->error('Erro durante os testes: ' . $e->getMessage());
-            Log::error('Erro nos testes do GeoServer', [
-                'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            return 1;
-        }
+            if ($response->successful()) {
+                $data = $response->json();
+                if (isset($data['workspace']['name'])) {
+                    $this->info("✅ Workspace '{$workspace}' encontrado!");
+                } else {
+                    $this->error("❌ Resposta inválida do GeoServer");
+                    $this->error("Resposta recebida: " . json_encode($data, JSON_PRETTY_PRINT));
+                }
+            } else {
+                $this->error("❌ Erro ao acessar o workspace '{$workspace}'");
+                $this->error("Status: " . $response->status());
+                $this->error("Resposta: " . $response->body());
+            }
 
-        return 0;
-    }
+            // Testa o acesso à camada de parcelas
+            $layer = config('geoserver.layer');
+            $this->info("\nTestando acesso à camada...");
+            $response = Http::withBasicAuth($username, $password)
+                ->timeout(30)
+                ->get("{$baseUrl}/rest/layers/{$workspace}:{$layer}");
 
-    protected function testBasicConnection()
-    {
-        $this->info('Testando conexão básica...');
+            if ($response->successful()) {
+                $data = $response->json();
+                if (isset($data['layer']['name'])) {
+                    $this->info("✅ Camada '{$layer}' encontrada!");
+                } else {
+                    $this->error("❌ Resposta inválida do GeoServer");
+                    $this->error("Resposta recebida: " . json_encode($data, JSON_PRETTY_PRINT));
+                }
+            } else {
+                $this->error("❌ Erro ao acessar a camada '{$layer}'");
+                $this->error("Status: " . $response->status());
+                $this->error("Resposta: " . $response->body());
+            }
 
-        $response = Http::withBasicAuth($this->username, $this->password)
-            ->get("{$this->baseUrl}/rest/about/version");
-
-        if ($response->successful()) {
-            $version = $response->json()['about']['resource'][0]['version'];
-            $this->info("Conexão bem sucedida! Versão do GeoServer: {$version}");
-        } else {
-            throw new \Exception('Erro ao conectar com o GeoServer: ' . $response->body());
-        }
-    }
-
-    protected function testWorkspace()
-    {
-        $this->info('Testando workspace...');
-
-        $response = Http::withBasicAuth($this->username, $this->password)
-            ->get("{$this->baseUrl}/rest/workspaces/{$this->workspace}");
-
-        if ($response->successful()) {
-            $this->info('Workspace encontrado e acessível.');
-        } else {
-            throw new \Exception('Erro ao acessar workspace: ' . $response->body());
-        }
-    }
-
-    protected function testWFS()
-    {
-        $this->info('Testando WFS...');
-
-        $response = Http::withBasicAuth($this->username, $this->password)
-            ->get("{$this->baseUrl}/{$this->workspace}/ows", [
+            // Testa o serviço WFS
+            $this->info("\nTestando serviço WFS...");
+            $params = [
                 'service' => 'WFS',
                 'version' => '2.0.0',
-                'request' => 'GetCapabilities'
-            ]);
+                'request' => 'GetCapabilities',
+                'typeName' => "{$workspace}:{$layer}"
+            ];
 
-        if ($response->successful()) {
-            $this->info('WFS está funcionando corretamente.');
-        } else {
-            throw new \Exception('Erro ao testar WFS: ' . $response->body());
+            $response = Http::withBasicAuth($username, $password)
+                ->timeout(30)
+                ->get("{$baseUrl}/wfs", $params);
+
+            if ($response->successful()) {
+                $this->info("✅ Serviço WFS funcionando!");
+            } else {
+                $this->error("❌ Erro ao acessar o serviço WFS");
+                $this->error("Status: " . $response->status());
+                $this->error("Resposta: " . $response->body());
+            }
+
+        } catch (\Exception $e) {
+            $this->error("\n❌ Erro ao testar conexão:");
+            $this->error($e->getMessage());
+            $this->error("\nStack trace:");
+            $this->error($e->getTraceAsString());
+            
+            Log::error('Erro ao testar conexão com GeoServer', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'baseUrl' => $baseUrl,
+                'workspace' => $workspace
+            ]);
         }
     }
 } 

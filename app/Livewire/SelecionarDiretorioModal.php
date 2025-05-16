@@ -6,50 +6,130 @@ use Livewire\Component;
 use App\Models\Cliente;
 use App\Models\Projeto;
 use App\Models\Servico;
+use App\Services\CacheService;
+use App\Events\ServicoAtualizado;
+use App\Jobs\LimparCacheDiretorio;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Collection;
 
 class SelecionarDiretorioModal extends Component
 {
-    public $clientes = [];
-    public $projetos = [];
-    public $servicos = [];
+    public Collection $clientes;
+    public Collection $projetos;
+    public Collection $servicos;
 
     public $cliente_id = null;
     public $projeto_id = null;
     public $servico_id = null;
+    
+    public $searchCliente = '';
+    public $searchProjeto = '';
+    public $searchServico = '';
+
+    protected $queryString = [
+        'cliente_id' => ['except' => ''],
+        'projeto_id' => ['except' => ''],
+        'servico_id' => ['except' => '']
+    ];
+
+    protected $cacheService;
+
+    public function boot(CacheService $cacheService)
+    {
+        $this->cacheService = $cacheService;
+    }
 
     public function mount()
     {
-        $this->clientes = Cliente::orderBy('nome')->get();
+        // Inicializa as coleções vazias
+        $this->clientes = collect();
+        $this->projetos = collect();
+        $this->servicos = collect();
         
-        // Recupera o serviço atual da sessão
+        $this->loadClientes();
+        
         $currentServiceId = session('current_service_id');
         if ($currentServiceId) {
-            $servico = Servico::find($currentServiceId);
+            $servico = $this->cacheService->getServicoCompleto($currentServiceId);
+            
             if ($servico) {
                 $this->servico_id = $servico->id;
                 $this->projeto_id = $servico->projeto_id;
                 $this->cliente_id = $servico->projeto->cliente_id;
                 
-                // Carrega os projetos e serviços relacionados
-                $this->projetos = Projeto::where('cliente_id', $this->cliente_id)->orderBy('nome')->get();
-                $this->servicos = Servico::where('projeto_id', $this->projeto_id)->orderBy('nome')->get();
+                $this->loadProjetos();
+                $this->loadServicos();
             }
+        }
+    }
+
+    protected function loadClientes()
+    {
+        $this->clientes = $this->cacheService->getClientesList($this->searchCliente) ?? collect();
+    }
+
+    protected function loadProjetos()
+    {
+        if ($this->cliente_id) {
+            $this->projetos = $this->cacheService->getProjetosList($this->cliente_id, $this->searchProjeto) ?? collect();
+        } else {
+            $this->projetos = collect();
+        }
+    }
+
+    protected function loadServicos()
+    {
+        if ($this->projeto_id) {
+            $this->servicos = $this->cacheService->getServicosList($this->projeto_id, $this->searchServico) ?? collect();
+        } else {
+            $this->servicos = collect();
+        }
+    }
+
+    public function updatedSearchCliente()
+    {
+        $this->loadClientes();
+    }
+
+    public function updatedSearchProjeto()
+    {
+        if ($this->cliente_id) {
+            $this->loadProjetos();
+        }
+    }
+
+    public function updatedSearchServico()
+    {
+        if ($this->projeto_id) {
+            $this->loadServicos();
         }
     }
 
     public function updatedClienteId($value)
     {
-        $this->projetos = Projeto::where('cliente_id', $value)->orderBy('nome')->get();
         $this->projeto_id = null;
-        $this->servicos = [];
         $this->servico_id = null;
+        $this->servicos = collect();
+        $this->searchProjeto = '';
+        $this->searchServico = '';
+        
+        if ($value) {
+            $this->loadProjetos();
+        } else {
+            $this->projetos = collect();
+        }
     }
 
     public function updatedProjetoId($value)
     {
-        $this->servicos = Servico::where('projeto_id', $value)->orderBy('nome')->get();
         $this->servico_id = null;
+        $this->searchServico = '';
+        
+        if ($value) {
+            $this->loadServicos();
+        } else {
+            $this->servicos = collect();
+        }
     }
 
     public function confirmarSelecao()
@@ -63,15 +143,13 @@ class SelecionarDiretorioModal extends Component
             return;
         }
 
-        // Valida se o serviço pertence ao projeto e cliente selecionados
-        $servico = Servico::where('id', $this->servico_id)
-            ->whereHas('projeto', function ($query) {
-                $query->where('id', $this->projeto_id)
-                    ->where('cliente_id', $this->cliente_id);
-            })
-            ->first();
+        $servico = $this->cacheService->getServicoCompleto($this->servico_id);
 
-        if (!$servico) {
+        if (
+            !$servico ||
+            (int)$servico->projeto_id !== (int)$this->projeto_id ||
+            (int)$servico->projeto->cliente_id !== (int)$this->cliente_id
+        ) {
             Notification::make()
                 ->title('Erro')
                 ->body('Serviço inválido para o projeto/cliente selecionado.')
@@ -80,8 +158,11 @@ class SelecionarDiretorioModal extends Component
             return;
         }
 
-        // Salva o ID do serviço na sessão
         session()->put('current_service_id', $this->servico_id);
+        
+        // Dispara eventos e jobs
+        event(new ServicoAtualizado($servico));
+        LimparCacheDiretorio::dispatch('servico', $this->servico_id);
 
         Notification::make()
             ->title('Sucesso')
@@ -95,20 +176,23 @@ class SelecionarDiretorioModal extends Component
 
     public function atualizarClientes()
     {
-        $this->clientes = \App\Models\Cliente::orderBy('nome')->get();
+        LimparCacheDiretorio::dispatch('cliente', $this->cliente_id);
+        $this->loadClientes();
     }
 
     public function atualizarProjetos()
     {
         if ($this->cliente_id) {
-            $this->projetos = \App\Models\Projeto::where('cliente_id', $this->cliente_id)->orderBy('nome')->get();
+            LimparCacheDiretorio::dispatch('projeto', $this->projeto_id);
+            $this->loadProjetos();
         }
     }
 
     public function atualizarServicos()
     {
         if ($this->projeto_id) {
-            $this->servicos = \App\Models\Servico::where('projeto_id', $this->projeto_id)->orderBy('nome')->get();
+            LimparCacheDiretorio::dispatch('servico', $this->servico_id);
+            $this->loadServicos();
         }
     }
 
@@ -116,6 +200,7 @@ class SelecionarDiretorioModal extends Component
 
     public function atualizarTudo()
     {
+        LimparCacheDiretorio::dispatch('todos');
         $this->atualizarClientes();
         $this->atualizarProjetos();
         $this->atualizarServicos();

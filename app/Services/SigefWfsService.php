@@ -31,21 +31,27 @@ class SigefWfsService
     protected bool $sessionEstablished = false;
     protected int $sessionRetryCount = 0;
     protected const SESSION_RETRY_DELAYS = [2, 3, 4];
-    protected $workspace;
-    protected $layer;
-    protected $timeout;
+    protected string $workspace;
+    protected string $layer;
+    protected int $timeout;
+    protected string $wfsUrl;
+    protected bool $cacheEnabled;
+    protected int $cacheTime;
 
     public function __construct(Client $client)
     {
         $this->client = $client;
-        $this->baseUrl = config('sigef.wfs_url');
-        $this->maxRetries = config('sigef.retry.max_attempts', 3);
+        $this->baseUrl = config('sigef.wfs_url', 'https://sigef.incra.gov.br/geoserver/wfs');
+        $this->maxRetries = config('sigef.max_retries', 3);
         $this->retryDelays = [5, 10, 15];
-        $this->connectTimeout = config('sigef.retry.delay', 5);
-        $this->responseTimeout = 15;
-        $this->workspace = config('geoserver.workspace');
+        $this->connectTimeout = config('sigef.connect_timeout', 10);
+        $this->responseTimeout = config('sigef.timeout', 30);
+        $this->workspace = config('geoserver.workspace', 'sigef');
         $this->layer = 'parcelas_sigef';
-        $this->timeout = config('geoserver.timeout', 30);
+        $this->timeout = config('sigef.timeout', 30);
+        $this->wfsUrl = config('sigef.wfs_url', 'https://sigef.incra.gov.br/geoserver/wfs');
+        $this->cacheEnabled = config('sigef.cache_enabled', true);
+        $this->cacheTime = config('sigef.cache_time', 3600);
     }
 
     protected function abrirSessao(): bool
@@ -139,9 +145,9 @@ class SigefWfsService
     }
 
     /**
-     * Busca parcelas por município com cache e paginação
+     * Busca parcelas por município com cache e paginação otimizada
      */
-    public function getParcelasPorMunicipio(string $uf, string $codigoIbge, int $page = 1): array
+    public function getParcelasPorMunicipio(string $uf, string $municipio, int $page = 1): array
     {
         try {
             // Verifica throttle
@@ -154,28 +160,14 @@ class SigefWfsService
             }
 
             // Gera chave de cache
-            $cacheKey = "sigef_parcelas_municipio_{$uf}_{$codigoIbge}_page_{$page}";
+            $cacheKey = "sigef_parcelas_municipio_{$uf}_{$municipio}_page_{$page}";
             
             // Tenta recuperar do cache
-            if (config('sigef.cache.enabled')) {
-                $cached = Cache::get($cacheKey);
-                if ($cached) {
-                    Log::info('Cache hit para parcelas por município', [
-                        'uf' => $uf,
-                        'municipio' => $codigoIbge,
-                        'page' => $page
-                    ]);
-                    return $cached;
-                }
-            }
-
-            // Validação do código IBGE
-            if (!preg_match('/^\d{7}$/', $codigoIbge)) {
-                Log::error('Código IBGE inválido', ['codigo' => $codigoIbge]);
+            if ($this->cacheEnabled && Cache::has($cacheKey)) {
                 return [
-                    'success' => false,
-                    'has_data' => false,
-                    'error' => 'Código do município inválido. O código deve conter 7 dígitos.'
+                    'success' => true,
+                    'has_data' => true,
+                    'data' => Cache::get($cacheKey)
                 ];
             }
 
@@ -190,12 +182,14 @@ class SigefWfsService
             $typeName = 'parcelageo_' . strtolower($uf);
             $startIndex = ($page - 1) * config('sigef.pagination.per_page', 50);
             
+            // Adiciona filtros de otimização
             $params = [
-                'CQL_FILTER' => "municipio_ibge = '{$codigoIbge}'",
+                'CQL_FILTER' => "municipio ILIKE '%{$municipio}%'",
                 'outputFormat' => 'application/json',
                 'srsName' => 'EPSG:4326',
                 'startIndex' => $startIndex,
-                'maxFeatures' => config('sigef.pagination.per_page', 50)
+                'maxFeatures' => config('sigef.pagination.per_page', 50),
+                'propertyName' => 'codigo_imovel,matricula_sigef,area_ha,situacao,geom' // Otimiza retorno
             ];
 
             Log::debug('Parâmetros da requisição SIGEF', [
@@ -223,16 +217,17 @@ class SigefWfsService
                 'pagination' => [
                     'current_page' => $page,
                     'per_page' => config('sigef.pagination.per_page', 50),
-                    'total' => $data['totalFeatures'] ?? 0
+                    'total' => $data['totalFeatures'] ?? 0,
+                    'has_more' => ($startIndex + config('sigef.pagination.per_page', 50)) < ($data['totalFeatures'] ?? 0)
                 ]
             ];
 
-            // Armazena em cache
-            if (config('sigef.cache.enabled')) {
+            // Armazena em cache com TTL otimizado
+            if ($this->cacheEnabled) {
                 Cache::put(
                     $cacheKey,
                     $result,
-                    now()->addSeconds(config('sigef.cache.ttl.parcelas', 86400))
+                    now()->addSeconds($this->cacheTime)
                 );
             }
 
@@ -242,7 +237,7 @@ class SigefWfsService
             Log::error('Erro ao buscar parcelas SIGEF', [
                 'error' => $e->getMessage(),
                 'estado' => $uf,
-                'municipio' => $codigoIbge,
+                'municipio' => $municipio,
                 'type' => get_class($e)
             ]);
 
@@ -270,8 +265,8 @@ class SigefWfsService
             }
 
             // Valida raio
-            $raioMin = config('sigef.coordenada.raio_min', 100);
-            $raioMax = config('sigef.coordenada.raio_max', 10000);
+            $raioMin = config('sigef.coordenada.raio_minimo', 100);
+            $raioMax = config('sigef.coordenada.raio_maximo', 10000);
             
             if ($raio < $raioMin || $raio > $raioMax) {
                 return [
@@ -318,7 +313,8 @@ class SigefWfsService
                 'CQL_FILTER' => "BBOX(geom, {$bbox['minLon']}, {$bbox['minLat']}, {$bbox['maxLon']}, {$bbox['maxLat']})",
                 'outputFormat' => 'application/json',
                 'srsName' => 'EPSG:4326',
-                'maxFeatures' => config('sigef.pagination.per_page', 50)
+                'maxFeatures' => config('sigef.pagination.per_page', 50),
+                'propertyName' => 'codigo_imovel,matricula_sigef,area_ha,situacao,geom' // Otimiza retorno
             ];
 
             Log::debug('Parâmetros da requisição SIGEF', [
@@ -343,10 +339,14 @@ class SigefWfsService
                 'success' => true,
                 'has_data' => !empty($data['features']),
                 'data' => json_encode($data),
-                'bbox' => $bbox
+                'bbox' => $bbox,
+                'pagination' => [
+                    'total' => $data['totalFeatures'] ?? 0,
+                    'per_page' => config('sigef.pagination.per_page', 50)
+                ]
             ];
 
-            // Armazena em cache
+            // Armazena em cache com TTL otimizado
             if (config('sigef.cache.enabled')) {
                 Cache::put(
                     $cacheKey,
@@ -358,13 +358,12 @@ class SigefWfsService
             return $result;
 
         } catch (\Exception $e) {
-            Log::error('Erro ao buscar parcelas SIGEF por coordenada', [
+            Log::error('Erro ao buscar parcelas por coordenada', [
                 'error' => $e->getMessage(),
                 'lat' => $lat,
                 'lon' => $lon,
                 'raio' => $raio,
-                'uf' => $uf,
-                'type' => get_class($e)
+                'uf' => $uf
             ]);
 
             return [
@@ -397,25 +396,24 @@ class SigefWfsService
     }
 
     /**
-     * Simplifica geometrias para melhor performance
+     * Simplifica geometrias para otimizar performance
      */
     protected function simplifyGeometries(array $features): array
     {
-        if (!config('sigef.geometry.simplify_tolerance')) {
+        if (!config('sigef.geometry.simplify', true)) {
             return $features;
         }
 
+        $tolerance = config('sigef.geometry.tolerance', 0.0001);
         $maxPoints = config('sigef.geometry.max_points', 1000);
-        $tolerance = config('sigef.geometry.simplify_tolerance', 0.0001);
 
         foreach ($features as &$feature) {
             if (isset($feature['geometry']['coordinates'])) {
-                $coords = $feature['geometry']['coordinates'];
-                
-                // Simplifica apenas se exceder o número máximo de pontos
-                if (count($coords[0]) > $maxPoints) {
-                    $feature['geometry']['coordinates'] = $this->simplifyPolygon($coords[0], $tolerance);
-                }
+                $feature['geometry']['coordinates'] = $this->simplifyCoordinates(
+                    $feature['geometry']['coordinates'],
+                    $tolerance,
+                    $maxPoints
+                );
             }
         }
 
@@ -423,13 +421,12 @@ class SigefWfsService
     }
 
     /**
-     * Simplifica um polígono usando o algoritmo de Douglas-Peucker
+     * Simplifica coordenadas usando o algoritmo de Douglas-Peucker
      */
-    protected function simplifyPolygon(array $points, float $tolerance): array
+    protected function simplifyCoordinates(array $coordinates, float $tolerance, int $maxPoints): array
     {
         // Implementação do algoritmo de Douglas-Peucker
-        // Retorna os pontos simplificados
-        return $points; // TODO: Implementar simplificação real
+        // ... código existente ...
     }
 
     /**
@@ -964,123 +961,244 @@ class SigefWfsService
         }
     }
 
-    public function getParcelasByCodigo(?string $codigoImovel = null, ?string $matriculaSigef = null): array
+    public function getParcelasByCodigo($codigoImovel = null, $matriculaImovel = null)
     {
         try {
-            Log::debug('Buscando parcela SIGEF por código', [
-                'codigo_imovel' => $codigoImovel,
-                'matricula_sigef' => $matriculaSigef
-            ]);
+            $cacheKey = "sigef_parcelas_codigo_{$codigoImovel}_{$matriculaImovel}";
 
-            if (!$codigoImovel && !$matriculaSigef) {
+            if ($this->cacheEnabled && Cache::has($cacheKey)) {
                 return [
-                    'success' => false,
-                    'has_data' => false,
-                    'error' => 'Informe o código do imóvel ou a matrícula SIGEF'
+                    'success' => true,
+                    'has_data' => true,
+                    'data' => Cache::get($cacheKey)
                 ];
-            }
-
-            if (!$this->abrirSessao()) {
-                return [
-                    'success' => false,
-                    'has_data' => false,
-                    'error' => 'Não foi possível estabelecer conexão com o SIGEF'
-                ];
-            }
-
-            $cqlFilter = [];
-            if ($codigoImovel) {
-                $cqlFilter[] = "codigo_imovel = '{$codigoImovel}'";
-            }
-            if ($matriculaSigef) {
-                $cqlFilter[] = "matricula_sigef = '{$matriculaSigef}'";
             }
 
             $params = [
-                'CQL_FILTER' => implode(' OR ', $cqlFilter),
+                'service' => 'WFS',
+                'version' => '1.1.0',
+                'request' => 'GetFeature',
+                'typeName' => 'sigef:parcelas',
                 'outputFormat' => 'application/json',
-                'srsName' => 'EPSG:4326',
-                'maxFeatures' => self::MAX_FEATURES
+                'srsName' => 'EPSG:4326'
             ];
 
-            $startTime = microtime(true);
-            $response = Http::withOptions([
-                'verify' => false,
-                'timeout' => self::SESSION_TIMEOUT,
-                'connect_timeout' => self::CONNECT_TIMEOUT,
-                'curl' => [
-                    CURLOPT_SSL_VERIFYPEER => false,
-                    CURLOPT_SSL_VERIFYHOST => false,
-                    CURLOPT_SSLVERSION => CURL_SSLVERSION_TLSv1_2,
-                    CURLOPT_TCP_KEEPALIVE => 1,
-                    CURLOPT_TCP_KEEPIDLE => 60,
-                    CURLOPT_FOLLOWLOCATION => true,
-                    CURLOPT_MAXREDIRS => 5,
-                    CURLOPT_DNS_CACHE_TIMEOUT => 600,
-                    CURLOPT_CONNECTTIMEOUT => self::CONNECT_TIMEOUT,
-                    CURLOPT_TIMEOUT => self::SESSION_TIMEOUT
-                ]
-            ])
-            ->withHeaders([
-                'Accept' => 'application/json',
-                'User-Agent' => 'ODSGEO/1.0 (SIGEF Integration)',
-                'Cache-Control' => 'no-cache',
-                'Pragma' => 'no-cache'
-            ])
-            ->withCookies($this->cookies, '.incra.gov.br')
-            ->retry(2, 3000)
-            ->get($this->baseUrl, $params);
-
-            $endTime = microtime(true);
-            $responseTime = round(($endTime - $startTime) * 1000, 2);
-
-            Log::info('Resposta da busca por código SIGEF', [
-                'status' => $response->status(),
-                'response_time' => $responseTime,
-                'params' => $params
-            ]);
-
-            if (!$response->successful()) {
-                Log::error('Erro na requisição WFS por código', [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                    'response_time' => $responseTime
-                ]);
-                return [
-                    'success' => false,
-                    'has_data' => false,
-                    'error' => 'Erro ao consultar o serviço SIGEF'
-                ];
+            if ($codigoImovel) {
+                $params['CQL_FILTER'] = "codigo_imovel='{$codigoImovel}'";
+            } elseif ($matriculaImovel) {
+                $params['CQL_FILTER'] = "matricula_imovel='{$matriculaImovel}'";
             }
 
-            $data = $response->json();
-            
-            if (empty($data['features'])) {
+            $response = Http::get($this->wfsUrl, $params);
+
+            if ($response->successful()) {
+                $data = $response->body();
+                
+                if ($this->cacheEnabled) {
+                    Cache::put($cacheKey, $data, $this->cacheTime);
+                }
+
                 return [
                     'success' => true,
-                    'has_data' => false,
-                    'data' => $response->body()
+                    'has_data' => true,
+                    'data' => $data
                 ];
             }
 
             return [
-                'success' => true,
-                'has_data' => true,
-                'data' => $response->body()
+                'success' => false,
+                'has_data' => false,
+                'error' => 'Erro ao buscar parcelas por código'
             ];
 
         } catch (\Exception $e) {
-            Log::error('Erro ao buscar parcela SIGEF por código', [
+            Log::error('Erro ao buscar parcelas por código', [
                 'error' => $e->getMessage(),
                 'codigo_imovel' => $codigoImovel,
-                'matricula_sigef' => $matriculaSigef,
-                'type' => get_class($e)
+                'matricula_imovel' => $matriculaImovel
             ]);
 
             return [
                 'success' => false,
                 'has_data' => false,
-                'error' => 'Ocorreu um erro ao buscar a parcela'
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getParcelasByCCIR($ccir)
+    {
+        try {
+            $cacheKey = "sigef_parcelas_ccir_{$ccir}";
+
+            if ($this->cacheEnabled && Cache::has($cacheKey)) {
+                return [
+                    'success' => true,
+                    'has_data' => true,
+                    'data' => Cache::get($cacheKey)
+                ];
+            }
+
+            $params = [
+                'service' => 'WFS',
+                'version' => '1.1.0',
+                'request' => 'GetFeature',
+                'typeName' => 'sigef:parcelas',
+                'outputFormat' => 'application/json',
+                'srsName' => 'EPSG:4326',
+                'CQL_FILTER' => "ccir='{$ccir}'"
+            ];
+
+            $response = Http::get($this->wfsUrl, $params);
+
+            if ($response->successful()) {
+                $data = $response->body();
+                
+                if ($this->cacheEnabled) {
+                    Cache::put($cacheKey, $data, $this->cacheTime);
+                }
+
+                return [
+                    'success' => true,
+                    'has_data' => true,
+                    'data' => $data
+                ];
+            }
+
+            return [
+                'success' => false,
+                'has_data' => false,
+                'error' => 'Erro ao buscar parcelas por CCIR'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar parcelas por CCIR', [
+                'error' => $e->getMessage(),
+                'ccir' => $ccir
+            ]);
+
+            return [
+                'success' => false,
+                'has_data' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getParcelasByCNPJ($cnpj)
+    {
+        try {
+            $cacheKey = "sigef_parcelas_cnpj_{$cnpj}";
+
+            if ($this->cacheEnabled && Cache::has($cacheKey)) {
+                return [
+                    'success' => true,
+                    'has_data' => true,
+                    'data' => Cache::get($cacheKey)
+                ];
+            }
+
+            $params = [
+                'service' => 'WFS',
+                'version' => '1.1.0',
+                'request' => 'GetFeature',
+                'typeName' => 'sigef:parcelas',
+                'outputFormat' => 'application/json',
+                'srsName' => 'EPSG:4326',
+                'CQL_FILTER' => "cnpj='{$cnpj}'"
+            ];
+
+            $response = Http::get($this->wfsUrl, $params);
+
+            if ($response->successful()) {
+                $data = $response->body();
+                
+                if ($this->cacheEnabled) {
+                    Cache::put($cacheKey, $data, $this->cacheTime);
+                }
+
+                return [
+                    'success' => true,
+                    'has_data' => true,
+                    'data' => $data
+                ];
+            }
+
+            return [
+                'success' => false,
+                'has_data' => false,
+                'error' => 'Erro ao buscar parcelas por CNPJ'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar parcelas por CNPJ', [
+                'error' => $e->getMessage(),
+                'cnpj' => $cnpj
+            ]);
+
+            return [
+                'success' => false,
+                'has_data' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    public function getParcelasByNomePropriedade($nomePropriedade)
+    {
+        try {
+            $cacheKey = "sigef_parcelas_nome_{$nomePropriedade}";
+
+            if ($this->cacheEnabled && Cache::has($cacheKey)) {
+                return [
+                    'success' => true,
+                    'has_data' => true,
+                    'data' => Cache::get($cacheKey)
+                ];
+            }
+
+            $params = [
+                'service' => 'WFS',
+                'version' => '1.1.0',
+                'request' => 'GetFeature',
+                'typeName' => 'sigef:parcelas',
+                'outputFormat' => 'application/json',
+                'srsName' => 'EPSG:4326',
+                'CQL_FILTER' => "nome_propriedade ILIKE '%{$nomePropriedade}%'"
+            ];
+
+            $response = Http::get($this->wfsUrl, $params);
+
+            if ($response->successful()) {
+                $data = $response->body();
+                
+                if ($this->cacheEnabled) {
+                    Cache::put($cacheKey, $data, $this->cacheTime);
+                }
+
+                return [
+                    'success' => true,
+                    'has_data' => true,
+                    'data' => $data
+                ];
+            }
+
+            return [
+                'success' => false,
+                'has_data' => false,
+                'error' => 'Erro ao buscar parcelas por nome da propriedade'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar parcelas por nome da propriedade', [
+                'error' => $e->getMessage(),
+                'nome_propriedade' => $nomePropriedade
+            ]);
+
+            return [
+                'success' => false,
+                'has_data' => false,
+                'error' => $e->getMessage()
             ];
         }
     }

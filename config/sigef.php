@@ -15,31 +15,45 @@ return [
     | SIGEF WFS URL
     |--------------------------------------------------------------------------
     |
-    | URL base do serviço WFS do SIGEF
+    | URL do serviço WFS do SIGEF para consulta de parcelas
     |
     */
-    'wfs' => [
-        'url' => env('SIGEF_WFS_URL', 'https://sigef.incra.gov.br/geoserver/wfs'),
-    ],
+    'wfs_url' => env('SIGEF_WFS_URL', 'https://sigef.incra.gov.br/geoserver/wfs'),
 
     /*
     |--------------------------------------------------------------------------
     | Cache Settings
     |--------------------------------------------------------------------------
     |
-    | Configurações de cache para as requisições do SIGEF
+    | Configurações de cache para as consultas ao SIGEF
     |
     */
-    'cache' => [
-        'enabled' => env('SIGEF_CACHE_ENABLED', true),
-        'driver' => env('SIGEF_CACHE_DRIVER', 'redis'),
-        'ttl' => [
-            'parcelas' => env('SIGEF_CACHE_TTL_PARCELAS', 300), // 5 minutos
-            'municipios' => env('SIGEF_CACHE_TTL_MUNICIPIOS', 1296000), // 15 dias
-            'coordenadas' => env('SIGEF_CACHE_TTL_COORDENADAS', 300), // 5 minutos
-            'codigo' => env('SIGEF_CACHE_TTL_CODIGO', 300), // 5 minutos
-        ],
-    ],
+    'cache_enabled' => env('SIGEF_CACHE_ENABLED', true),
+    'cache_time' => env('SIGEF_CACHE_TIME', 3600), // 1 hora em segundos
+
+    /*
+    |--------------------------------------------------------------------------
+    | Request Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configurações de timeout e retry para as requisições ao SIGEF
+    |
+    */
+    'timeout' => env('SIGEF_TIMEOUT', 30),
+    'connect_timeout' => env('SIGEF_CONNECT_TIMEOUT', 10),
+    'max_retries' => env('SIGEF_MAX_RETRIES', 3),
+    'retry_delay' => env('SIGEF_RETRY_DELAY', 1000), // 1 segundo em milissegundos
+
+    /*
+    |--------------------------------------------------------------------------
+    | SSL Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configurações de SSL para as requisições ao SIGEF
+    |
+    */
+    'verify_ssl' => env('SIGEF_VERIFY_SSL', false),
+    'ssl_version' => env('SIGEF_SSL_VERSION', 'TLSv1.2'),
 
     /*
     |--------------------------------------------------------------------------
@@ -53,6 +67,8 @@ return [
         'enabled' => env('SIGEF_PAGINATION_ENABLED', true),
         'per_page' => env('SIGEF_PAGINATION_PER_PAGE', 50),
         'max_pages' => env('SIGEF_PAGINATION_MAX_PAGES', 100),
+        'load_more' => env('SIGEF_PAGINATION_LOAD_MORE', true),
+        'infinite_scroll' => env('SIGEF_PAGINATION_INFINITE_SCROLL', false),
     ],
 
     /*
@@ -109,5 +125,21 @@ return [
         'raio_minimo' => env('SIGEF_COORDENADA_RAIO_MINIMO', 100), // metros
         'raio_maximo' => env('SIGEF_COORDENADA_RAIO_MAXIMO', 10000), // metros
         'raio_padrao' => env('SIGEF_COORDENADA_RAIO_PADRAO', 1000), // metros
+        'raio_incremento' => env('SIGEF_COORDENADA_RAIO_INCREMENTO', 500), // metros
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Performance Settings
+    |--------------------------------------------------------------------------
+    |
+    | Configurações de performance para otimização
+    |
+    */
+    'performance' => [
+        'chunk_size' => env('SIGEF_PERFORMANCE_CHUNK_SIZE', 1000),
+        'max_concurrent_requests' => env('SIGEF_PERFORMANCE_MAX_CONCURRENT_REQUESTS', 5),
+        'request_timeout' => env('SIGEF_PERFORMANCE_REQUEST_TIMEOUT', 30), // segundos
+        'memory_limit' => env('SIGEF_PERFORMANCE_MEMORY_LIMIT', '256M'),
     ],
 ]; 
