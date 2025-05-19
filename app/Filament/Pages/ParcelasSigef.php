@@ -12,13 +12,14 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
+use App\Livewire\MapaParcelasSigef;
 
 class ParcelasSigef extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-map';
     protected static ?string $navigationLabel = 'Parcelas SIGEF';
-    protected static ?string $title = 'Buscar Parcelas SIGEF';
-    protected static ?int $navigationSort = 3;
+    protected static ?string $title = 'Parcelas SIGEF';
+    protected static ?int $navigationSort = 2;
     protected static string $view = 'filament.pages.parcelas-sigef';
     protected static ?string $slug = 'parcelas-sigef';
 
@@ -34,9 +35,9 @@ class ParcelasSigef extends Page
         $this->wfsService = $wfsService;
     }
 
-    public function mount(): void
+    public function mount()
     {
-        $this->form->fill();
+        // Removido: $this->authorize('viewAny', \App\Models\ParcelaSigef::class);
     }
 
     public function form(Form $form): Form

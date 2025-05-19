@@ -1,3 +1,3 @@
 <x-filament-panels::page>
-    <livewire:parcelas-sigef />
+    <livewire:mapa-parcelas-sigef />
 </x-filament-panels::page>
