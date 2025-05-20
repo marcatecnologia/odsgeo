@@ -37,7 +37,7 @@
             </label>
         </div>
         
-        <div id="map" style="height: 600px; width: 100%; min-width: 300px; min-height: 300px;"></div>
+        <div id="map" style="height: 600px; width: 100%; min-width: 300px; min-height: 300px; background: #222 !important;"></div>
         @if($loading)
             <div class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
@@ -55,10 +55,14 @@
 @push('scripts')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@7.3.0/ol.css">
 <script src="https://cdn.jsdelivr.net/npm/ol@7.3.0/dist/ol.js"></script>
-@endpush
-
-@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
 <script>
+    // Registra a projeção EPSG:4674 (SIRGAS 2000) no OpenLayers
+    proj4.defs("EPSG:4674", "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs");
+    if (ol && ol.proj && ol.proj.proj4) {
+        ol.proj.proj4.register(proj4);
+    }
+
 function waitForOl(callback) {
     if (typeof ol !== 'undefined') {
         callback();
@@ -94,7 +98,8 @@ document.addEventListener('livewire:initialized', function () {
                 layers: [osmLayer, satelliteLayer],
                 view: new ol.View({
                     center: ol.proj.fromLonLat([-54.0, -15.0]),
-                    zoom: 4
+                    zoom: 4,
+                    projection: 'EPSG:3857'
                 })
             });
 
@@ -106,9 +111,7 @@ document.addEventListener('livewire:initialized', function () {
                         color: '#3388ff',
                         width: 2
                     }),
-                    fill: new ol.style.Fill({
-                        color: 'rgba(51, 136, 255, 0.1)'
-                    })
+                    fill: null
                 })
             });
             
@@ -150,6 +153,10 @@ document.addEventListener('livewire:initialized', function () {
         }
 
         Livewire.on('estadoSelecionado', (data) => {
+            // Garante que data seja sempre o objeto FeatureCollection
+            if (Array.isArray(data)) {
+                data = data[0];
+            }
             console.log('Dados recebidos do estado:', data);
             const source = estadoLayer.getSource();
             source.clear();
@@ -164,6 +171,7 @@ document.addEventListener('livewire:initialized', function () {
 
                 // Pega a primeira feature do FeatureCollection
                 const featureGeoJson = data.features[0];
+                console.log('Feature GeoJSON:', featureGeoJson);
 
                 const geojsonFormat = new ol.format.GeoJSON();
                 const feature = geojsonFormat.readFeature(featureGeoJson, {
@@ -186,9 +194,11 @@ document.addEventListener('livewire:initialized', function () {
                 // Obtém o extent em SIRGAS 2000 primeiro
                 const geometry4674 = feature.getGeometry().clone().transform('EPSG:3857', 'EPSG:4674');
                 const extent4674 = geometry4674.getExtent();
+                console.log('Extent em EPSG:4674:', extent4674);
+
                 // Converte o extent para EPSG:3857
                 const extent = ol.proj.transformExtent(extent4674, 'EPSG:4674', 'EPSG:3857');
-                console.log('Extent calculado:', extent);
+                console.log('Extent em EPSG:3857:', extent);
 
                 if (!extent || extent.some(coord => !isFinite(coord))) {
                     console.warn('Extent inválido:', extent);
@@ -197,34 +207,75 @@ document.addEventListener('livewire:initialized', function () {
                 }
 
                 // Ajusta o zoom com valores mais conservadores
-                map.getView().fit(extent, {
-                    padding: [100, 100, 100, 100],
-                    duration: 1000,
-                    maxZoom: 8,
-                    minZoom: 4
-                });
-
-                console.log('Zoom aplicado com sucesso');
+                if (extent && extent.length === 4 && extent.every(coord => isFinite(coord))) {
+                    // Garante que minX < maxX e minY < maxY
+                    const [minX, minY, maxX, maxY] = extent;
+                    if (minX < maxX && minY < maxY) {
+                        map.getView().fit(extent, {
+                            padding: [100, 100, 100, 100],
+                            duration: 1000,
+                            maxZoom: 8,
+                            minZoom: 4
+                        });
+                        setTimeout(() => {
+                            map.updateSize();
+                        }, 500);
+                        console.log('Zoom aplicado com sucesso');
+                    } else {
+                        console.warn('Extent invertido, aplicando zoom no Brasil');
+                        fitBrasil();
+                    }
+                } else {
+                    console.warn('Extent inválido, aplicando zoom no Brasil');
+                    fitBrasil();
+                }
 
             } catch (error) {
                 console.error('Erro ao processar estado:', error);
+                console.error('Stack trace:', error.stack);
                 fitBrasil();
             }
         });
 
         Livewire.on('parcelasCarregadas', (data) => {
+            console.log('Dados recebidos das parcelas:', data);
             const source = parcelasLayer.getSource();
             source.clear();
-            if (data.parcelas && data.parcelas.length > 0) {
+
+            try {
+                if (!data.parcelas || !Array.isArray(data.parcelas) || data.parcelas.length === 0) {
+                    console.warn('Nenhuma parcela encontrada');
+                    return;
+                }
+
                 const features = data.parcelas.map(parcela => {
-                    const geometry = new ol.format.GeoJSON().readGeometry(parcela.geometry, {
-                        dataProjection: 'EPSG:4674',
-                        featureProjection: 'EPSG:3857'
+                    try {
+                        const geometry = new ol.format.GeoJSON().readGeometry(parcela.geometry, {
+                            dataProjection: 'EPSG:4674',
+                            featureProjection: 'EPSG:3857'
+                        });
+                        return new ol.Feature({ geometry });
+                    } catch (error) {
+                        console.error('Erro ao processar geometria da parcela:', error);
+                        return null;
+                    }
+                }).filter(feature => feature !== null);
+
+                if (features.length > 0) {
+                    source.addFeatures(features);
+                    const extent = source.getExtent();
+                    map.getView().fit(extent, {
+                        padding: [50, 50, 50, 50],
+                        duration: 1000,
+                        maxZoom: 15
                     });
-                    return new ol.Feature({ geometry });
-                });
-                source.addFeatures(features);
-                map.getView().fit(source.getExtent(), { padding: [50, 50, 50, 50], duration: 1000 });
+                    console.log('Parcelas carregadas com sucesso');
+                } else {
+                    console.warn('Nenhuma feature válida encontrada nas parcelas');
+                }
+            } catch (error) {
+                console.error('Erro ao processar parcelas:', error);
+                console.error('Stack trace:', error.stack);
             }
         });
 

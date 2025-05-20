@@ -43,8 +43,14 @@ class MapaParcelasSigef extends Component
 
             // Emite evento para atualizar o mapa com a geometria do estado
             $geometry = $geoserverService->getEstadoGeometry($value);
-            if ($geometry) {
-                $this->dispatch('estadoSelecionado', ['geometry' => $geometry]);
+            \Log::debug('Geometry retornada:', ['geometry' => $geometry]);
+            if (is_array($geometry) && isset($geometry[0]['type']) && $geometry[0]['type'] === 'FeatureCollection') {
+                $geometry = $geometry[0];
+            }
+            if (isset($geometry['type']) && $geometry['type'] === 'FeatureCollection') {
+                $this->dispatch('estadoSelecionado', json_decode(json_encode($geometry)));
+            } else {
+                $this->error = 'Não foi possível carregar a geometria do estado.';
             }
         } catch (\Exception $e) {
             $this->error = 'Erro ao carregar municípios: ' . $e->getMessage();

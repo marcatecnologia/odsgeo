@@ -13,6 +13,7 @@ class Kernel extends ConsoleKernel
         Commands\AtualizarMunicipiosRapido::class,
         Commands\DividirGeoJSONMunicipios::class,
         Commands\BaixarGeoJSONMunicipios::class,
+        \App\Console\Commands\DiagnosticoGeoServerCommand::class,
     ];
 
     protected function schedule(Schedule $schedule): void

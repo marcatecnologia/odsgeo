@@ -819,9 +819,9 @@ class GeoServerService
                     'service' => 'WFS',
                     'version' => '2.0.0',
                     'request' => 'GetFeature',
-                    'typeName' => $this->estadosLayer,
+                    'typeName' => "{$this->workspace}:br_uf_2024",
                     'outputFormat' => 'application/json',
-                    'srsName' => 'EPSG:4326',
+                    'srsName' => 'EPSG:4674',
                     'CQL_FILTER' => "sigla_uf = '{$uf}'"
                 ]);
 
