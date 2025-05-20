@@ -25,6 +25,9 @@
   <enabled>true</enabled>
   <metadata>
     <entry key="cachingEnabled">false</entry>
+    <entry key="simplify">true</entry>
+    <entry key="simplifyTolerance">0.001</entry>
+    <entry key="maxPoints">500</entry>
   </metadata>
   <store class="postgis">
     <name>odsgeo</name>

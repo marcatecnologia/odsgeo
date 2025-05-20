@@ -500,7 +500,7 @@ class GeoServerService
     /**
      * Busca município por código IBGE
      */
-    public function getMunicipioByCodigo(string $codigoIbge): ?array
+    public function getMunicipioByCodigoIBGE($codigoIbge)
     {
         try {
             $params = [
@@ -509,12 +509,10 @@ class GeoServerService
                 'request' => 'GetFeature',
                 'typeName' => 'municipios_simplificado',
                 'outputFormat' => 'application/json',
-                'CQL_FILTER' => "codigo_ibge = '{$codigoIbge}'"
+                'CQL_FILTER' => "codigo_ibge = '{$codigoIbge}'",
+                'srsName' => 'EPSG:4326',
+                'propertyName' => 'id,codigo_ibge,nome,uf,geom'
             ];
-
-            if ($this->geometrySettings['simplify']) {
-                $params['propertyName'] = "*,ST_Simplify(geom,{$this->geometrySettings['tolerance']}) as geom_simplificado";
-            }
 
             $response = Http::withBasicAuth($this->username, $this->password)
                 ->timeout($this->timeout)
@@ -523,7 +521,10 @@ class GeoServerService
 
             if ($response->successful()) {
                 $data = $response->json();
-                return $data['features'][0] ?? null;
+                if (!empty($data['features'])) {
+                    $feature = $data['features'][0];
+                    return $feature;
+                }
             }
 
             Log::error('Erro ao buscar município no GeoServer', [
@@ -763,10 +764,19 @@ class GeoServerService
                                 'nome' => $feature['properties']['nm_mun'] ?? null
                             ];
                         })
+                        ->filter(function ($municipio) {
+                            return !empty($municipio['codigo']) && !empty($municipio['nome']);
+                        })
+                        ->sortBy('nome')
+                        ->values()
                         ->toArray();
                 }
                 return [];
             } catch (\Exception $e) {
+                \Log::error('Erro ao buscar municípios', [
+                    'uf' => $uf,
+                    'error' => $e->getMessage()
+                ]);
                 return [];
             }
         });
@@ -886,5 +896,56 @@ class GeoServerService
         ];
 
         return $estados[$uf] ?? $uf;
+    }
+
+    /**
+     * Busca a geometria do município pelo código IBGE
+     */
+    public function getMunicipioGeometry(string $codigoIbge)
+    {
+        try {
+            \Log::debug('Buscando geometria do município', ['codigo_ibge' => $codigoIbge]);
+            
+            $params = [
+                'service' => 'WFS',
+                'version' => '2.0.0',
+                'request' => 'GetFeature',
+                'typeName' => $this->municipiosLayer,
+                'outputFormat' => 'application/json',
+                'srsName' => 'EPSG:4674',
+                'CQL_FILTER' => "cd_mun = '{$codigoIbge}'"
+            ];
+
+            $response = Http::withBasicAuth($this->username, $this->password)
+                ->timeout($this->timeout)
+                ->retry($this->retryAttempts, $this->retryDelay)
+                ->get("{$this->baseUrl}/{$this->workspace}/wfs", $params);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                \Log::debug('Resposta do GeoServer', ['data' => $data]);
+                
+                if (!empty($data['features'])) {
+                    return [
+                        'type' => 'FeatureCollection',
+                        'features' => $data['features']
+                    ];
+                }
+            }
+
+            Log::error('Erro ao buscar geometria do município no GeoServer', [
+                'codigo_ibge' => $codigoIbge,
+                'status' => $response->status(),
+                'response' => $response->body()
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Exceção ao buscar geometria do município no GeoServer', [
+                'codigo_ibge' => $codigoIbge,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
     }
 } 

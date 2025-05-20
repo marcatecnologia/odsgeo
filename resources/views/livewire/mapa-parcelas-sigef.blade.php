@@ -240,6 +240,52 @@ waitForLivewire(function() {
             });
         }, 200);
     });
+
+    Livewire.on('municipioSelecionado', (data) => {
+        console.log('Evento municipioSelecionado recebido:', data);
+        // Remove camada anterior do município, se existir
+        if (window.municipioLayer) {
+            map.removeLayer(window.municipioLayer);
+        }
+
+        // Garante que data seja FeatureCollection
+        if (Array.isArray(data)) {
+            data = data[0];
+        }
+        if (!data || !data.features || !data.features.length) return;
+
+        const featureGeoJson = data.features[0];
+        const geojsonFormat = new ol.format.GeoJSON({
+            dataProjection: 'EPSG:4674',
+            featureProjection: 'EPSG:3857'
+        });
+        const feature = geojsonFormat.readFeature(featureGeoJson);
+
+        // Cria camada vetorial para o município
+        window.municipioLayer = new ol.layer.Vector({
+            source: new ol.source.Vector({
+                features: [feature]
+            }),
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: '#ff9900',
+                    width: 3
+                }),
+                fill: null
+            })
+        });
+
+        map.addLayer(window.municipioLayer);
+
+        // Aplica zoom no município
+        const extent = feature.getGeometry().getExtent();
+        map.getView().fit(extent, {
+            padding: [50, 50, 50, 50],
+            duration: 1000,
+            maxZoom: 13,
+            minZoom: 8
+        });
+    });
 });
 </script>
 @endpush 

@@ -121,11 +121,13 @@ return [
     |
     */
     'geometry' => [
-        'simplify' => env('SIGEF_GEOMETRY_SIMPLIFY', true),
-        'tolerance' => env('SIGEF_GEOMETRY_TOLERANCE', 0.0001),
-        'max_points' => env('SIGEF_GEOMETRY_MAX_POINTS', 1000),
-        'buffer_distance' => env('GEOSERVER_BUFFER_DISTANCE', 0.0001), // Aproximadamente 10 metros
-        'simplify_tolerance' => env('GEOSERVER_SIMPLIFY_TOLERANCE', 0.00001), // Aproximadamente 1 metro
+        'simplify' => true,
+        'tolerance' => 0.001, // Aumentado para aproximadamente 110 metros
+        'max_points' => 500, // Reduzido para limitar o número de pontos
+        'simplify_factor' => 0.001,
+        'preserve_topology' => true,
+        'buffer_distance' => env('GEOSERVER_BUFFER_DISTANCE', 0.001),
+        'simplify_tolerance' => env('GEOSERVER_SIMPLIFY_TOLERANCE', 0.001),
     ],
 
     /*
@@ -218,6 +220,6 @@ return [
     | Nome da camada de municipios no GeoServer
     |
     */
-    'municipios_layer' => env('GEOSERVER_MUNICIPIOS_LAYER', 'br_municipios_2024'),
+    'municipios_layer' => env('GEOSERVER_MUNICIPIOS_LAYER', 'municipios_simplificado'),
     'estados_layer' => env('GEOSERVER_ESTADOS_LAYER', 'br_uf_2024'),
 ]; 
