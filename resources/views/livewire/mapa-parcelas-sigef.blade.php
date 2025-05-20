@@ -74,7 +74,7 @@ function waitForMapDiv(callback) {
     }
 }
 
-let map, osmLayer, satelliteLayer;
+let map, osmLayer, satelliteLayer, estadoLayer;
 
 function initMap() {
     osmLayer = new ol.layer.Tile({
@@ -88,9 +88,20 @@ function initMap() {
         }),
         visible: false
     });
+    // Camada vetorial para o perímetro do estado
+    estadoLayer = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: '#3388ff',
+                width: 3
+            }),
+            fill: null
+        })
+    });
     map = new ol.Map({
         target: 'map',
-        layers: [osmLayer, satelliteLayer],
+        layers: [osmLayer, satelliteLayer, estadoLayer],
         view: new ol.View({
             center: ol.proj.fromLonLat([-54.0, -15.0]),
             zoom: 4,
@@ -151,12 +162,11 @@ function waitForLivewire(callback) {
 
 waitForLivewire(function() {
     Livewire.on('estadoSelecionado', (data) => {
-        // Aguarda o novo div #map ser recriado após o Livewire atualizar o DOM
         setTimeout(() => {
             waitForMapDiv(function() {
                 if (map) {
                     try {
-                        map.setTarget(null); // Destroi o canvas antigo
+                        map.setTarget(null);
                     } catch (e) { console.warn('Erro ao destruir mapa antigo:', e); }
                     map = null;
                 }
@@ -185,6 +195,9 @@ waitForLivewire(function() {
                             fitBrasil();
                             return;
                         }
+                        // Adiciona o perímetro do estado na camada vetorial
+                        estadoLayer.getSource().clear();
+                        estadoLayer.getSource().addFeature(feature);
                         const extent = feature.getGeometry().getExtent();
                         console.log('Extent da feature:', extent);
                         const isExtentValid = extent &&
@@ -225,7 +238,7 @@ waitForLivewire(function() {
                     }
                 }, 100);
             });
-        }, 200); // Pequeno delay para garantir que o DOM foi atualizado
+        }, 200);
     });
 });
 </script>
