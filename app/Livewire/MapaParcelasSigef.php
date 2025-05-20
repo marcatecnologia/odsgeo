@@ -43,7 +43,11 @@ class MapaParcelasSigef extends Component
 
             // Emite evento para atualizar o mapa com a geometria do estado
             $geometry = $geoserverService->getEstadoGeometry($value);
-            \Log::debug('Geometry retornada:', ['geometry' => $geometry]);
+            \Log::debug('Geometry retornada:', [
+                'type' => $geometry['type'] ?? null,
+                'features_count' => isset($geometry['features']) ? count($geometry['features']) : 0,
+                'bbox' => $geometry['bbox'] ?? null
+            ]);
             
             if (is_array($geometry)) {
                 // Se for um array de FeatureCollection, pega o primeiro
@@ -91,7 +95,11 @@ class MapaParcelasSigef extends Component
             
             // Buscar geometria do município e emitir evento
             $municipioGeometry = $geoserverService->getMunicipioGeometry($value);
-            \Log::debug('GeoJSON do município:', ['geojson' => $municipioGeometry]);
+            \Log::debug('GeoJSON do município:', [
+                'type' => $municipioGeometry['type'] ?? null,
+                'features_count' => isset($municipioGeometry['features']) ? count($municipioGeometry['features']) : 0,
+                'bbox' => $municipioGeometry['bbox'] ?? null
+            ]);
             
             if (isset($municipioGeometry['type']) && $municipioGeometry['type'] === 'FeatureCollection' && !empty($municipioGeometry['features'])) {
                 $this->dispatch('municipioSelecionado', json_decode(json_encode($municipioGeometry)));

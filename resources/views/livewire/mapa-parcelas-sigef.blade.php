@@ -56,6 +56,14 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@7.3.0/ol.css">
 <script src="https://cdn.jsdelivr.net/npm/ol@7.3.0/dist/ol.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+<style>
+#map canvas {
+    z-index: 9999 !important;
+    opacity: 1 !important;
+    border: 3px solid red !important;
+    background: none !important;
+}
+</style>
 <script>
     console.log('Script do mapa carregado!');
     proj4.defs("EPSG:4674", "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs");
@@ -74,7 +82,7 @@ function waitForMapDiv(callback) {
     }
 }
 
-let map, osmLayer, satelliteLayer, estadoLayer;
+let map, osmLayer, satelliteLayer, estadoLayer, municipioLayer;
 
 function initMap() {
     osmLayer = new ol.layer.Tile({
@@ -99,9 +107,21 @@ function initMap() {
             fill: null
         })
     });
+    // Camada vetorial fixa para o município
+    municipioLayer = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: '#ffff00', // amarelo neon
+                width: 10
+            }),
+            fill: undefined
+        }),
+        zIndex: 99
+    });
     map = new ol.Map({
         target: 'map',
-        layers: [osmLayer, satelliteLayer, estadoLayer],
+        layers: [osmLayer, satelliteLayer, estadoLayer, municipioLayer],
         view: new ol.View({
             center: ol.proj.fromLonLat([-54.0, -15.0]),
             zoom: 4,
@@ -243,48 +263,104 @@ waitForLivewire(function() {
 
     Livewire.on('municipioSelecionado', (data) => {
         console.log('Evento municipioSelecionado recebido:', data);
-        // Remove camada anterior do município, se existir
-        if (window.municipioLayer) {
-            map.removeLayer(window.municipioLayer);
+        if (!map) {
+            console.warn('Mapa não inicializado!');
+            return;
         }
-
+        // Limpa camada fixa do município
+        municipioLayer.getSource().clear();
         // Garante que data seja FeatureCollection
         if (Array.isArray(data)) {
             data = data[0];
         }
-        if (!data || !data.features || !data.features.length) return;
-
-        const featureGeoJson = data.features[0];
-        const geojsonFormat = new ol.format.GeoJSON({
-            dataProjection: 'EPSG:4674',
-            featureProjection: 'EPSG:3857'
-        });
-        const feature = geojsonFormat.readFeature(featureGeoJson);
-
-        // Cria camada vetorial para o município
-        window.municipioLayer = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                features: [feature]
-            }),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: '#ff9900',
-                    width: 3
+        if (!data || !data.features || !data.features.length) {
+            console.warn('Dados do município inválidos:', data);
+            return;
+        }
+        try {
+            const featureGeoJson = data.features[0];
+            console.log('Feature GeoJSON do município:', featureGeoJson);
+            const geojsonFormat = new ol.format.GeoJSON({
+                dataProjection: 'EPSG:4674',
+                featureProjection: 'EPSG:3857'
+            });
+            const feature = geojsonFormat.readFeature(featureGeoJson);
+            console.log('Feature convertida:', feature);
+            if (!feature || !feature.getGeometry()) {
+                console.warn('Feature ou geometria inválida');
+                return;
+            }
+            const geometry = feature.getGeometry();
+            console.log('Tipo de geometria:', geometry.getType());
+            if (geometry.getType() === 'MultiPolygon' || geometry.getType() === 'Polygon') {
+                const coords = geometry.getCoordinates();
+                console.log('Quantidade de polígonos:', coords.length);
+                if (coords.length > 0) {
+                    console.log('Primeiro polígono (primeiros 5 pontos):', coords[0][0].slice(0,5));
+                }
+            }
+            // Adiciona a feature na camada fixa do município
+            municipioLayer.getSource().addFeature(feature);
+            // Aplica zoom no município
+            const extent = feature.getGeometry().getExtent();
+            console.log('Extent do município:', extent);
+            const isExtentValid = extent &&
+                extent.length === 4 &&
+                extent.every(coord => isFinite(coord)) &&
+                extent[0] < extent[2] && extent[1] < extent[3];
+            if (!isExtentValid) {
+                console.warn('Extent do município inválido:', extent);
+                return;
+            }
+            map.getView().fit(extent, {
+                padding: [50, 50, 50, 50],
+                duration: 1000,
+                maxZoom: 13,
+                minZoom: 8
+            });
+            // Adiciona um ponto no centro do município para depuração visual
+            const center = ol.extent.getCenter(extent);
+            const marker = new ol.Feature({
+                geometry: new ol.geom.Point(center)
+            });
+            console.log('Ponto verde (centro) adicionado em:', center);
+            // Camada de marker (continua dinâmica)
+            const markerLayer = new ol.layer.Vector({
+                source: new ol.source.Vector({features: [marker]}),
+                style: new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 12,
+                        fill: new ol.style.Fill({color: '#00ff00'}),
+                        stroke: new ol.style.Stroke({color: '#000', width: 3})
+                    })
                 }),
-                fill: null
-            })
-        });
-
-        map.addLayer(window.municipioLayer);
-
-        // Aplica zoom no município
-        const extent = feature.getGeometry().getExtent();
-        map.getView().fit(extent, {
-            padding: [50, 50, 50, 50],
-            duration: 1000,
-            maxZoom: 13,
-            minZoom: 8
-        });
+                zIndex: 100
+            });
+            if (window.municipioMarkerLayer) {
+                map.removeLayer(window.municipioMarkerLayer);
+            }
+            window.municipioMarkerLayer = markerLayer;
+            map.addLayer(markerLayer);
+            setTimeout(() => {
+                map.updateSize();
+                console.log('Tamanho do mapa atualizado');
+                console.log('Zoom atual:', map.getView().getZoom());
+                console.log('Camadas do mapa após município:', map.getLayers().getArray());
+                if (municipioLayer) {
+                    console.log('Status da camada do município:', municipioLayer.getVisible(), municipioLayer.getSource().getFeatures().length);
+                }
+                // Log do bounding box do canvas do mapa
+                const mapDiv = document.getElementById('map');
+                const canvas = mapDiv.querySelector('canvas');
+                if (canvas) {
+                    const rect = canvas.getBoundingClientRect();
+                    console.log('Bounding box do canvas:', rect);
+                }
+            }, 500);
+        } catch (error) {
+            console.error('Erro ao processar município:', error);
+            console.error('Stack trace:', error.stack);
+        }
     });
 });
 </script>

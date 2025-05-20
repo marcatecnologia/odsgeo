@@ -138,19 +138,15 @@ class ParcelasSigef extends Component
         if ($value) {
             $this->loading = true;
             try {
-                $result = $this->geoserverService->getMunicipiosPorUF($this->estado);
-                if ($result['success']) {
-                    $municipio = collect($result['municipios'])->firstWhere('codigo', $value);
-                    if ($municipio && isset($municipio['geometry'])) {
-                        $this->centroide = $this->calcularCentroide($municipio['geometry']);
-                        $this->zoom = 10;
-                        $this->dispatch('centroideAtualizado', [
-                            'lat' => $this->centroide['lat'],
-                            'lon' => $this->centroide['lon'],
-                            'zoom' => $this->zoom
-                        ]);
-                    }
+                $geoserverService = app(\App\Services\GeoServerService::class);
+                $municipioGeometry = $geoserverService->getMunicipioGeometry($value);
+                
+                if ($municipioGeometry) {
+                    $this->dispatch('municipioSelecionado', $municipioGeometry);
+                } else {
+                    $this->erro = 'Não foi possível obter a geometria do município';
                 }
+                
                 $this->reset(['parcelas', 'erro', 'currentPage']);
             } catch (\Exception $e) {
                 $this->erro = 'Erro ao centralizar município: ' . $e->getMessage();

@@ -923,9 +923,22 @@ class GeoServerService
 
             if ($response->successful()) {
                 $data = $response->json();
-                \Log::debug('Resposta do GeoServer', ['data' => $data]);
-                
+                \Log::debug('Resposta do GeoServer', [
+                    'type' => $data['type'] ?? null,
+                    'features_count' => isset($data['features']) ? count($data['features']) : 0,
+                    'bbox' => $data['bbox'] ?? null
+                ]);
                 if (!empty($data['features'])) {
+                    $feature = $data['features'][0];
+                    \Log::debug('Campos da feature do município', [
+                        'keys' => array_keys($feature),
+                        'geometry_keys' => isset($feature['geometry']) ? array_keys($feature['geometry']) : (isset($feature['geom']) ? array_keys($feature['geom']) : null)
+                    ]);
+                    if (isset($feature['geom']) && !isset($feature['geometry'])) {
+                        $feature['geometry'] = $feature['geom'];
+                        unset($feature['geom']);
+                        $data['features'][0] = $feature;
+                    }
                     return [
                         'type' => 'FeatureCollection',
                         'features' => $data['features']

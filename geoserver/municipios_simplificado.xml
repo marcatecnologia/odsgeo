@@ -6,28 +6,28 @@
     <name>odsgeo</name>
   </namespace>
   <title>Municípios Simplificados</title>
-  <srs>EPSG:4326</srs>
+  <srs>EPSG:4674</srs>
   <nativeBoundingBox>
     <minx>-74.0</minx>
     <maxx>-34.0</maxx>
     <miny>-33.0</miny>
     <maxy>5.0</maxy>
-    <crs>EPSG:4326</crs>
+    <crs>EPSG:4674</crs>
   </nativeBoundingBox>
   <latLonBoundingBox>
     <minx>-74.0</minx>
     <maxx>-34.0</maxx>
     <miny>-33.0</miny>
     <maxy>5.0</maxy>
-    <crs>EPSG:4326</crs>
+    <crs>EPSG:4674</crs>
   </latLonBoundingBox>
   <projectionPolicy>FORCE_DECLARED</projectionPolicy>
   <enabled>true</enabled>
   <metadata>
     <entry key="cachingEnabled">false</entry>
     <entry key="simplify">true</entry>
-    <entry key="simplifyTolerance">0.001</entry>
-    <entry key="maxPoints">500</entry>
+    <entry key="simplifyTolerance">0.0001</entry>
+    <entry key="maxPoints">1000</entry>
   </metadata>
   <store class="postgis">
     <name>odsgeo</name>
@@ -35,7 +35,7 @@
   <maxFeatures>0</maxFeatures>
   <numDecimals value="0"/>
   <responseSRS>
-    <string>EPSG:4326</string>
+    <string>EPSG:4674</string>
   </responseSRS>
   <overridingServiceSRS>false</overridingServiceSRS>
   <skipNumberMatched>true</skipNumberMatched>
@@ -70,7 +70,7 @@
       <binding>java.lang.String</binding>
     </attribute>
     <attribute>
-      <name>geometry</name>
+      <name>geom</name>
       <minOccurs>0</minOccurs>
       <maxOccurs>1</maxOccurs>
       <nillable>true</nillable>
