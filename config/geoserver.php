@@ -27,7 +27,7 @@ return [
     | URL base do GeoServer
     |
     */
-    'url' => env('GEOSERVER_URL', 'http://host.docker.internal:8082/geoserver'),
+    'url' => env('GEOSERVER_URL', 'http://localhost:8080/geoserver'),
 
     /*
     |--------------------------------------------------------------------------
@@ -47,7 +47,7 @@ return [
     | Nome da camada de parcelas SIGEF no GeoServer
     |
     */
-    'layer' => env('GEOSERVER_LAYER', 'parcelas_sigef_brasil'),
+    'parcelas_layer' => env('GEOSERVER_LAYER', 'parcelas_sigef_brasil'),
 
     /*
     |--------------------------------------------------------------------------
@@ -152,10 +152,9 @@ return [
     |
     */
     'performance' => [
-        'chunk_size' => env('SIGEF_PERFORMANCE_CHUNK_SIZE', 1000),
-        'max_concurrent_requests' => env('SIGEF_PERFORMANCE_MAX_CONCURRENT_REQUESTS', 5),
-        'request_timeout' => env('SIGEF_PERFORMANCE_REQUEST_TIMEOUT', 30),
-        'memory_limit' => env('SIGEF_PERFORMANCE_MEMORY_LIMIT', '256M'),
+        'max_features' => env('GEOSERVER_MAX_FEATURES', 1000),
+        'timeout' => env('GEOSERVER_TIMEOUT', 30),
+        'cache_ttl' => env('GEOSERVER_CACHE_TTL', 3600), // 1 hora
     ],
 
     /*
@@ -210,4 +209,15 @@ return [
         'ccir_length' => env('GEOSERVER_CCIR_LENGTH', 14),
         'cnpj_length' => env('GEOSERVER_CNPJ_LENGTH', 14),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Municipios Layer
+    |--------------------------------------------------------------------------
+    |
+    | Nome da camada de municipios no GeoServer
+    |
+    */
+    'municipios_layer' => env('GEOSERVER_MUNICIPIOS_LAYER', 'br_municipios_2024'),
+    'estados_layer' => env('GEOSERVER_ESTADOS_LAYER', 'br_uf_2024'),
 ]; 

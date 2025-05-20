@@ -23,6 +23,9 @@ class GeoServerService
     protected array $coordinateSettings;
     protected array $performanceSettings;
     protected int $paginationPerPage;
+    protected string $parcelasLayer;
+    protected string $municipiosLayer;
+    protected string $estadosLayer;
 
     public function __construct()
     {
@@ -41,6 +44,9 @@ class GeoServerService
         $this->coordinateSettings = config('geoserver.coordinate', []);
         $this->performanceSettings = config('geoserver.performance', []);
         $this->paginationPerPage = config('geoserver.pagination.per_page', 50);
+        $this->parcelasLayer = config('geoserver.parcelas_layer');
+        $this->municipiosLayer = config('geoserver.municipios_layer');
+        $this->estadosLayer = config('geoserver.estados_layer');
     }
 
     /**
@@ -695,5 +701,190 @@ class GeoServerService
         ]);
 
         throw new \Exception('Erro ao buscar parcelas: ' . $response->status());
+    }
+
+    public function getEstados()
+    {
+        // Use fallback estático para garantir leveza
+        return [
+            'AC' => 'Acre',
+            'AL' => 'Alagoas',
+            'AP' => 'Amapá',
+            'AM' => 'Amazonas',
+            'BA' => 'Bahia',
+            'CE' => 'Ceará',
+            'DF' => 'Distrito Federal',
+            'ES' => 'Espírito Santo',
+            'GO' => 'Goiás',
+            'MA' => 'Maranhão',
+            'MT' => 'Mato Grosso',
+            'MS' => 'Mato Grosso do Sul',
+            'MG' => 'Minas Gerais',
+            'PA' => 'Pará',
+            'PB' => 'Paraíba',
+            'PR' => 'Paraná',
+            'PE' => 'Pernambuco',
+            'PI' => 'Piauí',
+            'RJ' => 'Rio de Janeiro',
+            'RN' => 'Rio Grande do Norte',
+            'RS' => 'Rio Grande do Sul',
+            'RO' => 'Rondônia',
+            'RR' => 'Roraima',
+            'SC' => 'Santa Catarina',
+            'SP' => 'São Paulo',
+            'SE' => 'Sergipe',
+            'TO' => 'Tocantins'
+        ];
+    }
+
+    public function getMunicipios(string $uf)
+    {
+        $cacheKey = "municipios_{$uf}";
+        return \Cache::remember($cacheKey, 3600, function () use ($uf) {
+            try {
+                $response = \Http::withBasicAuth($this->username, $this->password)
+                    ->timeout($this->timeout)
+                    ->get("{$this->baseUrl}/{$this->workspace}/wfs", [
+                        'service' => 'WFS',
+                        'version' => '2.0.0',
+                        'request' => 'GetFeature',
+                        'typeName' => $this->municipiosLayer,
+                        'outputFormat' => 'application/json',
+                        'srsName' => 'EPSG:4326',
+                        'CQL_FILTER' => "sigla_uf = '{$uf}'"
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    return collect($data['features'])
+                        ->map(function ($feature) {
+                            return [
+                                'codigo' => $feature['properties']['cd_mun'] ?? null,
+                                'nome' => $feature['properties']['nm_mun'] ?? null
+                            ];
+                        })
+                        ->toArray();
+                }
+                return [];
+            } catch (\Exception $e) {
+                return [];
+            }
+        });
+    }
+
+    public function getParcelas(string $codigoMunicipio)
+    {
+        try {
+            $response = Http::withBasicAuth($this->username, $this->password)
+                ->timeout($this->timeout)
+                ->get("{$this->baseUrl}/{$this->workspace}/wfs", [
+                    'service' => 'WFS',
+                    'version' => '2.0.0',
+                    'request' => 'GetFeature',
+                    'typeName' => $this->parcelasLayer,
+                    'outputFormat' => 'application/json',
+                    'srsName' => 'EPSG:4326',
+                    'CQL_FILTER' => "municipio_ = '{$codigoMunicipio}'"
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return $data['features'];
+            }
+
+            \Log::error('Erro ao buscar parcelas do GeoServer', [
+                'codigo_municipio' => $codigoMunicipio,
+                'status' => $response->status(),
+                'response' => $response->body()
+            ]);
+
+            return [];
+        } catch (\Exception $e) {
+            \Log::error('Exceção ao buscar parcelas do GeoServer', [
+                'codigo_municipio' => $codigoMunicipio,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return [];
+        }
+    }
+
+    public function getEstadoGeometry(string $uf)
+    {
+        try {
+            $response = Http::withBasicAuth($this->username, $this->password)
+                ->timeout($this->timeout)
+                ->get("{$this->baseUrl}/{$this->workspace}/wfs", [
+                    'service' => 'WFS',
+                    'version' => '2.0.0',
+                    'request' => 'GetFeature',
+                    'typeName' => $this->estadosLayer,
+                    'outputFormat' => 'application/json',
+                    'srsName' => 'EPSG:4326',
+                    'CQL_FILTER' => "sigla_uf = '{$uf}'"
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                if (!empty($data['features'])) {
+                    return [
+                        'type' => 'FeatureCollection',
+                        'features' => $data['features']
+                    ];
+                }
+            }
+
+            \Log::error('Erro ao buscar geometria do estado do GeoServer', [
+                'uf' => $uf,
+                'status' => $response->status(),
+                'response' => $response->body()
+            ]);
+
+            return null;
+        } catch (\Exception $e) {
+            \Log::error('Exceção ao buscar geometria do estado do GeoServer', [
+                'uf' => $uf,
+                'message' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return null;
+        }
+    }
+
+    protected function getNomeEstado(string $uf): string
+    {
+        $estados = [
+            'AC' => 'Acre',
+            'AL' => 'Alagoas',
+            'AP' => 'Amapá',
+            'AM' => 'Amazonas',
+            'BA' => 'Bahia',
+            'CE' => 'Ceará',
+            'DF' => 'Distrito Federal',
+            'ES' => 'Espírito Santo',
+            'GO' => 'Goiás',
+            'MA' => 'Maranhão',
+            'MT' => 'Mato Grosso',
+            'MS' => 'Mato Grosso do Sul',
+            'MG' => 'Minas Gerais',
+            'PA' => 'Pará',
+            'PB' => 'Paraíba',
+            'PR' => 'Paraná',
+            'PE' => 'Pernambuco',
+            'PI' => 'Piauí',
+            'RJ' => 'Rio de Janeiro',
+            'RN' => 'Rio Grande do Norte',
+            'RS' => 'Rio Grande do Sul',
+            'RO' => 'Rondônia',
+            'RR' => 'Roraima',
+            'SC' => 'Santa Catarina',
+            'SP' => 'São Paulo',
+            'SE' => 'Sergipe',
+            'TO' => 'Tocantins'
+        ];
+
+        return $estados[$uf] ?? $uf;
     }
 } 
