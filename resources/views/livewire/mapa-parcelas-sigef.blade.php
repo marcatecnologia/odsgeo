@@ -37,7 +37,7 @@
             </label>
         </div>
         
-        <div id="map" style="height: 600px; width: 100%; min-width: 300px; min-height: 300px; background: #222 !important;"></div>
+        <div id="map" style="height: 600px; width: 100%; min-width: 300px; min-height: 300px;"></div>
         @if($loading)
             <div class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
                 <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
@@ -57,233 +57,175 @@
 <script src="https://cdn.jsdelivr.net/npm/ol@7.3.0/dist/ol.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
 <script>
-    // Registra a projeção EPSG:4674 (SIRGAS 2000) no OpenLayers
+    console.log('Script do mapa carregado!');
     proj4.defs("EPSG:4674", "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs");
     if (ol && ol.proj && ol.proj.proj4) {
         ol.proj.proj4.register(proj4);
     }
 
-function waitForOl(callback) {
-    if (typeof ol !== 'undefined') {
+function waitForMapDiv(callback) {
+    const mapDiv = document.getElementById('map');
+    if (mapDiv) {
+        console.log('DIV MAP encontrado:', mapDiv);
         callback();
     } else {
-        setTimeout(() => waitForOl(callback), 100);
+        console.log('DIV MAP ainda não existe, aguardando...');
+        setTimeout(() => waitForMapDiv(callback), 100);
     }
 }
 
-document.addEventListener('livewire:initialized', function () {
-    waitForOl(function() {
-        let map, estadoLayer, parcelasLayer, satelliteLayer;
-        const brasilExtent = ol.proj.transformExtent([-74, -34, -34, 5], 'EPSG:4326', 'EPSG:3857');
+let map, osmLayer, satelliteLayer;
 
-        function initMap() {
-            // Camada base OSM (padrão)
-            const osmLayer = new ol.layer.Tile({
-                source: new ol.source.OSM(),
-                visible: true
-            });
+function initMap() {
+    osmLayer = new ol.layer.Tile({
+        source: new ol.source.OSM(),
+        visible: true
+    });
+    satelliteLayer = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            maxZoom: 19
+        }),
+        visible: false
+    });
+    map = new ol.Map({
+        target: 'map',
+        layers: [osmLayer, satelliteLayer],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([-54.0, -15.0]),
+            zoom: 4,
+            projection: 'EPSG:3857',
+            extent: ol.proj.transformExtent([-74, -34, -34, 5], 'EPSG:4326', 'EPSG:3857')
+        })
+    });
+    console.log('OSM visível:', osmLayer.getVisible());
+    console.log('Satélite visível:', satelliteLayer.getVisible());
+    document.getElementById('toggleSatellite').addEventListener('change', function(e) {
+        osmLayer.setVisible(!e.target.checked);
+        satelliteLayer.setVisible(e.target.checked);
+        console.log('OSM visível:', osmLayer.getVisible());
+        console.log('Satélite visível:', satelliteLayer.getVisible());
+    });
+}
 
-            // Camada de satélite (Esri World Imagery)
-            satelliteLayer = new ol.layer.Tile({
-                source: new ol.source.XYZ({
-                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                    maxZoom: 19
-                }),
-                visible: false
-            });
+function fitBrasil() {
+    console.log('Aplicando zoom no Brasil');
+    try {
+        map.getView().fit(ol.proj.transformExtent([-74, -34, -34, 5], 'EPSG:4326', 'EPSG:3857'), {
+            padding: [50, 50, 50, 50],
+            duration: 1000,
+            maxZoom: 5
+        });
+        setTimeout(() => {
+            map.updateSize();
+            console.log('updateSize chamado (fitBrasil)');
+        }, 500);
+        console.log('Zoom no Brasil aplicado com sucesso');
+    } catch (error) {
+        console.error('Erro ao aplicar zoom no Brasil:', error);
+    }
+}
 
-            // Inicialização do mapa com ambas as camadas base
-            map = new ol.Map({
-                target: 'map',
-                layers: [osmLayer, satelliteLayer],
-                view: new ol.View({
-                    center: ol.proj.fromLonLat([-54.0, -15.0]),
-                    zoom: 4,
-                    projection: 'EPSG:3857'
-                })
-            });
+document.addEventListener('DOMContentLoaded', function () {
+    console.log('DOMContentLoaded disparado!');
+    waitForMapDiv(function() {
+        initMap();
+        fitBrasil();
+        setTimeout(() => {
+            map.updateSize();
+            console.log('updateSize chamado (init)');
+        }, 500);
+    });
+});
 
-            // Camadas vetoriais
-            estadoLayer = new ol.layer.Vector({ 
-                source: new ol.source.Vector(),
-                style: new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: '#3388ff',
-                        width: 2
-                    }),
-                    fill: null
-                })
-            });
-            
-            parcelasLayer = new ol.layer.Vector({ 
-                source: new ol.source.Vector(),
-                style: new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: '#ff0000',
-                        width: 2
-                    }),
-                    fill: new ol.style.Fill({
-                        color: 'rgba(255, 0, 0, 0.1)'
-                    })
-                })
-            });
+// Aguarda o Livewire estar disponível antes de registrar o evento
+function waitForLivewire(callback) {
+    if (typeof window.Livewire !== 'undefined' && typeof window.Livewire.on === 'function') {
+        console.log('Livewire disponível!');
+        callback();
+    } else {
+        console.log('Aguardando Livewire...');
+        setTimeout(() => waitForLivewire(callback), 100);
+    }
+}
 
-            map.addLayer(estadoLayer);
-            map.addLayer(parcelasLayer);
-
-            // Controle de visibilidade da camada de satélite
-            document.getElementById('toggleSatellite').addEventListener('change', function(e) {
-                osmLayer.setVisible(!e.target.checked);
-                satelliteLayer.setVisible(e.target.checked);
-            });
-        }
-
-        function fitBrasil() {
-            console.log('Aplicando zoom no Brasil');
-            try {
-                map.getView().fit(brasilExtent, {
-                    padding: [50, 50, 50, 50],
-                    duration: 1000,
-                    maxZoom: 5
-                });
-                console.log('Zoom no Brasil aplicado com sucesso');
-            } catch (error) {
-                console.error('Erro ao aplicar zoom no Brasil:', error);
-            }
-        }
-
-        Livewire.on('estadoSelecionado', (data) => {
-            // Garante que data seja sempre o objeto FeatureCollection
-            if (Array.isArray(data)) {
-                data = data[0];
-            }
-            console.log('Dados recebidos do estado:', data);
-            const source = estadoLayer.getSource();
-            source.clear();
-
-            try {
-                // Verifica se o FeatureCollection está correto
-                if (!data || !data.features || !Array.isArray(data.features) || data.features.length === 0) {
-                    console.warn('Nenhuma feature encontrada');
-                    fitBrasil();
-                    return;
+waitForLivewire(function() {
+    Livewire.on('estadoSelecionado', (data) => {
+        // Aguarda o novo div #map ser recriado após o Livewire atualizar o DOM
+        setTimeout(() => {
+            waitForMapDiv(function() {
+                if (map) {
+                    try {
+                        map.setTarget(null); // Destroi o canvas antigo
+                    } catch (e) { console.warn('Erro ao destruir mapa antigo:', e); }
+                    map = null;
                 }
-
-                // Pega a primeira feature do FeatureCollection
-                const featureGeoJson = data.features[0];
-                console.log('Feature GeoJSON:', featureGeoJson);
-
-                const geojsonFormat = new ol.format.GeoJSON();
-                const feature = geojsonFormat.readFeature(featureGeoJson, {
-                    dataProjection: 'EPSG:4674',
-                    featureProjection: 'EPSG:3857'
-                });
-
-                console.log('Feature criada:', feature);
-
-                if (!feature || !feature.getGeometry()) {
-                    console.warn('Feature ou geometria inválida');
-                    fitBrasil();
-                    return;
-                }
-
-                // Adiciona a feature à camada
-                source.addFeature(feature);
-                console.log('Feature adicionada à camada');
-
-                // Obtém o extent em SIRGAS 2000 primeiro
-                const geometry4674 = feature.getGeometry().clone().transform('EPSG:3857', 'EPSG:4674');
-                const extent4674 = geometry4674.getExtent();
-                console.log('Extent em EPSG:4674:', extent4674);
-
-                // Converte o extent para EPSG:3857
-                const extent = ol.proj.transformExtent(extent4674, 'EPSG:4674', 'EPSG:3857');
-                console.log('Extent em EPSG:3857:', extent);
-
-                if (!extent || extent.some(coord => !isFinite(coord))) {
-                    console.warn('Extent inválido:', extent);
-                    fitBrasil();
-                    return;
-                }
-
-                // Ajusta o zoom com valores mais conservadores
-                if (extent && extent.length === 4 && extent.every(coord => isFinite(coord))) {
-                    // Garante que minX < maxX e minY < maxY
-                    const [minX, minY, maxX, maxY] = extent;
-                    if (minX < maxX && minY < maxY) {
+                initMap();
+                setTimeout(() => {
+                    if (Array.isArray(data)) {
+                        data = data[0];
+                    }
+                    console.log('Dados recebidos do estado:', data);
+                    try {
+                        if (!data || !data.features || !Array.isArray(data.features) || data.features.length === 0) {
+                            console.warn('Nenhuma feature encontrada');
+                            fitBrasil();
+                            return;
+                        }
+                        const featureGeoJson = data.features[0];
+                        console.log('Feature GeoJSON:', featureGeoJson);
+                        const geojsonFormat = new ol.format.GeoJSON({
+                            dataProjection: 'EPSG:4674',
+                            featureProjection: 'EPSG:3857'
+                        });
+                        const feature = geojsonFormat.readFeature(featureGeoJson);
+                        console.log('Feature criada:', feature);
+                        if (!feature || !feature.getGeometry()) {
+                            console.warn('Feature ou geometria inválida');
+                            fitBrasil();
+                            return;
+                        }
+                        const extent = feature.getGeometry().getExtent();
+                        console.log('Extent da feature:', extent);
+                        const isExtentValid = extent &&
+                            extent.length === 4 &&
+                            extent.every(coord => isFinite(coord)) &&
+                            extent[0] > -9e6 && extent[2] < -3e6 &&
+                            extent[1] > -5e6 && extent[3] < 7e6 &&
+                            extent[0] < extent[2] && extent[1] < extent[3];
+                        if (!isExtentValid) {
+                            console.warn('Extent inválido ou fora do Brasil:', extent);
+                            fitBrasil();
+                            return;
+                        }
                         map.getView().fit(extent, {
-                            padding: [100, 100, 100, 100],
+                            padding: [50, 50, 50, 50],
                             duration: 1000,
                             maxZoom: 8,
                             minZoom: 4
                         });
                         setTimeout(() => {
                             map.updateSize();
+                            console.log('updateSize chamado (fit estado)');
                         }, 500);
                         console.log('Zoom aplicado com sucesso');
-                    } else {
-                        console.warn('Extent invertido, aplicando zoom no Brasil');
+                        setTimeout(() => {
+                            const mapDiv = document.getElementById('map');
+                            console.log('ChildNodes do #map:', mapDiv.childNodes);
+                            if (mapDiv.childNodes.length > 0) {
+                                mapDiv.childNodes.forEach((el, idx) => {
+                                    console.log('Elemento filho', idx, el, window.getComputedStyle(el));
+                                });
+                            }
+                        }, 1000);
+                    } catch (error) {
+                        console.error('Erro ao processar estado:', error);
+                        console.error('Stack trace:', error.stack);
                         fitBrasil();
                     }
-                } else {
-                    console.warn('Extent inválido, aplicando zoom no Brasil');
-                    fitBrasil();
-                }
-
-            } catch (error) {
-                console.error('Erro ao processar estado:', error);
-                console.error('Stack trace:', error.stack);
-                fitBrasil();
-            }
-        });
-
-        Livewire.on('parcelasCarregadas', (data) => {
-            console.log('Dados recebidos das parcelas:', data);
-            const source = parcelasLayer.getSource();
-            source.clear();
-
-            try {
-                if (!data.parcelas || !Array.isArray(data.parcelas) || data.parcelas.length === 0) {
-                    console.warn('Nenhuma parcela encontrada');
-                    return;
-                }
-
-                const features = data.parcelas.map(parcela => {
-                    try {
-                        const geometry = new ol.format.GeoJSON().readGeometry(parcela.geometry, {
-                            dataProjection: 'EPSG:4674',
-                            featureProjection: 'EPSG:3857'
-                        });
-                        return new ol.Feature({ geometry });
-                    } catch (error) {
-                        console.error('Erro ao processar geometria da parcela:', error);
-                        return null;
-                    }
-                }).filter(feature => feature !== null);
-
-                if (features.length > 0) {
-                    source.addFeatures(features);
-                    const extent = source.getExtent();
-                    map.getView().fit(extent, {
-                        padding: [50, 50, 50, 50],
-                        duration: 1000,
-                        maxZoom: 15
-                    });
-                    console.log('Parcelas carregadas com sucesso');
-                } else {
-                    console.warn('Nenhuma feature válida encontrada nas parcelas');
-                }
-            } catch (error) {
-                console.error('Erro ao processar parcelas:', error);
-                console.error('Stack trace:', error.stack);
-            }
-        });
-
-        initMap();
-        fitBrasil();
-        setTimeout(() => {
-            map.updateSize();
-        }, 500);
+                }, 100);
+            });
+        }, 200); // Pequeno delay para garantir que o DOM foi atualizado
     });
 });
 </script>
