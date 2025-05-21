@@ -27,19 +27,17 @@
         </div>
     </div>
 
-    <!-- Botão de Centralizar Brasil -->
-    <div class="mb-2 flex justify-end">
-        <button type="button" id="btnCentralizarBrasil" class="px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700 transition">Centralizar Brasil</button>
-    </div>
-
     <!-- Mapa -->
     <div class="relative h-[600px] w-full rounded-lg overflow-hidden shadow-lg">
-        <!-- Controle de Camada -->
-        <div class="absolute top-4 right-4 z-10 bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-            <label class="flex items-center space-x-3 text-sm font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors duration-200">
-                <input type="checkbox" id="toggleSatellite" class="form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 transition-colors duration-200">
-                <span class="select-none">Visualização Satélite</span>
-            </label>
+        <!-- Controles flutuantes no canto superior direito do mapa -->
+        <div style="position: absolute; top: 1rem; right: 1rem; z-index: 10; display: flex; flex-direction: row; gap: 0.75rem;">
+            <div class="bg-white p-2 rounded-lg shadow border border-gray-200 flex items-center">
+                <label class="flex items-center space-x-2 text-sm font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors duration-200 m-0">
+                    <input type="checkbox" id="toggleSatellite" class="form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 transition-colors duration-200">
+                    <span class="select-none">Visualização Satélite</span>
+                </label>
+            </div>
+            <button type="button" id="btnCentralizarBrasil" class="bg-white p-2 rounded-lg shadow border border-gray-200 text-gray-700 hover:bg-indigo-600 hover:text-white font-medium transition flex items-center">Centralizar Brasil</button>
         </div>
         
         <div id="map" style="height: 600px; width: 100%; min-width: 300px; min-height: 300px;"></div>
