@@ -59,7 +59,8 @@ class GeoServerParcelasService
         try {
             Log::info('Fazendo requisição ao GeoServer', [
                 'endpoint' => $endpoint,
-                'params' => $params
+                'params' => $params,
+                'timestamp' => now()->toIso8601String()
             ]);
 
             $response = Http::withBasicAuth($this->username, $this->password)
@@ -72,7 +73,8 @@ class GeoServerParcelasService
                     'status' => $response->status(),
                     'body' => $response->body(),
                     'endpoint' => $endpoint,
-                    'params' => $params
+                    'params' => $params,
+                    'timestamp' => now()->toIso8601String()
                 ]);
 
                 return [
@@ -81,9 +83,32 @@ class GeoServerParcelasService
                 ];
             }
 
+            $data = $response->json();
+            
+            // Validação do GeoJSON
+            if (!isset($data['type']) || $data['type'] !== 'FeatureCollection') {
+                Log::error('Resposta inválida do GeoServer', [
+                    'data' => $data,
+                    'endpoint' => $endpoint,
+                    'timestamp' => now()->toIso8601String()
+                ]);
+
+                return [
+                    'success' => false,
+                    'error' => 'Resposta inválida do GeoServer: formato GeoJSON incorreto'
+                ];
+            }
+
+            // Log de sucesso com informações úteis
+            Log::info('Requisição ao GeoServer bem sucedida', [
+                'endpoint' => $endpoint,
+                'features_count' => count($data['features'] ?? []),
+                'timestamp' => now()->toIso8601String()
+            ]);
+
             return [
                 'success' => true,
-                'data' => $response->json()
+                'data' => $data
             ];
 
         } catch (\Exception $e) {
@@ -91,7 +116,8 @@ class GeoServerParcelasService
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
                 'endpoint' => $endpoint,
-                'params' => $params
+                'params' => $params,
+                'timestamp' => now()->toIso8601String()
             ]);
 
             return [
@@ -108,13 +134,44 @@ class GeoServerParcelasService
     {
         $cacheKey = "parcelas_municipio_{$codigoMunicipio}_page_{$page}";
 
-        if ($this->cacheEnabled) {
-            return Cache::remember($cacheKey, $this->cacheTime, function () use ($codigoMunicipio, $page, $perPage) {
-                return $this->fetchParcelasPorMunicipio($codigoMunicipio, $page, $perPage);
-            });
-        }
+        try {
+            if ($this->cacheEnabled && Cache::has($cacheKey)) {
+                Log::info('Recuperando parcelas do cache', [
+                    'codigo_municipio' => $codigoMunicipio,
+                    'page' => $page,
+                    'timestamp' => now()->toIso8601String()
+                ]);
+                return Cache::get($cacheKey);
+            }
 
-        return $this->fetchParcelasPorMunicipio($codigoMunicipio, $page, $perPage);
+            $result = $this->fetchParcelasPorMunicipio($codigoMunicipio, $page, $perPage);
+
+            if ($this->cacheEnabled && isset($result['success']) && $result['success']) {
+                Cache::put($cacheKey, $result, $this->cacheTime);
+                Log::info('Parcelas armazenadas em cache', [
+                    'codigo_municipio' => $codigoMunicipio,
+                    'page' => $page,
+                    'cache_time' => $this->cacheTime,
+                    'timestamp' => now()->toIso8601String()
+                ]);
+            }
+
+            return $result;
+
+        } catch (\Exception $e) {
+            Log::error('Erro ao buscar parcelas por município', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+                'codigo_municipio' => $codigoMunicipio,
+                'page' => $page,
+                'timestamp' => now()->toIso8601String()
+            ]);
+
+            return [
+                'success' => false,
+                'error' => "Erro ao buscar parcelas: {$e->getMessage()}"
+            ];
+        }
     }
 
     /**

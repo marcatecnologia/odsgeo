@@ -27,6 +27,11 @@
         </div>
     </div>
 
+    <!-- Botão de Centralizar Brasil -->
+    <div class="mb-2 flex justify-end">
+        <button type="button" id="btnCentralizarBrasil" class="px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700 transition">Centralizar Brasil</button>
+    </div>
+
     <!-- Mapa -->
     <div class="relative h-[600px] w-full rounded-lg overflow-hidden shadow-lg">
         <!-- Controle de Camada -->
@@ -57,12 +62,63 @@
 <script src="https://cdn.jsdelivr.net/npm/ol@7.3.0/dist/ol.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
 <style>
-#map canvas {
-    z-index: 9999 !important;
-    opacity: 1 !important;
-    border: 3px solid red !important;
-    background: none !important;
-}
+    #map {
+        width: 100%;
+        height: 500px;
+        position: relative;
+        z-index: 1;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    #map canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+        background: #fffbe6 !important; /* fundo amarelo claro temporário para depuração */
+    }
+
+    .ol-layer {
+        z-index: 2;
+    }
+
+    .ol-zoom {
+        z-index: 3;
+    }
+
+    .ol-attribution {
+        z-index: 3;
+    }
+
+    .ol-control {
+        z-index: 3;
+    }
+
+    .ol-overlay-container {
+        z-index: 4;
+    }
+
+    /* Garante que o mapa não seja afetado por estilos globais */
+    #map * {
+        box-sizing: border-box;
+    }
+
+    /* Remove qualquer transformação que possa afetar o canvas */
+    #map canvas {
+        transform: none !important;
+        filter: none !important;
+        mix-blend-mode: normal !important;
+    }
+
+    /* Garante que o mapa tenha prioridade sobre outros elementos */
+    .map-container {
+        position: relative;
+        z-index: 1;
+    }
 </style>
 <script>
     console.log('Script do mapa carregado!');
@@ -82,7 +138,7 @@ function waitForMapDiv(callback) {
     }
 }
 
-let map, osmLayer, satelliteLayer, estadoLayer, municipioLayer;
+let map, osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer;
 
 function initMap() {
     osmLayer = new ol.layer.Tile({
@@ -112,16 +168,37 @@ function initMap() {
         source: new ol.source.Vector(),
         style: new ol.style.Style({
             stroke: new ol.style.Stroke({
-                color: '#ffff00', // amarelo neon
-                width: 10
+                color: '#3388ff', // azul elegante
+                width: 3
             }),
-            fill: undefined
+            fill: new ol.style.Fill({
+                color: 'rgba(51,136,255,0.08)' // azul translúcido sutil
+            })
         }),
         zIndex: 99
     });
+
+    // Corrigido: apenas atribuição, sem const/let
+    centroideLayer = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        style: new ol.style.Style({
+            image: new ol.style.Circle({
+                radius: 18,
+                fill: new ol.style.Fill({
+                    color: 'rgba(0,255,0,0.8)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: '#000',
+                    width: 4
+                })
+            })
+        }),
+        zIndex: 100
+    });
+
     map = new ol.Map({
         target: 'map',
-        layers: [osmLayer, satelliteLayer, estadoLayer, municipioLayer],
+        layers: [osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer],
         view: new ol.View({
             center: ol.proj.fromLonLat([-54.0, -15.0]),
             zoom: 4,
@@ -142,7 +219,9 @@ function initMap() {
 function fitBrasil() {
     console.log('Aplicando zoom no Brasil');
     try {
-        map.getView().fit(ol.proj.transformExtent([-74, -34, -34, 5], 'EPSG:4326', 'EPSG:3857'), {
+        const brasilExtent = ol.proj.transformExtent([-74, -34, -34, 5], 'EPSG:4326', 'EPSG:3857');
+        console.log('Extent do Brasil:', brasilExtent);
+        map.getView().fit(brasilExtent, {
             padding: [50, 50, 50, 50],
             duration: 1000,
             maxZoom: 5
@@ -150,7 +229,7 @@ function fitBrasil() {
         setTimeout(() => {
             map.updateSize();
             console.log('updateSize chamado (fitBrasil)');
-        }, 500);
+        }, 700);
         console.log('Zoom no Brasil aplicado com sucesso');
     } catch (error) {
         console.error('Erro ao aplicar zoom no Brasil:', error);
@@ -167,6 +246,15 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log('updateSize chamado (init)');
         }, 500);
     });
+    // Botão Centralizar Brasil
+    const btnCentralizar = document.getElementById('btnCentralizarBrasil');
+    if (btnCentralizar) {
+        btnCentralizar.addEventListener('click', function() {
+            if (typeof fitBrasil === 'function') {
+                fitBrasil();
+            }
+        });
+    }
 });
 
 // Aguarda o Livewire estar disponível antes de registrar o evento
@@ -263,104 +351,105 @@ waitForLivewire(function() {
 
     Livewire.on('municipioSelecionado', (data) => {
         console.log('Evento municipioSelecionado recebido:', data);
-        if (!map) {
-            console.warn('Mapa não inicializado!');
-            return;
-        }
-        // Limpa camada fixa do município
-        municipioLayer.getSource().clear();
-        // Garante que data seja FeatureCollection
-        if (Array.isArray(data)) {
-            data = data[0];
-        }
-        if (!data || !data.features || !data.features.length) {
-            console.warn('Dados do município inválidos:', data);
-            return;
-        }
-        try {
-            const featureGeoJson = data.features[0];
-            console.log('Feature GeoJSON do município:', featureGeoJson);
-            const geojsonFormat = new ol.format.GeoJSON({
-                dataProjection: 'EPSG:4674',
-                featureProjection: 'EPSG:3857'
-            });
-            const feature = geojsonFormat.readFeature(featureGeoJson);
-            console.log('Feature convertida:', feature);
-            if (!feature || !feature.getGeometry()) {
-                console.warn('Feature ou geometria inválida');
-                return;
-            }
-            const geometry = feature.getGeometry();
-            console.log('Tipo de geometria:', geometry.getType());
-            if (geometry.getType() === 'MultiPolygon' || geometry.getType() === 'Polygon') {
-                const coords = geometry.getCoordinates();
-                console.log('Quantidade de polígonos:', coords.length);
-                if (coords.length > 0) {
-                    console.log('Primeiro polígono (primeiros 5 pontos):', coords[0][0].slice(0,5));
+        // Destruir e recriar o mapa igual ao evento de estado
+        setTimeout(() => {
+            waitForMapDiv(function() {
+                if (map) {
+                    try {
+                        map.setTarget(null);
+                    } catch (e) { console.warn('Erro ao destruir mapa antigo:', e); }
+                    map = null;
                 }
-            }
-            // Adiciona a feature na camada fixa do município
-            municipioLayer.getSource().addFeature(feature);
-            // Aplica zoom no município
-            const extent = feature.getGeometry().getExtent();
-            console.log('Extent do município:', extent);
-            const isExtentValid = extent &&
-                extent.length === 4 &&
-                extent.every(coord => isFinite(coord)) &&
-                extent[0] < extent[2] && extent[1] < extent[3];
-            if (!isExtentValid) {
-                console.warn('Extent do município inválido:', extent);
-                return;
-            }
-            map.getView().fit(extent, {
-                padding: [50, 50, 50, 50],
-                duration: 1000,
-                maxZoom: 13,
-                minZoom: 8
+                initMap();
+                setTimeout(() => {
+                    // Limpa camadas
+                    municipioLayer.getSource().clear();
+                    centroideLayer.getSource().clear();
+
+                    // Garante que data seja FeatureCollection
+                    if (Array.isArray(data)) {
+                        data = data[0];
+                    }
+
+                    try {
+                        if (!data || !data.features || !Array.isArray(data.features) || data.features.length === 0) {
+                            console.warn('Nenhuma feature encontrada');
+                            return;
+                        }
+
+                        const featureGeoJson = data.features[0];
+                        console.log('Feature GeoJSON do município:', featureGeoJson);
+
+                        const geojsonFormat = new ol.format.GeoJSON({
+                            dataProjection: 'EPSG:4674',
+                            featureProjection: 'EPSG:3857'
+                        });
+
+                        const feature = geojsonFormat.readFeature(featureGeoJson);
+                        console.log('Feature do município criada:', feature);
+
+                        if (!feature || !feature.getGeometry()) {
+                            console.warn('Feature ou geometria inválida');
+                            return;
+                        }
+
+                        const geometry = feature.getGeometry();
+                        console.log('Tipo de geometria:', geometry.getType());
+                        if (geometry.getType() === 'MultiPolygon' || geometry.getType() === 'Polygon') {
+                            const coords = geometry.getCoordinates();
+                            console.log('Quantidade de polígonos:', coords.length);
+                            if (coords.length > 0) {
+                                console.log('Primeiro polígono (primeiros 5 pontos):', coords[0][0].slice(0,5));
+                            }
+                        }
+
+                        // Adiciona o perímetro do município
+                        municipioLayer.getSource().addFeature(feature);
+                        console.log('Features na camada do município:', municipioLayer.getSource().getFeatures().length);
+                        console.log('Camada município visível:', municipioLayer.getVisible());
+
+                        // Calcula e adiciona o centroide
+                        const extent = geometry.getExtent();
+                        const center = ol.extent.getCenter(extent);
+                        console.log('Extent do município:', extent);
+                        console.log('Centroide do município:', center);
+
+                        // Validação do extent
+                        const isExtentValid = extent &&
+                            extent.length === 4 &&
+                            extent.every(coord => isFinite(coord)) &&
+                            extent[0] < extent[2] && extent[1] < extent[3];
+                        if (!isExtentValid) {
+                            console.warn('Extent do município inválido:', extent);
+                            return;
+                        }
+
+                        // Remover centroide: não adicionar ponto verde
+
+                        // Aplica zoom na geometria do município
+                        map.getView().fit(extent, {
+                            padding: [50, 50, 50, 50],
+                            duration: 1000,
+                            maxZoom: 15
+                        });
+                        setTimeout(() => {
+                            map.updateSize();
+                            console.log('updateSize chamado após fit município');
+                        }, 700);
+
+                        // Força updateSize extra
+                        setTimeout(() => {
+                            map.updateSize();
+                            console.log('updateSize extra (depuração)');
+                        }, 1500);
+
+                    } catch (error) {
+                        console.error('Erro ao processar município:', error);
+                        console.error('Stack trace:', error.stack);
+                    }
+                }, 100);
             });
-            // Adiciona um ponto no centro do município para depuração visual
-            const center = ol.extent.getCenter(extent);
-            const marker = new ol.Feature({
-                geometry: new ol.geom.Point(center)
-            });
-            console.log('Ponto verde (centro) adicionado em:', center);
-            // Camada de marker (continua dinâmica)
-            const markerLayer = new ol.layer.Vector({
-                source: new ol.source.Vector({features: [marker]}),
-                style: new ol.style.Style({
-                    image: new ol.style.Circle({
-                        radius: 12,
-                        fill: new ol.style.Fill({color: '#00ff00'}),
-                        stroke: new ol.style.Stroke({color: '#000', width: 3})
-                    })
-                }),
-                zIndex: 100
-            });
-            if (window.municipioMarkerLayer) {
-                map.removeLayer(window.municipioMarkerLayer);
-            }
-            window.municipioMarkerLayer = markerLayer;
-            map.addLayer(markerLayer);
-            setTimeout(() => {
-                map.updateSize();
-                console.log('Tamanho do mapa atualizado');
-                console.log('Zoom atual:', map.getView().getZoom());
-                console.log('Camadas do mapa após município:', map.getLayers().getArray());
-                if (municipioLayer) {
-                    console.log('Status da camada do município:', municipioLayer.getVisible(), municipioLayer.getSource().getFeatures().length);
-                }
-                // Log do bounding box do canvas do mapa
-                const mapDiv = document.getElementById('map');
-                const canvas = mapDiv.querySelector('canvas');
-                if (canvas) {
-                    const rect = canvas.getBoundingClientRect();
-                    console.log('Bounding box do canvas:', rect);
-                }
-            }, 500);
-        } catch (error) {
-            console.error('Erro ao processar município:', error);
-            console.error('Stack trace:', error.stack);
-        }
+        }, 200);
     });
 });
 </script>
