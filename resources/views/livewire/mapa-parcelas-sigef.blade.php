@@ -41,11 +41,19 @@
         </div>
         
         <div id="map" style="height: 600px; width: 100%; min-width: 300px; min-height: 300px;"></div>
-        @if($loading)
-            <div class="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+        <!-- Loader centralizado sobre o mapa -->
+        <div id="map-loader" style="display:none; position:absolute; left:0; top:0; width:100%; height:100%; z-index:50; background:rgba(24,24,28,0.45); backdrop-filter:blur(1.5px); align-items:center; justify-content:center;">
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%;">
+                <div class="globe-spin" style="width:64px; height:64px; margin-bottom:18px; box-shadow:0 4px 24px 0 rgba(0,0,0,0.18); border-radius:50%; background:linear-gradient(135deg,#1e293b 60%,#38bdf8 100%); display:flex; align-items:center; justify-content:center;">
+                    <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="22" cy="22" r="20" stroke="#fff" stroke-width="3" fill="#38bdf8"/>
+                        <ellipse cx="22" cy="22" rx="14" ry="20" stroke="#fff" stroke-width="2" fill="none"/>
+                        <ellipse cx="22" cy="22" rx="20" ry="8" stroke="#fff" stroke-width="2" fill="none"/>
+                    </svg>
+                </div>
+                <div id="map-loader-text" style="color:#fff; font-size:1.1rem; font-weight:500; text-shadow:0 2px 8px #000a; letter-spacing:0.01em; margin-top:0.5rem;">Carregando...</div>
             </div>
-        @endif
+        </div>
     </div>
 
     @if($error)
@@ -116,6 +124,25 @@
     .map-container {
         position: relative;
         z-index: 1;
+    }
+
+    .globe-spin {
+        animation: globe-rotate 1.2s linear infinite;
+    }
+    @keyframes globe-rotate {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    #map-loader {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: all;
+        z-index: 9999 !important;
+    }
+    @media (max-width: 600px) {
+        #map-loader .globe-spin { width: 44px; height: 44px; }
+        #map-loader-text { font-size: 0.95rem; }
     }
 </style>
 <script>
@@ -189,8 +216,8 @@ function initMap() {
         }),
         style: new ol.style.Style({
             stroke: new ol.style.Stroke({
-                color: '#555',
-                width: 1.5
+                color: '#FFD600', // Amarelo destacado
+                width: 2.5
             }),
             fill: null
         })
@@ -308,6 +335,8 @@ function initMap() {
             fetchParcelaDetails(codCcir);
         }
     });
+
+    addParcelasLoaderHooks();
 }
 
 function fitBrasil() {
@@ -364,12 +393,11 @@ function waitForLivewire(callback) {
 
 waitForLivewire(function() {
     Livewire.on('estadoSelecionado', (data) => {
+        showMapLoader('Buscando estado...');
         setTimeout(() => {
             waitForMapDiv(function() {
                 if (map) {
-                    try {
-                        map.setTarget(null);
-                    } catch (e) { console.warn('Erro ao destruir mapa antigo:', e); }
+                    try { map.setTarget(null); } catch (e) { console.warn('Erro ao destruir mapa antigo:', e); }
                     map = null;
                 }
                 initMap();
@@ -433,6 +461,7 @@ waitForLivewire(function() {
                                 });
                             }
                         }, 1000);
+                        hideMapLoader();
                     } catch (error) {
                         console.error('Erro ao processar estado:', error);
                         console.error('Stack trace:', error.stack);
@@ -444,13 +473,12 @@ waitForLivewire(function() {
     });
 
     Livewire.on('municipioSelecionado', (data) => {
+        showMapLoader('Buscando município...');
         console.log('Evento municipioSelecionado recebido:', data);
         setTimeout(() => {
             waitForMapDiv(function() {
                 if (map) {
-                    try {
-                        map.setTarget(null);
-                    } catch (e) { console.warn('Erro ao destruir mapa antigo:', e); }
+                    try { map.setTarget(null); } catch (e) { console.warn('Erro ao destruir mapa antigo:', e); }
                     map = null;
                 }
                 initMap();
@@ -548,6 +576,7 @@ waitForLivewire(function() {
                         console.error('Erro ao processar município:', error);
                         console.error('Stack trace:', error.stack);
                     }
+                    hideMapLoader();
                 }, 100);
             });
         }, 200);
@@ -622,6 +651,45 @@ async function salvarParcela(codCcir) {
     } catch (error) {
         console.error('Erro ao salvar parcela:', error);
         alert('Erro ao salvar parcela. Tente novamente.');
+    }
+}
+
+function showMapLoader(text) {
+    const loader = document.getElementById('map-loader');
+    const loaderText = document.getElementById('map-loader-text');
+    if (loader && loaderText) {
+        loaderText.textContent = text || 'Carregando...';
+        loader.style.display = 'flex';
+    }
+}
+function hideMapLoader() {
+    const loader = document.getElementById('map-loader');
+    if (loader) loader.style.display = 'none';
+}
+
+document.addEventListener('livewire:load', function () {
+    if (window.livewire) {
+        window.livewire.hook('message.sent', () => {
+            showMapLoader('Carregando...');
+        });
+        window.livewire.hook('message.processed', () => {
+            hideMapLoader();
+        });
+    }
+});
+
+// Loader para as parcelas SIGEF (camada WFS)
+function addParcelasLoaderHooks() {
+    if (typeof parcelasLayer !== 'undefined' && parcelasLayer.getSource()) {
+        parcelasLayer.getSource().on('featuresloadstart', function() {
+            showMapLoader('Buscando parcelas...');
+        });
+        parcelasLayer.getSource().on('featuresloadend', function() {
+            hideMapLoader();
+        });
+        parcelasLayer.getSource().on('featuresloaderror', function() {
+            hideMapLoader();
+        });
     }
 }
 </script>
