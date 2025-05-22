@@ -125,6 +125,10 @@
         ol.proj.proj4.register(proj4);
     }
 
+    window.GEOSERVER_URL = "{{ env('GEOSERVER_URL', 'http://host.docker.internal:8082/geoserver') }}";
+    window.GEOSERVER_WORKSPACE = "{{ env('GEOSERVER_WORKSPACE', 'odsgeo') }}";
+    window.GEOSERVER_LAYER = "{{ env('GEOSERVER_LAYER', 'parcelas_sigef_brasil') }}";
+
 function waitForMapDiv(callback) {
     const mapDiv = document.getElementById('map');
     if (mapDiv) {
@@ -136,7 +140,21 @@ function waitForMapDiv(callback) {
     }
 }
 
-let map, osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer;
+let map, osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer;
+
+function getParcelasWfsUrl(codigoMun) {
+    const geoserverUrl = window.GEOSERVER_URL;
+    const workspace = window.GEOSERVER_WORKSPACE;
+    const layer = window.GEOSERVER_LAYER;
+    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:4674&CQL_FILTER=municipio_=${codigoMun}&propertyName=parcela_co,geom`;
+}
+
+function getParcelaDetailUrl(codCcir) {
+    const geoserverUrl = window.GEOSERVER_URL;
+    const workspace = window.GEOSERVER_WORKSPACE;
+    const layer = window.GEOSERVER_LAYER;
+    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:4674&CQL_FILTER=cod_ccir='${codCcir}'`;
+}
 
 function initMap() {
     osmLayer = new ol.layer.Tile({
@@ -150,6 +168,34 @@ function initMap() {
         }),
         visible: false
     });
+
+    // Camada WFS para parcelas SIGEF
+    parcelasLayer = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            format: new ol.format.GeoJSON({
+                dataProjection: 'EPSG:4674',
+                featureProjection: 'EPSG:3857'
+            }),
+            url: function(extent) {
+                if (!window.currentMunicipioCodigo) {
+                    console.warn('Código do município não definido para WFS!');
+                    return undefined;
+                }
+                const url = getParcelasWfsUrl(window.currentMunicipioCodigo);
+                console.log('URL WFS das parcelas SIGEF:', url);
+                return url;
+            },
+            strategy: ol.loadingstrategy.bbox
+        }),
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({
+                color: '#555',
+                width: 1.5
+            }),
+            fill: null
+        })
+    });
+
     // Camada vetorial para o perímetro do estado
     estadoLayer = new ol.layer.Vector({
         source: new ol.source.Vector(),
@@ -196,7 +242,7 @@ function initMap() {
 
     map = new ol.Map({
         target: 'map',
-        layers: [osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer],
+        layers: [osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer],
         view: new ol.View({
             center: ol.proj.fromLonLat([-54.0, -15.0]),
             zoom: 4,
@@ -211,6 +257,56 @@ function initMap() {
         satelliteLayer.setVisible(e.target.checked);
         console.log('OSM visível:', osmLayer.getVisible());
         console.log('Satélite visível:', satelliteLayer.getVisible());
+    });
+
+    // Adiciona interatividade para as parcelas
+    const overlay = new ol.Overlay({
+        element: document.createElement('div'),
+        positioning: 'bottom-center',
+        offset: [0, -10],
+        stopEvent: false
+    });
+    map.addOverlay(overlay);
+
+    // Tooltip para mostrar o código CCIR
+    const tooltipElement = document.createElement('div');
+    tooltipElement.className = 'tooltip';
+    tooltipElement.style.position = 'absolute';
+    tooltipElement.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+    tooltipElement.style.color = 'white';
+    tooltipElement.style.padding = '4px 8px';
+    tooltipElement.style.borderRadius = '4px';
+    tooltipElement.style.fontSize = '12px';
+    tooltipElement.style.pointerEvents = 'none';
+    tooltipElement.style.display = 'none';
+    document.body.appendChild(tooltipElement);
+
+    // Evento de hover para mostrar tooltip
+    map.on('pointermove', function(evt) {
+        const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+            return feature;
+        });
+
+        if (feature && feature.get('cod_ccir')) {
+            tooltipElement.style.display = 'block';
+            tooltipElement.style.left = evt.pixel[0] + 'px';
+            tooltipElement.style.top = evt.pixel[1] - 10 + 'px';
+            tooltipElement.innerHTML = feature.get('cod_ccir');
+        } else {
+            tooltipElement.style.display = 'none';
+        }
+    });
+
+    // Evento de clique para mostrar detalhes da parcela
+    map.on('click', function(evt) {
+        const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+            return feature;
+        });
+
+        if (feature && feature.get('cod_ccir')) {
+            const codCcir = feature.get('cod_ccir');
+            fetchParcelaDetails(codCcir);
+        }
     });
 }
 
@@ -349,7 +445,6 @@ waitForLivewire(function() {
 
     Livewire.on('municipioSelecionado', (data) => {
         console.log('Evento municipioSelecionado recebido:', data);
-        // Destruir e recriar o mapa igual ao evento de estado
         setTimeout(() => {
             waitForMapDiv(function() {
                 if (map) {
@@ -363,6 +458,7 @@ waitForLivewire(function() {
                     // Limpa camadas
                     municipioLayer.getSource().clear();
                     centroideLayer.getSource().clear();
+                    parcelasLayer.getSource().clear();
 
                     // Garante que data seja FeatureCollection
                     if (Array.isArray(data)) {
@@ -377,6 +473,10 @@ waitForLivewire(function() {
 
                         const featureGeoJson = data.features[0];
                         console.log('Feature GeoJSON do município:', featureGeoJson);
+
+                        // Armazena o código do município para uso na camada WFS
+                        window.currentMunicipioCodigo = featureGeoJson.properties.cd_mun;
+                        console.log('Código IBGE do município selecionado:', window.currentMunicipioCodigo);
 
                         const geojsonFormat = new ol.format.GeoJSON({
                             dataProjection: 'EPSG:4674',
@@ -441,6 +541,9 @@ waitForLivewire(function() {
                             console.log('updateSize extra (depuração)');
                         }, 1500);
 
+                        // Atualiza a fonte da camada de parcelas (após definir o código!)
+                        parcelasLayer.getSource().refresh();
+
                     } catch (error) {
                         console.error('Erro ao processar município:', error);
                         console.error('Stack trace:', error.stack);
@@ -450,5 +553,76 @@ waitForLivewire(function() {
         }, 200);
     });
 });
+
+// Função para buscar detalhes da parcela
+async function fetchParcelaDetails(codCcir) {
+    try {
+        console.time('fetchParcelaDetails');
+        const response = await fetch(getParcelaDetailUrl(codCcir));
+        const data = await response.json();
+        console.timeEnd('fetchParcelaDetails');
+        if (data.features && data.features.length > 0) {
+            showParcelaDetails(data.features[0].properties);
+        }
+    } catch (error) {
+        console.error('Erro ao buscar detalhes da parcela:', error);
+    }
+}
+
+// Função para exibir detalhes da parcela
+function showParcelaDetails(properties) {
+    // Criar modal com os detalhes
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Dados da Parcela</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="space-y-2">
+                ${Object.entries(properties).map(([key, value]) => `
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="font-medium text-gray-700">${key}:</div>
+                        <div class="col-span-2">${value}</div>
+                    </div>
+                `).join('')}
+            </div>
+            <div class="mt-6 flex justify-end space-x-4">
+                <button onclick="salvarParcela('${properties.cod_ccir}')" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
+                    Salvar Parcela
+                </button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+// Função para salvar parcela
+async function salvarParcela(codCcir) {
+    try {
+        const response = await fetch('/api/parcelas/salvar', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({ cod_ccir: codCcir })
+        });
+
+        if (response.ok) {
+            alert('Parcela salva com sucesso!');
+        } else {
+            throw new Error('Erro ao salvar parcela');
+        }
+    } catch (error) {
+        console.error('Erro ao salvar parcela:', error);
+        alert('Erro ao salvar parcela. Tente novamente.');
+    }
+}
 </script>
 @endpush 
