@@ -272,9 +272,9 @@ function initMap() {
         layers: [osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer],
         view: new ol.View({
             center: ol.proj.fromLonLat([-54.0, -15.0]),
-            zoom: 4,
+            zoom: 0.5,
             projection: 'EPSG:3857',
-            extent: ol.proj.transformExtent([-74, -34, -34, 5], 'EPSG:4326', 'EPSG:3857')
+            extent: ol.proj.transformExtent([-85, -40, -25, 10], 'EPSG:4326', 'EPSG:3857')
         })
     });
     console.log('OSM visível:', osmLayer.getVisible());
