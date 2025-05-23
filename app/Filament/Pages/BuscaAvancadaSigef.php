@@ -8,9 +8,9 @@ use Filament\Navigation\NavigationItem;
 class BuscaAvancadaSigef extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-magnifying-glass';
-    protected static ?string $navigationLabel = 'Busca Avançada SIGEF';
-    protected static ?string $title = 'Busca Avançada de Parcelas SIGEF';
-    protected static ?string $navigationGroup = 'SIGEF';
+    protected static ?string $navigationLabel = 'Busca Avançada';
+    protected static ?string $title = 'Busca Avançada de Parcelas';
+    protected static ?string $navigationGroup = 'Parcelas SIGEF';
     protected static ?int $navigationSort = 2;
 
     protected static string $view = 'filament.pages.busca-avancada-sigef';

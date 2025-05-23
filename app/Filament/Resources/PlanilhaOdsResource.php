@@ -25,7 +25,9 @@ class PlanilhaOdsResource extends Resource
     
     protected static ?string $pluralModelLabel = 'Planilhas ODS';
 
-    protected static ?int $navigationSort = 3;
+    protected static ?string $navigationGroup = 'Parcelas SIGEF';
+
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
