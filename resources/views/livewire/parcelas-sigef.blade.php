@@ -1,5 +1,5 @@
 <div class="sigef-card">
-    <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Buscar Parcelas SIGEF</h2>
+    {{-- <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Buscar Parcelas SIGEF</h2> --}}
 
     <!-- Tabs -->
     <div class="mb-6">

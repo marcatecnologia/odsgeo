@@ -17,8 +17,8 @@ use App\Livewire\MapaParcelasSigef;
 class ParcelasSigef extends Page
 {
     protected static ?string $navigationIcon = 'heroicon-o-map';
-    protected static ?string $navigationLabel = 'Buscar Parcelas';
-    protected static ?string $title = 'Buscar Parcelas';
+    protected static ?string $navigationLabel = null;
+    protected static ?string $title = null;
     protected static ?string $navigationGroup = 'Parcelas SIGEF';
     protected static ?int $navigationSort = 3;
     protected static string $view = 'filament.pages.parcelas-sigef';
@@ -200,5 +200,10 @@ class ParcelasSigef extends Page
     public static function shouldRegisterNavigation(): bool
     {
         return auth()->user()->hasAnyRole(['admin', 'visualizador_sigef']);
+    }
+
+    public function getTitle(): string
+    {
+        return '';
     }
 } 

@@ -12,7 +12,7 @@
         </div>
     </div>
     <div class="space-y-6">
-        <livewire:mapa-parcelas-sigef />
+        @livewire('mapa-parcelas-sigef')
     </div>
 </x-filament-panels::page>
 
