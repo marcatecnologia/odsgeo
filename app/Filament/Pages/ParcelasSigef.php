@@ -19,8 +19,7 @@ class ParcelasSigef extends Page
     protected static ?string $navigationIcon = 'heroicon-o-map';
     protected static ?string $navigationLabel = 'Buscar Parcelas';
     protected static ?string $title = null;
-    protected static ?string $navigationGroup = 'Parcelas SIGEF';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
     protected static string $view = 'filament.pages.parcelas-sigef';
     protected static ?string $slug = 'parcelas-sigef';
 

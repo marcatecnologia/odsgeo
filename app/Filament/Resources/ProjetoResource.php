@@ -25,8 +25,6 @@ class ProjetoResource extends Resource
     
     protected static ?string $pluralModelLabel = 'Projetos';
 
-    protected static ?string $navigationGroup = 'Diretórios';
-
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form

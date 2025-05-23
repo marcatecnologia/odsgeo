@@ -25,8 +25,6 @@ class ServicoResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Serviços';
 
-    protected static ?string $navigationGroup = 'Diretórios';
-
     protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
