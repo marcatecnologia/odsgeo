@@ -18,7 +18,7 @@ class LogResource extends Resource
     protected static ?string $modelLabel = 'Log de Erro';
     protected static ?string $pluralModelLabel = 'Logs de Erro';
     protected static ?string $navigationGroup = 'Configurações';
-    protected static ?int $navigationSort = 100;
+    protected static ?int $navigationSort = 4;
 
     public static function table(Table $table): Table
     {

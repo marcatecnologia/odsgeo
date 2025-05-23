@@ -17,7 +17,7 @@ class MinhasParcelas extends Page
     protected static ?string $navigationLabel = 'Minhas Parcelas';
     protected static ?string $title = 'Minhas Parcelas';
     protected static ?string $navigationGroup = 'Parcelas SIGEF';
-    protected static ?int $navigationSort = 3;
+    protected static ?int $navigationSort = 5;
     protected static string $view = 'filament.pages.minhas-parcelas';
 
     public function mount()
