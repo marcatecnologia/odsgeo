@@ -758,33 +758,197 @@ async function fetchParcelaDetails(parcelaCo) {
 
 // Função para exibir detalhes da parcela
 function showParcelaDetails(properties) {
-    // Criar modal com os detalhes
+    // Mapeamento de rótulos amigáveis e ícones
+    const labels = {
+        parcela_co: { label: 'Código Parcela', icon: '📋' },
+        rt: { label: 'RT', icon: '📄' },
+        art: { label: 'ART', icon: '📑' },
+        situacao_i: { label: 'Situação', icon: '📊' },
+        codigo_imo: { label: 'Código Imóvel', icon: '🏠' },
+        data_submi: { label: 'Data Submissão', icon: '📅' },
+        data_aprov: { label: 'Data Aprovação', icon: '✅' },
+        status: { label: 'Status', icon: '🔄' },
+        nome_area: { label: 'Nome Área', icon: '📍' },
+        registro_m: { label: 'Registro M', icon: '📝' },
+        registro_d: { label: 'Registro D', icon: '📝' },
+        municipio_: { label: 'Município', icon: '🏙️' },
+        uf_id: { label: 'UF', icon: '🏳️' }
+    };
+
+    // Função para formatar datas
+    const formatarData = (data) => {
+        if (!data) return '-';
+        try {
+            return new Date(data).toLocaleDateString('pt-BR');
+        } catch {
+            return data;
+        }
+    };
+
+    // Função para formatar status
+    const formatarStatus = (status) => {
+        if (!status) return '-';
+        const statusMap = {
+            'A': 'Aprovado',
+            'P': 'Pendente',
+            'R': 'Rejeitado'
+        };
+        return statusMap[status] || status;
+    };
+
+    // Função para formatar situação
+    const formatarSituacao = (situacao) => {
+        if (!situacao) return '-';
+        const situacaoMap = {
+            'A': 'Ativo',
+            'I': 'Inativo',
+            'S': 'Suspenso'
+        };
+        return situacaoMap[situacao] || situacao;
+    };
+
+    // Monta os campos que possuem valor
+    const campos = Object.entries(labels)
+        .map(([key, info]) => {
+            let valor = properties[key] || '-';
+            
+            // Formatação especial para alguns campos
+            if (key.includes('data_')) {
+                valor = formatarData(valor);
+            } else if (key === 'status') {
+                valor = formatarStatus(valor);
+            } else if (key === 'situacao_i') {
+                valor = formatarSituacao(valor);
+            }
+
+            return `<div class="odsgeo-modal-row">
+                        <div class="odsgeo-modal-label">
+                            <span class="odsgeo-modal-icon">${info.icon}</span>
+                            <span>${info.label}</span>
+                        </div>
+                        <span class="odsgeo-modal-value ${valor === '-' ? 'odsgeo-modal-value-empty' : ''}">${valor}</span>
+                    </div>`;
+        }).join('');
+
+    // Remove modal anterior se existir
+    document.querySelectorAll('.odsgeo-modal-bg').forEach(e => e.remove());
+
+    // Cria o modal
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.className = 'odsgeo-modal-bg';
     modal.innerHTML = `
-        <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold">Dados da Parcela</h3>
-                <button onclick="this.closest('.fixed').remove()" class="text-gray-500 hover:text-gray-700">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        <div class="odsgeo-modal-content">
+            <button class="odsgeo-modal-close" title="Fechar" onclick="this.closest('.odsgeo-modal-bg').remove()">&times;</button>
+            <div class="odsgeo-modal-header">
+                <h2 class="odsgeo-modal-title">Dados da Parcela</h2>
+                <div class="odsgeo-modal-subtitle">${properties.nome_area || 'Parcela SIGEF'}</div>
+            </div>
+            <div class="odsgeo-modal-fields">${campos}</div>
+            <div class="odsgeo-modal-actions">
+                <button onclick="salvarParcela('${properties.parcela_co || ''}')" class="odsgeo-modal-btn">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/>
                     </svg>
-                </button>
-            </div>
-            <div class="space-y-2">
-                ${Object.entries(properties).map(([key, value]) => `
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="font-medium text-gray-700">${key}:</div>
-                        <div class="col-span-2">${value}</div>
-                    </div>
-                `).join('')}
-            </div>
-            <div class="mt-6 flex justify-end space-x-4">
-                <button onclick="salvarParcela('${properties.cod_ccir}')" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
                     Salvar Parcela
                 </button>
             </div>
         </div>
+        <style>
+        .odsgeo-modal-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.45); z-index: 10000;
+            display: flex; align-items: center; justify-content: center;
+            padding: 1.5rem;
+            backdrop-filter: blur(4px);
+        }
+        .odsgeo-modal-content {
+            background: #fff; border-radius: 16px; box-shadow: 0 8px 32px #0005;
+            max-width: 480px; width: 100%; padding: 2rem 1.5rem 1.5rem 1.5rem;
+            position: relative; display: flex; flex-direction: column;
+            animation: odsgeo-modal-in 0.2s cubic-bezier(.4,1.4,.6,1) 1;
+        }
+        @keyframes odsgeo-modal-in {
+            from { opacity: 0; transform: translateY(40px) scale(0.98); }
+            to { opacity: 1; transform: none; }
+        }
+        .odsgeo-modal-close {
+            position: absolute; top: 14px; right: 16px; background: none; border: none;
+            font-size: 2rem; color: #888; cursor: pointer; line-height: 1;
+            transition: all 0.2s; width: 32px; height: 32px; display: flex;
+            align-items: center; justify-content: center; border-radius: 50%;
+        }
+        .odsgeo-modal-close:hover { 
+            color: #e11d48; 
+            background: rgba(225,29,72,0.1);
+        }
+        .odsgeo-modal-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .odsgeo-modal-title {
+            font-size: 1.4rem; font-weight: 700; color: #e11d48; margin-bottom: 0.3rem;
+        }
+        .odsgeo-modal-subtitle {
+            color: #64748b; font-size: 0.95rem;
+        }
+        .odsgeo-modal-fields {
+            display: flex; flex-direction: column; gap: 0.8rem;
+            max-height: 50vh; overflow-y: auto; margin-bottom: 1.5rem;
+            padding-right: 0.5rem;
+        }
+        .odsgeo-modal-fields::-webkit-scrollbar {
+            width: 6px;
+        }
+        .odsgeo-modal-fields::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 3px;
+        }
+        .odsgeo-modal-fields::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        .odsgeo-modal-row {
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;
+        }
+        .odsgeo-modal-label {
+            display: flex; align-items: center; gap: 0.5rem;
+            font-weight: 600; color: #334155; font-size: 1rem;
+        }
+        .odsgeo-modal-icon {
+            font-size: 1.1rem;
+        }
+        .odsgeo-modal-value {
+            color: #1e293b; font-size: 1rem; word-break: break-all;
+            text-align: right; font-weight: 500;
+        }
+        .odsgeo-modal-value-empty {
+            color: #94a3b8; font-style: italic;
+        }
+        .odsgeo-modal-actions {
+            display: flex; justify-content: flex-end; gap: 0.5rem;
+        }
+        .odsgeo-modal-btn {
+            background: #6366f1; color: #fff; border: none; border-radius: 8px;
+            padding: 0.7rem 1.4rem; font-size: 1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
+            justify-content: center;
+        }
+        .odsgeo-modal-btn:hover { 
+            background: #4338ca;
+            transform: translateY(-1px);
+        }
+        @media (max-width: 600px) {
+            .odsgeo-modal-content { 
+                max-width: 98vw; 
+                padding: 1.5rem 1rem 1rem 1rem;
+                border-radius: 12px;
+            }
+            .odsgeo-modal-title { font-size: 1.2rem; }
+            .odsgeo-modal-label, .odsgeo-modal-value { font-size: 0.95rem; }
+            .odsgeo-modal-btn { padding: 0.6rem 1.2rem; }
+        }
+        </style>
     `;
     document.body.appendChild(modal);
 }
