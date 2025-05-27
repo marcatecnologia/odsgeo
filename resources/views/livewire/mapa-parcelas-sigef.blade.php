@@ -65,7 +65,7 @@
 
 @push('scripts')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@7.3.0/ol.css">
-<script src="https://cdn.jsdelivr.net/npm/ol@7.3.0/dist/ol.js"></script>
+<script src="/vendor/ol/ol.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
 <style>
     #map {
@@ -173,14 +173,14 @@ function getParcelasWfsUrl(codigoMun) {
     const geoserverUrl = window.GEOSERVER_URL;
     const workspace = window.GEOSERVER_WORKSPACE;
     const layer = window.GEOSERVER_LAYER;
-    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:4674&CQL_FILTER=municipio_=${codigoMun}&propertyName=parcela_co,nome_area,geom`;
+    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:3857&CQL_FILTER=municipio_=${codigoMun}&propertyName=parcela_co,nome_area,geom`;
 }
 
 function getParcelaDetailUrl(codCcir) {
     const geoserverUrl = window.GEOSERVER_URL;
     const workspace = window.GEOSERVER_WORKSPACE;
     const layer = window.GEOSERVER_LAYER;
-    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:4674&CQL_FILTER=cod_ccir='${codCcir}'`;
+    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:3857&CQL_FILTER=cod_ccir='${codCcir}'`;
 }
 
 function initMap() {
@@ -200,7 +200,7 @@ function initMap() {
     parcelasLayer = new ol.layer.Vector({
         source: new ol.source.Vector({
             format: new ol.format.GeoJSON({
-                dataProjection: 'EPSG:4674',
+                dataProjection: 'EPSG:3857',
                 featureProjection: 'EPSG:3857'
             }),
             url: function(extent) {
@@ -353,44 +353,103 @@ function initMap() {
     function addParcelasLabels() {
         parcelasLabelLayer.getSource().clear();
         const features = parcelasLayer.getSource().getFeatures();
+        // Log dos tipos de geometria recebidos
+        const tiposGeometria = features.map(f => f.getGeometry() ? f.getGeometry().getType() : 'SEM_GEOMETRIA');
+        console.log('Tipos de geometria das parcelas:', tiposGeometria);
         let count = 0;
+        // LOG EXTRA PARA DEBUG
+        console.log('Features das parcelas:', features);
+        if (features.length > 0) {
+            console.log('Propriedades da primeira feature:', features[0].getProperties());
+        }
         features.forEach(feature => {
-            const geometry = feature.getGeometry();
-            const nomePropriedade = feature.get('nome_area');
+            let geometry = feature.getGeometry();
+            const nomeArea = feature.get('nome_area');
+
+            // Log detalhado para depuração
+            if (geometry && geometry.getCoordinates) {
+                const coords = geometry.getCoordinates();
+                if (Array.isArray(coords) && coords.length > 0) {
+                    console.log('Primeiras coords:', coords[0]?.[0]?.slice(0, 5));
+                }
+            }
+            console.log('geometry:', geometry, 'instanceof:', geometry instanceof ol.geom.MultiPolygon, 'type:', geometry && geometry.getType ? geometry.getType() : 'SEM_TIPO');
+
+            // Força a conversão se necessário usando GeoJSON puro
             if (
-                nomePropriedade &&
+                geometry &&
+                geometry.getType &&
+                geometry.getType() === 'MultiPolygon' &&
+                !(geometry instanceof ol.geom.MultiPolygon)
+            ) {
+                const geojsonFeature = {
+                    type: 'Feature',
+                    geometry: {
+                        type: geometry.getType(),
+                        coordinates: geometry.getCoordinates()
+                    },
+                    properties: {}
+                };
+                const featureOL = new ol.format.GeoJSON().readFeature(geojsonFeature, {
+                    dataProjection: 'EPSG:3857',
+                    featureProjection: 'EPSG:3857'
+                });
+                geometry = featureOL.getGeometry();
+            }
+            // Log para garantir que o método existe
+            console.log('Após conversão, getInteriorPoints existe?', typeof geometry.getInteriorPoints === 'function');
+
+            // Só processa se for Polygon ou MultiPolygon
+            if (
+                nomeArea &&
                 geometry &&
                 (geometry.getType() === 'Polygon' || geometry.getType() === 'MultiPolygon')
             ) {
-                // Centro do extent como fallback
-                const center = ol.extent.getCenter(geometry.getExtent());
-                // Corrigir a projeção do centro para EPSG:3857
-                const center3857 = ol.proj.transform(center, 'EPSG:4674', 'EPSG:3857');
-                const point = new ol.geom.Point(center3857);
-                const labelFeature = new ol.Feature({
-                    geometry: point,
-                    nome: nomePropriedade
-                });
-                labelFeature.setStyle(new ol.style.Style({
-                    image: new ol.style.Circle({
-                        radius: 12,
-                        fill: new ol.style.Fill({ color: '#ff0000' }), // círculo vermelho visível
-                        stroke: new ol.style.Stroke({ color: '#000', width: 2 })
-                    }),
-                    text: new ol.style.Text({
-                        text: 'TESTE', // texto fixo para depuração
-                        font: 'bold 16px Arial',
-                        fill: new ol.style.Fill({ color: '#00ff00' }), // verde limão
-                        backgroundFill: new ol.style.Fill({ color: 'rgba(0,0,0,0.8)' }),
-                        padding: [8, 16],
-                        offsetY: -20,
-                        textBaseline: 'bottom'
-                    }),
-                    zIndex: 9999
-                }));
-                console.log('LabelFeature adicionada:', labelFeature);
-                parcelasLabelLayer.getSource().addFeature(labelFeature);
-                count++;
+                let labelPoint = null;
+                if (geometry.getType() === 'Polygon' && typeof geometry.getInteriorPoint === 'function') {
+                    labelPoint = geometry.getInteriorPoint();
+                } else if (geometry.getType() === 'MultiPolygon' && typeof geometry.getInteriorPoints === 'function') {
+                    const interiorPoints = geometry.getInteriorPoints();
+                    labelPoint = interiorPoints.getPoint(0); // Pega o primeiro ponto
+                }
+                if (labelPoint) {
+                    // Feature do círculo
+                    const circleFeature = new ol.Feature({
+                        geometry: labelPoint
+                    });
+                    circleFeature.setStyle(new ol.style.Style({
+                        image: new ol.style.Circle({
+                            radius: 10,
+                            fill: new ol.style.Fill({ color: '#00ff00' }),
+                            stroke: new ol.style.Stroke({ color: '#000', width: 2 })
+                        }),
+                        zIndex: 99998
+                    }));
+                    parcelasLabelLayer.getSource().addFeature(circleFeature);
+
+                    // Feature do texto
+                    const textFeature = new ol.Feature({
+                        geometry: labelPoint,
+                        nomeArea: nomeArea
+                    });
+                    textFeature.setStyle(new ol.style.Style({
+                        text: new ol.style.Text({
+                            text: `${nomeArea}`,
+                            font: 'bold 18px Arial',
+                            fill: new ol.style.Fill({ color: '#ff0000' }),
+                            backgroundFill: new ol.style.Fill({ color: 'rgba(0,0,0,0.85)' }),
+                            padding: [8, 16],
+                            offsetY: 0,
+                            textBaseline: 'middle',
+                            textAlign: 'center'
+                        }),
+                        zIndex: 99999
+                    }));
+                    parcelasLabelLayer.getSource().addFeature(textFeature);
+
+                    console.log('Label adicionada:', textFeature);
+                    count++;
+                }
             }
         });
         console.log('Labels de parcelas criados:', count);
