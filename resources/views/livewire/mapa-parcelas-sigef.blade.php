@@ -437,8 +437,6 @@ function initMap() {
                             text: `${nomeArea}`,
                             font: 'bold 18px Arial',
                             fill: new ol.style.Fill({ color: '#ff0000' }),
-                            backgroundFill: new ol.style.Fill({ color: 'rgba(0,0,0,0.85)' }),
-                            padding: [8, 16],
                             offsetY: 0,
                             textBaseline: 'middle',
                             textAlign: 'center'
