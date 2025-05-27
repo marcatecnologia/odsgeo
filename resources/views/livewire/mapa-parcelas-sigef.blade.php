@@ -248,7 +248,16 @@ function initMap() {
     // Camada para os labels das parcelas (sempre zIndex alto)
     parcelasLabelLayer = new ol.layer.Vector({
         source: new ol.source.Vector(),
-        zIndex: 9999
+        zIndex: 9999,
+        style: new ol.style.Style({
+            image: new ol.style.Icon({
+                src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="white" stroke="%23e11d48" stroke-width="3"/><circle cx="18" cy="18" r="10" fill="none" stroke="%23e11d48" stroke-width="2"/><circle cx="18" cy="18" r="4" fill="%23e11d48"/></svg>',
+                anchor: [0.5, 0.5],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'fraction',
+                scale: 0.55
+            })
+        })
     });
 
     // Camada vetorial para o perímetro do estado
@@ -356,14 +365,45 @@ function initMap() {
 
     // Evento de clique para mostrar detalhes da parcela
     map.on('click', function(evt) {
-        const feature = map.forEachFeatureAtPixel(evt.pixel, function(feature) {
-            return feature;
+        let clickedFeature = null;
+        
+        // Primeiro verifica na camada de labels
+        map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+            if (layer === parcelasLabelLayer) {
+                clickedFeature = feature;
+                return true;
+            }
         });
 
-        // Usa parcela_co como identificador
-        if (feature && feature.get('parcela_co')) {
-            const parcelaCo = feature.get('parcela_co');
-            fetchParcelaDetails(parcelaCo);
+        // Se não encontrou na camada de labels, verifica na camada de parcelas
+        if (!clickedFeature) {
+            map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+                if (layer === parcelasLayer) {
+                    clickedFeature = feature;
+                    return true;
+                }
+            });
+        }
+
+        // Se encontrou uma feature, mostra os detalhes
+        if (clickedFeature) {
+            const properties = {
+                parcela_co: clickedFeature.get('parcela_co'),
+                rt: clickedFeature.get('rt'),
+                art: clickedFeature.get('art'),
+                situacao_i: clickedFeature.get('situacao_i'),
+                codigo_imo: clickedFeature.get('codigo_imo'),
+                data_submi: clickedFeature.get('data_submi'),
+                data_aprov: clickedFeature.get('data_aprov'),
+                status: clickedFeature.get('status'),
+                nome_area: clickedFeature.get('nome_area'),
+                registro_m: clickedFeature.get('registro_m'),
+                registro_d: clickedFeature.get('registro_d'),
+                municipio_: clickedFeature.get('municipio_'),
+                uf_id: clickedFeature.get('uf_id')
+            };
+            
+            showParcelaDetails(properties);
         }
     });
 
@@ -373,53 +413,12 @@ function initMap() {
     function addParcelasLabels() {
         parcelasLabelLayer.getSource().clear();
         const features = parcelasLayer.getSource().getFeatures();
-        // Log dos tipos de geometria recebidos
-        const tiposGeometria = features.map(f => f.getGeometry() ? f.getGeometry().getType() : 'SEM_GEOMETRIA');
-        console.log('Tipos de geometria das parcelas:', tiposGeometria);
         let count = 0;
-        // LOG EXTRA PARA DEBUG
-        console.log('Features das parcelas:', features);
-        if (features.length > 0) {
-            console.log('Propriedades da primeira feature:', features[0].getProperties());
-        }
+
         features.forEach(feature => {
             let geometry = feature.getGeometry();
             const nomeArea = feature.get('nome_area');
 
-            // Log detalhado para depuração
-            if (geometry && geometry.getCoordinates) {
-                const coords = geometry.getCoordinates();
-                if (Array.isArray(coords) && coords.length > 0) {
-                    console.log('Primeiras coords:', coords[0]?.[0]?.slice(0, 5));
-                }
-            }
-            console.log('geometry:', geometry, 'instanceof:', geometry instanceof ol.geom.MultiPolygon, 'type:', geometry && geometry.getType ? geometry.getType() : 'SEM_TIPO');
-
-            // Força a conversão se necessário usando GeoJSON puro
-            if (
-                geometry &&
-                geometry.getType &&
-                geometry.getType() === 'MultiPolygon' &&
-                !(geometry instanceof ol.geom.MultiPolygon)
-            ) {
-                const geojsonFeature = {
-                    type: 'Feature',
-                    geometry: {
-                        type: geometry.getType(),
-                        coordinates: geometry.getCoordinates()
-                    },
-                    properties: {}
-                };
-                const featureOL = new ol.format.GeoJSON().readFeature(geojsonFeature, {
-                    dataProjection: 'EPSG:3857',
-                    featureProjection: 'EPSG:3857'
-                });
-                geometry = featureOL.getGeometry();
-            }
-            // Log para garantir que o método existe
-            console.log('Após conversão, getInteriorPoints existe?', typeof geometry.getInteriorPoints === 'function');
-
-            // Só processa se for Polygon ou MultiPolygon
             if (
                 nomeArea &&
                 geometry &&
@@ -430,10 +429,10 @@ function initMap() {
                     labelPoint = geometry.getInteriorPoint();
                 } else if (geometry.getType() === 'MultiPolygon' && typeof geometry.getInteriorPoints === 'function') {
                     const interiorPoints = geometry.getInteriorPoints();
-                    labelPoint = interiorPoints.getPoint(0); // Pega o primeiro ponto
+                    labelPoint = interiorPoints.getPoint(0);
                 }
+
                 if (labelPoint) {
-                    // Feature do marcador (ícone discreto)
                     const markerFeature = new ol.Feature({
                         geometry: labelPoint,
                         parcela_co: feature.get('parcela_co'),
@@ -450,16 +449,7 @@ function initMap() {
                         municipio_: feature.get('municipio_'),
                         uf_id: feature.get('uf_id')
                     });
-                    markerFeature.setStyle(new ol.style.Style({
-                        image: new ol.style.Icon({
-                            src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="white" stroke="%23e11d48" stroke-width="3"/><circle cx="18" cy="18" r="10" fill="none" stroke="%23e11d48" stroke-width="2"/><circle cx="18" cy="18" r="4" fill="%23e11d48"/></svg>',
-                            anchor: [0.5, 0.5],
-                            anchorXUnits: 'fraction',
-                            anchorYUnits: 'fraction',
-                            scale: 0.55
-                        }),
-                        zIndex: 99999
-                    }));
+
                     parcelasLabelLayer.getSource().addFeature(markerFeature);
                     count++;
                 }
@@ -735,12 +725,31 @@ waitForLivewire(function() {
 // Função para buscar detalhes da parcela
 async function fetchParcelaDetails(parcelaCo) {
     try {
-        // Ajuste a URL conforme sua API se necessário
-        const response = await fetch(`/api/parcelas/${parcelaCo}`);
-        if (!response.ok) throw new Error('Erro ao buscar detalhes da parcela');
-        const data = await response.json();
-        if (data && data.properties) {
-            showParcelaDetails(data.properties);
+        // Busca a feature na camada de parcelas
+        const features = parcelasLayer.getSource().getFeatures();
+        const feature = features.find(f => f.get('parcela_co') === parcelaCo);
+        
+        if (feature) {
+            // Cria um objeto com as propriedades da parcela
+            const properties = {
+                parcela_co: feature.get('parcela_co'),
+                rt: feature.get('rt'),
+                art: feature.get('art'),
+                situacao_i: feature.get('situacao_i'),
+                codigo_imo: feature.get('codigo_imo'),
+                data_submi: feature.get('data_submi'),
+                data_aprov: feature.get('data_aprov'),
+                status: feature.get('status'),
+                nome_area: feature.get('nome_area'),
+                registro_m: feature.get('registro_m'),
+                registro_d: feature.get('registro_d'),
+                municipio_: feature.get('municipio_'),
+                uf_id: feature.get('uf_id')
+            };
+            
+            showParcelaDetails(properties);
+        } else {
+            throw new Error('Parcela não encontrada');
         }
     } catch (error) {
         console.error('Erro ao buscar detalhes da parcela:', error);
