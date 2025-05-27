@@ -413,39 +413,34 @@ function initMap() {
                     labelPoint = interiorPoints.getPoint(0); // Pega o primeiro ponto
                 }
                 if (labelPoint) {
-                    // Feature do círculo
-                    const circleFeature = new ol.Feature({
-                        geometry: labelPoint
-                    });
-                    circleFeature.setStyle(new ol.style.Style({
-                        image: new ol.style.Circle({
-                            radius: 10,
-                            fill: new ol.style.Fill({ color: '#00ff00' }),
-                            stroke: new ol.style.Stroke({ color: '#000', width: 2 })
-                        }),
-                        zIndex: 99998
-                    }));
-                    parcelasLabelLayer.getSource().addFeature(circleFeature);
-
-                    // Feature do texto
-                    const textFeature = new ol.Feature({
+                    // Feature do marcador (ícone discreto)
+                    const markerFeature = new ol.Feature({
                         geometry: labelPoint,
-                        nomeArea: nomeArea
+                        parcela_co: feature.get('parcela_co'),
+                        rt: feature.get('rt'),
+                        art: feature.get('art'),
+                        situacao_i: feature.get('situacao_i'),
+                        codigo_imo: feature.get('codigo_imo'),
+                        data_submi: feature.get('data_submi'),
+                        data_aprov: feature.get('data_aprov'),
+                        status: feature.get('status'),
+                        nome_area: feature.get('nome_area'),
+                        registro_m: feature.get('registro_m'),
+                        registro_d: feature.get('registro_d'),
+                        municipio_: feature.get('municipio_'),
+                        uf_id: feature.get('uf_id')
                     });
-                    textFeature.setStyle(new ol.style.Style({
-                        text: new ol.style.Text({
-                            text: `${nomeArea}`,
-                            font: 'bold 18px Arial',
-                            fill: new ol.style.Fill({ color: '#ff0000' }),
-                            offsetY: 0,
-                            textBaseline: 'middle',
-                            textAlign: 'center'
+                    markerFeature.setStyle(new ol.style.Style({
+                        image: new ol.style.Icon({
+                            src: 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36"><circle cx="18" cy="18" r="16" fill="white" stroke="%23e11d48" stroke-width="3"/><circle cx="18" cy="18" r="10" fill="none" stroke="%23e11d48" stroke-width="2"/><circle cx="18" cy="18" r="4" fill="%23e11d48"/></svg>',
+                            anchor: [0.5, 0.5],
+                            anchorXUnits: 'fraction',
+                            anchorYUnits: 'fraction',
+                            scale: 0.55
                         }),
                         zIndex: 99999
                     }));
-                    parcelasLabelLayer.getSource().addFeature(textFeature);
-
-                    console.log('Label adicionada:', textFeature);
+                    parcelasLabelLayer.getSource().addFeature(markerFeature);
                     count++;
                 }
             }
@@ -813,6 +808,46 @@ function addParcelasLoaderHooks() {
             hideMapLoader();
         });
     }
+}
+
+// Adicionar evento de clique para exibir modal com dados da parcela
+if (!window._parcelasModalHandlerAdded) {
+    window._parcelasModalHandlerAdded = true;
+    map.on('singleclick', function(evt) {
+        map.forEachFeatureAtPixel(evt.pixel, function(feature) {
+            if (feature && feature.get('parcela_co')) {
+                // Montar HTML do modal
+                const props = feature.getProperties();
+                let html = `<div class='odsgeo-modal-bg' style='position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.45);z-index:10000;display:flex;align-items:center;justify-content:center;'>`;
+                html += `<div class='odsgeo-modal' style='background:#fff;border-radius:12px;box-shadow:0 8px 32px #0005;max-width:420px;width:96vw;padding:2rem 1.5rem;position:relative;'>`;
+                html += `<button onclick='this.closest(".odsgeo-modal-bg").remove()' style='position:absolute;top:12px;right:12px;background:none;border:none;font-size:1.5rem;line-height:1;color:#888;cursor:pointer;'>&times;</button>`;
+                html += `<h2 style='font-size:1.2rem;font-weight:700;margin-bottom:1rem;color:#e11d48;'>Dados da Parcela</h2>`;
+                html += `<div style='display:grid;grid-template-columns:1fr 1fr;gap:0.5rem 1rem;'>`;
+                const campos = [
+                    ['parcela_co', 'Código Parcela'],
+                    ['rt', 'RT'],
+                    ['art', 'ART'],
+                    ['situacao_i', 'Situação'],
+                    ['codigo_imo', 'Código Imóvel'],
+                    ['data_submi', 'Data Submissão'],
+                    ['data_aprov', 'Data Aprovação'],
+                    ['status', 'Status'],
+                    ['nome_area', 'Nome Área'],
+                    ['registro_m', 'Registro M'],
+                    ['registro_d', 'Registro D'],
+                    ['municipio_', 'Município'],
+                    ['uf_id', 'UF']
+                ];
+                campos.forEach(([key, label]) => {
+                    html += `<div style='font-weight:600;color:#444;'>${label}:</div><div style='color:#222;'>${props[key] || '-'}</div>`;
+                });
+                html += `</div></div></div>`;
+                // Remove modal anterior se existir
+                document.querySelectorAll('.odsgeo-modal-bg').forEach(e => e.remove());
+                document.body.insertAdjacentHTML('beforeend', html);
+            }
+        });
+    });
 }
 </script>
 @endpush 
