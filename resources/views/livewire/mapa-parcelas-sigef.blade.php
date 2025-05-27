@@ -34,10 +34,10 @@
             <div class="bg-white p-2 rounded-lg shadow border border-gray-200 flex items-center">
                 <label class="flex items-center space-x-2 text-sm font-medium text-gray-700 cursor-pointer hover:text-indigo-600 transition-colors duration-200 m-0">
                     <input type="checkbox" id="toggleSatellite" class="form-checkbox h-5 w-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 transition-colors duration-200">
-                    <span class="select-none">Visualização Satélite</span>
+                    <span class="select-none">Informações</span>
                 </label>
             </div>
-            <button type="button" id="btnCentralizarBrasil" class="bg-white p-2 rounded-lg shadow border border-gray-200 text-gray-700 hover:bg-indigo-600 hover:text-white font-medium transition flex items-center">Centralizar Brasil</button>
+            <button type="button" id="btnCentralizarBrasil" class="bg-white p-2 rounded-lg shadow border border-gray-200 text-sm font-medium text-gray-700 hover:bg-indigo-600 hover:text-white transition flex items-center">Centralizar</button>
         </div>
         
         <div id="map" style="height: 600px; width: 100%; min-width: 300px; min-height: 300px;"></div>
@@ -186,14 +186,14 @@ function getParcelaDetailUrl(codCcir) {
 function initMap() {
     osmLayer = new ol.layer.Tile({
         source: new ol.source.OSM(),
-        visible: true
+        visible: false
     });
     satelliteLayer = new ol.layer.Tile({
         source: new ol.source.XYZ({
             url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
             maxZoom: 19
         }),
-        visible: false
+        visible: true
     });
 
     // Camada WFS para parcelas SIGEF
@@ -277,7 +277,7 @@ function initMap() {
 
     map = new ol.Map({
         target: 'map',
-        layers: [osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer], // labels será adicionada depois
+        layers: [satelliteLayer, osmLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer], // Reordenando as camadas
         view: new ol.View({
             center: ol.proj.fromLonLat([-54.0, -15.0]),
             zoom: 0.5,
@@ -290,10 +290,10 @@ function initMap() {
     console.log('OSM visível:', osmLayer.getVisible());
     console.log('Satélite visível:', satelliteLayer.getVisible());
     document.getElementById('toggleSatellite').addEventListener('change', function(e) {
-        osmLayer.setVisible(!e.target.checked);
-        satelliteLayer.setVisible(e.target.checked);
+        osmLayer.setVisible(e.target.checked);
+        // Força atualização do mapa
+        map.render();
         console.log('OSM visível:', osmLayer.getVisible());
-        console.log('Satélite visível:', satelliteLayer.getVisible());
     });
 
     // Adiciona interatividade para as parcelas
