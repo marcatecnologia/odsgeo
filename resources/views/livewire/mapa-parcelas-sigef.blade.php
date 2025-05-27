@@ -85,7 +85,7 @@
         width: 100%;
         height: 100%;
         z-index: 1;
-        background: #fffbe6 !important; /* fundo amarelo claro temporário para depuração */
+        background: #fffbe6 !important;
     }
 
     .ol-layer {
@@ -167,13 +167,13 @@ function waitForMapDiv(callback) {
     }
 }
 
-let map, osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer;
+let map, osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer, parcelasLabelLayer;
 
 function getParcelasWfsUrl(codigoMun) {
     const geoserverUrl = window.GEOSERVER_URL;
     const workspace = window.GEOSERVER_WORKSPACE;
     const layer = window.GEOSERVER_LAYER;
-    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:4674&CQL_FILTER=municipio_=${codigoMun}&propertyName=parcela_co,geom`;
+    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:4674&CQL_FILTER=municipio_=${codigoMun}&propertyName=parcela_co,nome_area,geom`;
 }
 
 function getParcelaDetailUrl(codCcir) {
@@ -216,11 +216,19 @@ function initMap() {
         }),
         style: new ol.style.Style({
             stroke: new ol.style.Stroke({
-                color: '#FFD600', // Amarelo destacado
+                color: '#FFD600',
                 width: 2.5
             }),
-            fill: null
+            fill: new ol.style.Fill({
+                color: 'rgba(255,255,255,0.01)'
+            })
         })
+    });
+
+    // Camada para os labels das parcelas (sempre zIndex alto)
+    parcelasLabelLayer = new ol.layer.Vector({
+        source: new ol.source.Vector(),
+        zIndex: 9999
     });
 
     // Camada vetorial para o perímetro do estado
@@ -269,7 +277,7 @@ function initMap() {
 
     map = new ol.Map({
         target: 'map',
-        layers: [osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer],
+        layers: [osmLayer, satelliteLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer], // labels será adicionada depois
         view: new ol.View({
             center: ol.proj.fromLonLat([-54.0, -15.0]),
             zoom: 0.5,
@@ -277,6 +285,8 @@ function initMap() {
             extent: ol.proj.transformExtent([-85, -40, -25, 10], 'EPSG:4326', 'EPSG:3857')
         })
     });
+    // Adiciona a camada de labels por último SEMPRE
+    map.addLayer(parcelasLabelLayer);
     console.log('OSM visível:', osmLayer.getVisible());
     console.log('Satélite visível:', satelliteLayer.getVisible());
     document.getElementById('toggleSatellite').addEventListener('change', function(e) {
@@ -330,13 +340,68 @@ function initMap() {
             return feature;
         });
 
-        if (feature && feature.get('cod_ccir')) {
-            const codCcir = feature.get('cod_ccir');
-            fetchParcelaDetails(codCcir);
+        // Usa parcela_co como identificador
+        if (feature && feature.get('parcela_co')) {
+            const parcelaCo = feature.get('parcela_co');
+            fetchParcelaDetails(parcelaCo);
         }
     });
 
     addParcelasLoaderHooks();
+
+    // Função para adicionar labels após o carregamento das features
+    function addParcelasLabels() {
+        parcelasLabelLayer.getSource().clear();
+        const features = parcelasLayer.getSource().getFeatures();
+        let count = 0;
+        features.forEach(feature => {
+            const geometry = feature.getGeometry();
+            const nomePropriedade = feature.get('nome_area');
+            if (
+                nomePropriedade &&
+                geometry &&
+                (geometry.getType() === 'Polygon' || geometry.getType() === 'MultiPolygon')
+            ) {
+                // Centro do extent como fallback
+                const center = ol.extent.getCenter(geometry.getExtent());
+                // Corrigir a projeção do centro para EPSG:3857
+                const center3857 = ol.proj.transform(center, 'EPSG:4674', 'EPSG:3857');
+                const point = new ol.geom.Point(center3857);
+                const labelFeature = new ol.Feature({
+                    geometry: point,
+                    nome: nomePropriedade
+                });
+                labelFeature.setStyle(new ol.style.Style({
+                    image: new ol.style.Circle({
+                        radius: 12,
+                        fill: new ol.style.Fill({ color: '#ff0000' }), // círculo vermelho visível
+                        stroke: new ol.style.Stroke({ color: '#000', width: 2 })
+                    }),
+                    text: new ol.style.Text({
+                        text: 'TESTE', // texto fixo para depuração
+                        font: 'bold 16px Arial',
+                        fill: new ol.style.Fill({ color: '#00ff00' }), // verde limão
+                        backgroundFill: new ol.style.Fill({ color: 'rgba(0,0,0,0.8)' }),
+                        padding: [8, 16],
+                        offsetY: -20,
+                        textBaseline: 'bottom'
+                    }),
+                    zIndex: 9999
+                }));
+                console.log('LabelFeature adicionada:', labelFeature);
+                parcelasLabelLayer.getSource().addFeature(labelFeature);
+                count++;
+            }
+        });
+        console.log('Labels de parcelas criados:', count);
+    }
+
+    // Chame essa função sempre que as features das parcelas forem carregadas/refrescadas
+    parcelasLayer.getSource().on('change', function(e) {
+        if (parcelasLayer.getSource().getState() === 'ready') {
+            addParcelasLabels();
+        }
+    });
 }
 
 function fitBrasil() {
@@ -584,14 +649,14 @@ waitForLivewire(function() {
 });
 
 // Função para buscar detalhes da parcela
-async function fetchParcelaDetails(codCcir) {
+async function fetchParcelaDetails(parcelaCo) {
     try {
-        console.time('fetchParcelaDetails');
-        const response = await fetch(getParcelaDetailUrl(codCcir));
+        // Ajuste a URL conforme sua API se necessário
+        const response = await fetch(`/api/parcelas/${parcelaCo}`);
+        if (!response.ok) throw new Error('Erro ao buscar detalhes da parcela');
         const data = await response.json();
-        console.timeEnd('fetchParcelaDetails');
-        if (data.features && data.features.length > 0) {
-            showParcelaDetails(data.features[0].properties);
+        if (data && data.properties) {
+            showParcelaDetails(data.properties);
         }
     } catch (error) {
         console.error('Erro ao buscar detalhes da parcela:', error);
