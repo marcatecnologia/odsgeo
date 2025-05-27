@@ -85,7 +85,6 @@
         width: 100%;
         height: 100%;
         z-index: 1;
-        background: #fffbe6 !important;
     }
 
     .ol-layer {
@@ -184,16 +183,37 @@ function getParcelaDetailUrl(codCcir) {
 }
 
 function initMap() {
+    // Garantir que a projeção está registrada
+    if (!ol.proj.get('EPSG:4674')) {
+        proj4.defs("EPSG:4674", "+proj=longlat +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +no_defs");
+        ol.proj.proj4.register(proj4);
+    }
+
+    // Camada OSM com tratamento de erro
     osmLayer = new ol.layer.Tile({
-        source: new ol.source.OSM(),
+        source: new ol.source.OSM({
+            crossOrigin: 'anonymous'
+        }),
         visible: false
     });
+
+    // Camada de satélite com tratamento de erro
     satelliteLayer = new ol.layer.Tile({
         source: new ol.source.XYZ({
             url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-            maxZoom: 19
+            maxZoom: 19,
+            crossOrigin: 'anonymous'
         }),
         visible: true
+    });
+
+    // Adicionar tratamento de erro para as camadas base
+    osmLayer.getSource().on('tileloaderror', function() {
+        console.error('Erro ao carregar tile OSM');
+    });
+
+    satelliteLayer.getSource().on('tileloaderror', function() {
+        console.error('Erro ao carregar tile de satélite');
     });
 
     // Camada WFS para parcelas SIGEF
@@ -277,10 +297,10 @@ function initMap() {
 
     map = new ol.Map({
         target: 'map',
-        layers: [satelliteLayer, osmLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer], // Reordenando as camadas
+        layers: [satelliteLayer, osmLayer, estadoLayer, municipioLayer, centroideLayer, parcelasLayer],
         view: new ol.View({
             center: ol.proj.fromLonLat([-54.0, -15.0]),
-            zoom: 0.5,
+            zoom: 3, // Aumentado para melhor visualização inicial
             projection: 'EPSG:3857',
             extent: ol.proj.transformExtent([-85, -40, -25, 10], 'EPSG:4326', 'EPSG:3857')
         })
@@ -454,6 +474,11 @@ function initMap() {
             addParcelasLabels();
         }
     });
+
+    // Forçar atualização do tamanho do mapa após inicialização
+    setTimeout(() => {
+        map.updateSize();
+    }, 100);
 }
 
 function fitBrasil() {
@@ -485,6 +510,13 @@ document.addEventListener('DOMContentLoaded', function () {
             map.updateSize();
             console.log('updateSize chamado (init)');
         }, 500);
+
+        // Adicionar evento de redimensionamento
+        window.addEventListener('resize', function() {
+            if (map) {
+                map.updateSize();
+            }
+        });
     });
     // Botão Centralizar Brasil
     const btnCentralizar = document.getElementById('btnCentralizarBrasil');
