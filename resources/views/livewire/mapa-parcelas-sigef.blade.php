@@ -172,7 +172,7 @@ function getParcelasWfsUrl(codigoMun) {
     const geoserverUrl = window.GEOSERVER_URL;
     const workspace = window.GEOSERVER_WORKSPACE;
     const layer = window.GEOSERVER_LAYER;
-    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:3857&CQL_FILTER=municipio_=${codigoMun}&propertyName=parcela_co,nome_area,geom`;
+    return `${geoserverUrl}/wfs?service=WFS&version=1.1.0&request=GetFeature&typename=${workspace}:${layer}&outputFormat=application/json&srsname=EPSG:3857&CQL_FILTER=municipio_=${codigoMun}&propertyName=parcela_co,rt,art,situacao_i,codigo_imo,data_submi,data_aprov,status,nome_area,registro_m,registro_d,municipio_,uf_id,geom`;
 }
 
 function getParcelaDetailUrl(codCcir) {
@@ -758,21 +758,21 @@ async function fetchParcelaDetails(parcelaCo) {
 
 // Função para exibir detalhes da parcela
 function showParcelaDetails(properties) {
-    // Mapeamento de rótulos amigáveis e ícones
+    // Mapeamento de rótulos amigáveis com ordem específica
     const labels = {
-        parcela_co: { label: 'Código Parcela', icon: '📋' },
-        rt: { label: 'RT', icon: '📄' },
-        art: { label: 'ART', icon: '📑' },
-        situacao_i: { label: 'Situação', icon: '📊' },
-        codigo_imo: { label: 'Código Imóvel', icon: '🏠' },
-        data_submi: { label: 'Data Submissão', icon: '📅' },
-        data_aprov: { label: 'Data Aprovação', icon: '✅' },
-        status: { label: 'Status', icon: '🔄' },
-        nome_area: { label: 'Nome Área', icon: '📍' },
-        registro_m: { label: 'Registro M', icon: '📝' },
-        registro_d: { label: 'Registro D', icon: '📝' },
-        municipio_: { label: 'Município', icon: '🏙️' },
-        uf_id: { label: 'UF', icon: '🏳️' }
+        nome_area: 'Área',
+        codigo_imo: 'Imóvel',
+        parcela_co: 'Parcela',
+        registro_m: 'Matrícula',
+        situacao_i: 'Situação',
+        status: 'Status',
+        art: 'ART',
+        rt: 'Responsável',
+        municipio_: 'Município',
+        uf_id: 'UF',
+        registro_d: 'Registro D',
+        data_submi: 'Data Submissão',
+        data_aprov: 'Data Aprovação'
     };
 
     // Função para formatar datas
@@ -807,9 +807,65 @@ function showParcelaDetails(properties) {
         return situacaoMap[situacao] || situacao;
     };
 
+    // Função para buscar nome do município
+    const getNomeMunicipio = (codigo) => {
+        if (!codigo) return '-';
+        
+        // Remove possíveis zeros à esquerda para comparação
+        const codigoLimpo = codigo.toString().replace(/^0+/, '');
+        
+        const select = document.getElementById('municipio');
+        if (select) {
+            const option = Array.from(select.options).find(opt => {
+                const optValue = opt.value.toString().replace(/^0+/, '');
+                return optValue === codigoLimpo;
+            });
+            return option ? option.text : codigo;
+        }
+        return codigo;
+    };
+
+    // Função para buscar nome do estado
+    const getNomeEstado = (uf) => {
+        if (!uf) return '-';
+        
+        const estados = {
+            '11': 'Rondônia',
+            '12': 'Acre',
+            '13': 'Amazonas',
+            '14': 'Roraima',
+            '15': 'Pará',
+            '16': 'Amapá',
+            '17': 'Tocantins',
+            '21': 'Maranhão',
+            '22': 'Piauí',
+            '23': 'Ceará',
+            '24': 'Rio Grande do Norte',
+            '25': 'Paraíba',
+            '26': 'Pernambuco',
+            '27': 'Alagoas',
+            '28': 'Sergipe',
+            '29': 'Bahia',
+            '31': 'Minas Gerais',
+            '32': 'Espírito Santo',
+            '33': 'Rio de Janeiro',
+            '35': 'São Paulo',
+            '41': 'Paraná',
+            '42': 'Santa Catarina',
+            '43': 'Rio Grande do Sul',
+            '50': 'Mato Grosso do Sul',
+            '51': 'Mato Grosso',
+            '52': 'Goiás',
+            '53': 'Distrito Federal'
+        };
+
+        const codigo = uf.toString().padStart(2, '0');
+        return estados[codigo] || uf;
+    };
+
     // Monta os campos que possuem valor
     const campos = Object.entries(labels)
-        .map(([key, info]) => {
+        .map(([key, label]) => {
             let valor = properties[key] || '-';
             
             // Formatação especial para alguns campos
@@ -819,13 +875,14 @@ function showParcelaDetails(properties) {
                 valor = formatarStatus(valor);
             } else if (key === 'situacao_i') {
                 valor = formatarSituacao(valor);
+            } else if (key === 'municipio_') {
+                valor = getNomeMunicipio(valor);
+            } else if (key === 'uf_id') {
+                valor = getNomeEstado(valor);
             }
 
             return `<div class="odsgeo-modal-row">
-                        <div class="odsgeo-modal-label">
-                            <span class="odsgeo-modal-icon">${info.icon}</span>
-                            <span>${info.label}</span>
-                        </div>
+                        <div class="odsgeo-modal-label">${label}</div>
                         <span class="odsgeo-modal-value ${valor === '-' ? 'odsgeo-modal-value-empty' : ''}">${valor}</span>
                     </div>`;
         }).join('');
@@ -841,7 +898,6 @@ function showParcelaDetails(properties) {
             <button class="odsgeo-modal-close" title="Fechar" onclick="this.closest('.odsgeo-modal-bg').remove()">&times;</button>
             <div class="odsgeo-modal-header">
                 <h2 class="odsgeo-modal-title">Dados da Parcela</h2>
-                <div class="odsgeo-modal-subtitle">${properties.nome_area || 'Parcela SIGEF'}</div>
             </div>
             <div class="odsgeo-modal-fields">${campos}</div>
             <div class="odsgeo-modal-actions">
@@ -856,16 +912,18 @@ function showParcelaDetails(properties) {
         <style>
         .odsgeo-modal-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: rgba(0,0,0,0.45); z-index: 10000;
+            background: rgba(0,0,0,0.75); z-index: 10000;
             display: flex; align-items: center; justify-content: center;
             padding: 1.5rem;
             backdrop-filter: blur(4px);
         }
         .odsgeo-modal-content {
-            background: #fff; border-radius: 16px; box-shadow: 0 8px 32px #0005;
+            background: rgb(17, 24, 39); border-radius: 16px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
             max-width: 480px; width: 100%; padding: 2rem 1.5rem 1.5rem 1.5rem;
             position: relative; display: flex; flex-direction: column;
             animation: odsgeo-modal-in 0.2s cubic-bezier(.4,1.4,.6,1) 1;
+            border: 1px solid rgba(75, 85, 99, 0.4);
         }
         @keyframes odsgeo-modal-in {
             from { opacity: 0; transform: translateY(40px) scale(0.98); }
@@ -873,23 +931,20 @@ function showParcelaDetails(properties) {
         }
         .odsgeo-modal-close {
             position: absolute; top: 14px; right: 16px; background: none; border: none;
-            font-size: 2rem; color: #888; cursor: pointer; line-height: 1;
+            font-size: 2rem; color: rgb(156, 163, 175); cursor: pointer; line-height: 1;
             transition: all 0.2s; width: 32px; height: 32px; display: flex;
             align-items: center; justify-content: center; border-radius: 50%;
         }
         .odsgeo-modal-close:hover { 
-            color: #e11d48; 
-            background: rgba(225,29,72,0.1);
+            color: rgb(239, 68, 68); 
+            background: rgba(239, 68, 68, 0.1);
         }
         .odsgeo-modal-header {
             text-align: center;
             margin-bottom: 1.5rem;
         }
         .odsgeo-modal-title {
-            font-size: 1.4rem; font-weight: 700; color: #e11d48; margin-bottom: 0.3rem;
-        }
-        .odsgeo-modal-subtitle {
-            color: #64748b; font-size: 0.95rem;
+            font-size: 1.4rem; font-weight: 700; color: rgb(234, 179, 8); margin-bottom: 0.3rem;
         }
         .odsgeo-modal-fields {
             display: flex; flex-direction: column; gap: 0.8rem;
@@ -900,43 +955,44 @@ function showParcelaDetails(properties) {
             width: 6px;
         }
         .odsgeo-modal-fields::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: rgb(31, 41, 55);
             border-radius: 3px;
         }
         .odsgeo-modal-fields::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: rgb(75, 85, 99);
             border-radius: 3px;
+        }
+        .odsgeo-modal-fields::-webkit-scrollbar-thumb:hover {
+            background: rgb(107, 114, 128);
         }
         .odsgeo-modal-row {
             display: flex; justify-content: space-between; align-items: center;
-            gap: 1rem; border-bottom: 1px solid #f1f5f9; padding-bottom: 0.5rem;
+            gap: 1rem; border-bottom: 1px solid rgba(75, 85, 99, 0.4); padding-bottom: 0.5rem;
         }
         .odsgeo-modal-label {
-            display: flex; align-items: center; gap: 0.5rem;
-            font-weight: 600; color: #334155; font-size: 1rem;
-        }
-        .odsgeo-modal-icon {
-            font-size: 1.1rem;
+            font-weight: 600; color: rgb(229, 231, 235); font-size: 1rem;
         }
         .odsgeo-modal-value {
-            color: #1e293b; font-size: 1rem; word-break: break-all;
+            color: rgb(209, 213, 219); font-size: 1rem; word-break: break-all;
             text-align: right; font-weight: 500;
         }
         .odsgeo-modal-value-empty {
-            color: #94a3b8; font-style: italic;
+            color: rgb(107, 114, 128); font-style: italic;
         }
         .odsgeo-modal-actions {
             display: flex; justify-content: flex-end; gap: 0.5rem;
         }
         .odsgeo-modal-btn {
-            background: #6366f1; color: #fff; border: none; border-radius: 8px;
+            background: rgb(79, 70, 229); color: rgb(255, 255, 255); border: none; border-radius: 8px;
             padding: 0.7rem 1.4rem; font-size: 1rem; font-weight: 600;
             cursor: pointer; transition: all 0.2s; display: flex; align-items: center;
             justify-content: center;
+            border: 1px solid rgba(99, 102, 241, 0.4);
         }
         .odsgeo-modal-btn:hover { 
-            background: #4338ca;
+            background: rgb(67, 56, 202);
             transform: translateY(-1px);
+            border-color: rgba(99, 102, 241, 0.6);
         }
         @media (max-width: 600px) {
             .odsgeo-modal-content { 
