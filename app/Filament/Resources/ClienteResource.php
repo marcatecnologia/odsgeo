@@ -18,15 +18,13 @@ class ClienteResource extends Resource
 {
     protected static ?string $model = Cliente::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-users';
-    
-    protected static ?string $navigationLabel = 'Clientes';
+    protected static ?string $navigationIcon = null;
+    protected static ?string $navigationLabel = null;
+    protected static ?int $navigationSort = null;
     
     protected static ?string $modelLabel = 'Cliente';
     
     protected static ?string $pluralModelLabel = 'Clientes';
-
-    protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
     {
@@ -150,6 +148,11 @@ class ClienteResource extends Resource
             'create' => Pages\CreateCliente::route('/create'),
             'edit' => Pages\EditCliente::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
     }
 
     private static function validarCPF($cpf)

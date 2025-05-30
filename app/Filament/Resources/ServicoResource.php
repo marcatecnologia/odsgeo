@@ -19,13 +19,13 @@ class ServicoResource extends Resource
 {
     protected static ?string $model = Servico::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = null;
+    protected static ?string $navigationLabel = null;
+    protected static ?int $navigationSort = null;
 
     protected static ?string $modelLabel = 'Serviço';
 
     protected static ?string $pluralModelLabel = 'Serviços';
-
-    protected static ?int $navigationSort = 3;
 
     public static function form(Form $form): Form
     {
@@ -154,5 +154,10 @@ class ServicoResource extends Resource
             'create' => Pages\CreateServico::route('/create'),
             'edit' => Pages\EditServico::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
     }
 }

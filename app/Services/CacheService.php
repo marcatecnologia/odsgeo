@@ -27,52 +27,45 @@ class CacheService
 
     public function getClientesList($search = '')
     {
-        $key = $search ? 'clientes_search_' . $search : 'clientes_list';
-        
-        return Cache::tags($this->tags)
-            ->remember($key, $this->ttl, function() use ($search) {
-                $query = Cliente::query()->orderBy('nome');
-                
-                if ($search) {
-                    $query->where('nome', 'like', '%' . $search . '%');
-                }
-                
-                return $query->get();
-            });
+        $key = 'clientes_list_' . md5($search);
+        return Cache::tags(['clientes'])->remember($key, $this->ttl, function () use ($search) {
+            return Cliente::query()
+                ->when($search, function ($query) use ($search) {
+                    $query->where('nome', 'like', "%{$search}%");
+                })
+                ->withCount('projetos')
+                ->orderBy('nome')
+                ->get();
+        });
     }
 
     public function getProjetosList($clienteId, $search = '')
     {
-        $key = 'projetos_cliente_' . $clienteId . ($search ? '_search_' . $search : '');
-        
-        return Cache::tags($this->tags)
-            ->remember($key, $this->ttl, function() use ($clienteId, $search) {
-                $query = Projeto::where('cliente_id', $clienteId)
-                    ->orderBy('nome');
-                
-                if ($search) {
-                    $query->where('nome', 'like', '%' . $search . '%');
-                }
-                
-                return $query->get();
-            });
+        $key = "projetos_list_{$clienteId}_" . md5($search);
+        return Cache::tags(['projetos'])->remember($key, $this->ttl, function () use ($clienteId, $search) {
+            return Projeto::query()
+                ->where('cliente_id', $clienteId)
+                ->when($search, function ($query) use ($search) {
+                    $query->where('nome', 'like', "%{$search}%");
+                })
+                ->withCount('servicos')
+                ->orderBy('nome')
+                ->get();
+        });
     }
 
     public function getServicosList($projetoId, $search = '')
     {
-        $key = 'servicos_projeto_' . $projetoId . ($search ? '_search_' . $search : '');
-        
-        return Cache::tags($this->tags)
-            ->remember($key, $this->ttl, function() use ($projetoId, $search) {
-                $query = Servico::where('projeto_id', $projetoId)
-                    ->orderBy('nome');
-                
-                if ($search) {
-                    $query->where('nome', 'like', '%' . $search . '%');
-                }
-                
-                return $query->get();
-            });
+        $key = "servicos_list_{$projetoId}_" . md5($search);
+        return Cache::tags(['servicos'])->remember($key, $this->ttl, function () use ($projetoId, $search) {
+            return Servico::query()
+                ->where('projeto_id', $projetoId)
+                ->when($search, function ($query) use ($search) {
+                    $query->where('nome', 'like', "%{$search}%");
+                })
+                ->orderBy('nome')
+                ->get();
+        });
     }
 
     public function flushCache()
@@ -83,17 +76,16 @@ class CacheService
     public function forgetServico($id)
     {
         Cache::tags($this->tags)->forget('servico_completo_' . $id);
+        Cache::tags($this->tags)->forget('servicos_projeto_' . $id);
     }
 
     public function forgetCliente($id)
     {
-        Cache::tags($this->tags)->forget('clientes_list');
-        Cache::tags($this->tags)->forget('clientes_search_*');
+        Cache::tags(['clientes'])->flush();
     }
 
     public function forgetProjeto($id)
     {
-        Cache::tags($this->tags)->forget('projetos_cliente_' . $id);
-        Cache::tags($this->tags)->forget('projetos_search_*');
+        Cache::tags(['projetos'])->flush();
     }
 } 

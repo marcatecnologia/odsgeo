@@ -17,15 +17,13 @@ class ProjetoResource extends Resource
 {
     protected static ?string $model = Projeto::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-folder';
-    
-    protected static ?string $navigationLabel = 'Projetos';
+    protected static ?string $navigationIcon = null;
+    protected static ?string $navigationLabel = null;
+    protected static ?int $navigationSort = null;
     
     protected static ?string $modelLabel = 'Projeto';
     
     protected static ?string $pluralModelLabel = 'Projetos';
-
-    protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form
     {
@@ -114,5 +112,10 @@ class ProjetoResource extends Resource
             'create' => Pages\CreateProjeto::route('/create'),
             'edit' => Pages\EditProjeto::route('/{record}/edit'),
         ];
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return false;
     }
 }

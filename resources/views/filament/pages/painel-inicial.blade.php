@@ -102,10 +102,8 @@
 
 <x-filament-panels::page>
     <div class="mb-6">
-        @livewire('selecionar-diretorio-button')
+        @livewire('diretorios-page')
     </div>
-    
-    {{-- Sistema antigo removido --}}
 </x-filament-panels::page>
 
 @push('scripts')
