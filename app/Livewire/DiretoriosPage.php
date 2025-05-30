@@ -233,6 +233,7 @@ class DiretoriosPage extends Component
             }
 
             $this->showForm = false;
+            $this->resetForm($type);
             $this->loadData();
 
             Notification::make()

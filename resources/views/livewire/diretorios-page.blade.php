@@ -58,18 +58,124 @@
     <div class="flex justify-between items-center mb-6">
         <div class="flex-1 max-w-sm">
             <div class="relative">
-                <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                <input type="text" wire:model.live="search" class="block w-full p-2 pr-12 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-yellow-500 focus:border-yellow-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-yellow-500 dark:focus:border-yellow-500" placeholder="   Buscar...">
+                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
                     <svg class="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"/>
                     </svg>
                 </div>
-                <input type="search" wire:model.live="search" class="block w-full p-2 pl-10 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Buscar...">
             </div>
         </div>
         <div>
-            <button wire:click="showCreateForm('{{ $activeTab }}')" class="text-white bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-primary-700 focus:outline-none dark:focus:ring-primary-800">
-                Novo {{ ucfirst($activeTab) }}
-            </button>
+            <x-filament::button
+                wire:click="showCreateForm('cliente')"
+                color="warning"
+                icon="heroicon-o-plus"
+                class="font-bold mb-4"
+            >
+                Novo Cliente
+            </x-filament::button>
+
+            @if($showForm)
+                <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm transition-all duration-200">
+                    <div class="relative bg-gray-900 rounded-2xl shadow-2xl border border-yellow-600 w-full max-w-lg p-8 animate-fade-in-up">
+                        <button
+                            type="button"
+                            class="absolute top-4 right-4 text-gray-400 hover:text-yellow-400 transition"
+                            wire:click="$set('showForm', false)"
+                            aria-label="Fechar"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <h2 class="text-2xl font-bold mb-6 text-yellow-400 text-center">Novo Cliente</h2>
+                        <form wire:submit.prevent="save">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="col-span-1">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Nome</label>
+                                    <input
+                                        type="text"
+                                        wire:model.defer="form.cliente.nome"
+                                        placeholder="Digite o nome do cliente"
+                                        required
+                                        autofocus
+                                        class="block w-full rounded-lg border border-gray-700 bg-gray-800 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                                    >
+                                    @error('form.cliente.nome')
+                                        <span class="text-danger text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                                    <input
+                                        type="email"
+                                        wire:model.defer="form.cliente.email"
+                                        placeholder="Digite o e-mail"
+                                        required
+                                        class="block w-full rounded-lg border border-gray-700 bg-gray-800 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                                    >
+                                    @error('form.cliente.email')
+                                        <span class="text-danger text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Telefone</label>
+                                    <input
+                                        type="text"
+                                        wire:model.defer="form.cliente.telefone"
+                                        placeholder="Digite o telefone"
+                                        class="block w-full rounded-lg border border-gray-700 bg-gray-800 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                                    >
+                                    @error('form.cliente.telefone')
+                                        <span class="text-danger text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">CPF/CNPJ</label>
+                                    <input
+                                        type="text"
+                                        wire:model.defer="form.cliente.cpf_cnpj"
+                                        placeholder="Digite o CPF ou CNPJ"
+                                        required
+                                        class="block w-full rounded-lg border border-gray-700 bg-gray-800 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                                    >
+                                    @error('form.cliente.cpf_cnpj')
+                                        <span class="text-danger text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-span-1">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Tipo de Pessoa</label>
+                                    <select wire:model.defer="form.cliente.tipo_pessoa" required
+                                        class="block w-full rounded-lg border border-gray-700 bg-gray-800 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500">
+                                        <option value="fisica">Física</option>
+                                        <option value="juridica">Jurídica</option>
+                                    </select>
+                                    @error('form.cliente.tipo_pessoa')
+                                        <span class="text-danger text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <div class="col-span-1 md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-300 mb-1">Observações</label>
+                                    <textarea
+                                        wire:model.defer="form.cliente.observacoes"
+                                        placeholder="Observações adicionais"
+                                        rows="3"
+                                        class="block w-full rounded-lg border border-gray-700 bg-gray-800 text-white shadow-sm focus:border-yellow-500 focus:ring-yellow-500"
+                                    ></textarea>
+                                    @error('form.cliente.observacoes')
+                                        <span class="text-danger text-xs">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                            <div class="flex justify-end gap-2 mt-8">
+                                <button type="submit" class="px-6 py-2 bg-yellow-500 text-white rounded-lg font-semibold shadow hover:bg-yellow-600 transition">Salvar</button>
+                                <button type="button" class="px-6 py-2 bg-gray-700 text-white rounded-lg font-semibold shadow hover:bg-gray-800 transition" wire:click="$set('showForm', false)">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -213,123 +319,27 @@
         @endif
     </div>
 
-    <!-- Form Modal -->
-    @if($showForm)
-        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-        <div class="fixed inset-0 z-10 overflow-y-auto">
-            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
-                                <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                    {{ $editMode ? 'Editar' : 'Novo' }} {{ ucfirst($formType) }}
-                                </h3>
-                                <div class="mt-4">
-                                    <form wire:submit.prevent="save">
-                                        @if($formType === 'cliente')
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Nome</label>
-                                                <input type="text" wire:model="form.cliente.nome" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Email</label>
-                                                <input type="email" wire:model="form.cliente.email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Telefone</label>
-                                                <input type="text" wire:model="form.cliente.telefone" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">CPF/CNPJ</label>
-                                                <input type="text" wire:model="form.cliente.cpf_cnpj" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Tipo de Pessoa</label>
-                                                <select wire:model="form.cliente.tipo_pessoa" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                                    <option value="fisica">Física</option>
-                                                    <option value="juridica">Jurídica</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Observações</label>
-                                                <textarea wire:model="form.cliente.observacoes" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
-                                            </div>
-                                        @elseif($formType === 'projeto')
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Nome</label>
-                                                <input type="text" wire:model="form.projeto.nome" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Descrição</label>
-                                                <textarea wire:model="form.projeto.descricao" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Status</label>
-                                                <select wire:model="form.projeto.status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                                    <option value="ativo">Ativo</option>
-                                                    <option value="concluido">Concluído</option>
-                                                    <option value="cancelado">Cancelado</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Data de Início</label>
-                                                <input type="date" wire:model="form.projeto.data_inicio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Data de Término</label>
-                                                <input type="date" wire:model="form.projeto.data_fim" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                        @elseif($formType === 'servico')
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Nome</label>
-                                                <input type="text" wire:model="form.servico.nome" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Tipo</label>
-                                                <select wire:model="form.servico.tipo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                                    <option value="georreferenciamento">Georreferenciamento</option>
-                                                    <option value="topografia">Topografia</option>
-                                                    <option value="aerofotogrametria">Aerofotogrametria</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Descrição</label>
-                                                <textarea wire:model="form.servico.descricao" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500"></textarea>
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Status</label>
-                                                <select wire:model="form.servico.status" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                                    <option value="pendente">Pendente</option>
-                                                    <option value="em_andamento">Em Andamento</option>
-                                                    <option value="concluido">Concluído</option>
-                                                    <option value="cancelado">Cancelado</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Data de Início</label>
-                                                <input type="date" wire:model="form.servico.data_inicio" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                            <div class="mb-4">
-                                                <label class="block text-sm font-medium text-gray-700">Data de Término</label>
-                                                <input type="date" wire:model="form.servico.data_fim" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary-500 focus:ring-primary-500">
-                                            </div>
-                                        @endif
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                        <button wire:click="save" type="button" class="inline-flex w-full justify-center rounded-md bg-primary-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-500 sm:ml-3 sm:w-auto">
-                            Salvar
-                        </button>
-                        <button wire:click="$set('showForm', false)" type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
-                            Cancelar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endif
-</div> 
+    <style>
+    @keyframes fade-in-up {
+        0% { opacity: 0; transform: translateY(40px);}
+        100% { opacity: 1; transform: translateY(0);}
+    }
+    .animate-fade-in-up {
+        animation: fade-in-up 0.3s cubic-bezier(.4,0,.2,1);
+    }
+    </style>
+</div>
+
+@push('scripts')
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('abrir-modal-novo-cliente', () => {
+            window.dispatchEvent(new CustomEvent('abrir-modal-novo-cliente'));
+        });
+        
+        Livewire.on('fechar-modal-novo-cliente', () => {
+            window.dispatchEvent(new CustomEvent('fechar-modal-novo-cliente'));
+        });
+    });
+</script>
+@endpush 

@@ -27,26 +27,39 @@ class CacheService
 
     public function getClientesList($search = '')
     {
-        $key = 'clientes_list_' . md5($search);
-        return Cache::tags(['clientes'])->remember($key, $this->ttl, function () use ($search) {
+        $search = trim($search);
+
+        if ($search) {
+            // Busca por nome, email ou telefone, sem cache
             return Cliente::query()
-                ->when($search, function ($query) use ($search) {
-                    $query->where('nome', 'like', "%{$search}%");
+                ->where(function ($query) use ($search) {
+                    $query->where('nome', 'like', "%{$search}%")
+                          ->orWhere('email', 'like', "%{$search}%")
+                          ->orWhere('telefone', 'like', "%{$search}%");
                 })
                 ->withCount('projetos')
                 ->orderBy('nome')
                 ->get();
+        }
+        // Cacheia apenas a lista completa
+        $key = 'clientes_list_all';
+        return Cache::tags(['clientes'])->remember($key, $this->ttl, function () {
+            return Cliente::withCount('projetos')->orderBy('nome')->get();
         });
     }
 
     public function getProjetosList($clienteId, $search = '')
     {
+        $search = trim($search);
         $key = "projetos_list_{$clienteId}_" . md5($search);
         return Cache::tags(['projetos'])->remember($key, $this->ttl, function () use ($clienteId, $search) {
             return Projeto::query()
                 ->where('cliente_id', $clienteId)
                 ->when($search, function ($query) use ($search) {
-                    $query->where('nome', 'like', "%{$search}%");
+                    $query->where(function ($q) use ($search) {
+                        $q->where('nome', 'like', "%{$search}%")
+                          ->orWhere('descricao', 'like', "%{$search}%");
+                    });
                 })
                 ->withCount('servicos')
                 ->orderBy('nome')
@@ -56,12 +69,16 @@ class CacheService
 
     public function getServicosList($projetoId, $search = '')
     {
+        $search = trim($search);
         $key = "servicos_list_{$projetoId}_" . md5($search);
         return Cache::tags(['servicos'])->remember($key, $this->ttl, function () use ($projetoId, $search) {
             return Servico::query()
                 ->where('projeto_id', $projetoId)
                 ->when($search, function ($query) use ($search) {
-                    $query->where('nome', 'like', "%{$search}%");
+                    $query->where(function ($q) use ($search) {
+                        $q->where('nome', 'like', "%{$search}%")
+                          ->orWhere('descricao', 'like', "%{$search}%");
+                    });
                 })
                 ->orderBy('nome')
                 ->get();
