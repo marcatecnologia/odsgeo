@@ -33,20 +33,20 @@
     <div class="mb-6 border-b border-gray-200 dark:border-gray-700">
         <ul class="flex flex-wrap -mb-px text-sm font-medium text-center">
             <li class="mr-2">
-                <button wire:click="$set('activeTab', 'clientes')" class="inline-block p-4 {{ $activeTab === 'clientes' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-500 hover:text-gray-600 hover:border-gray-300' }} rounded-t-lg">
+                <button wire:click="$set('activeTab', 'clientes')" class="inline-block p-4 {{ $activeTab === 'clientes' ? 'text-yellow-500 border-b-2 border-yellow-500' : 'text-gray-500 hover:text-yellow-600 hover:border-yellow-300' }} rounded-t-lg">
                     Clientes
                 </button>
             </li>
             @if($selectedCliente)
                 <li class="mr-2">
-                    <button wire:click="$set('activeTab', 'projetos')" class="inline-block p-4 {{ $activeTab === 'projetos' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-500 hover:text-gray-600 hover:border-gray-300' }} rounded-t-lg">
+                    <button wire:click="$set('activeTab', 'projetos')" class="inline-block p-4 {{ $activeTab === 'projetos' ? 'text-yellow-500 border-b-2 border-yellow-500' : 'text-gray-500 hover:text-yellow-600 hover:border-yellow-300' }} rounded-t-lg">
                         Projetos
                     </button>
                 </li>
             @endif
             @if($selectedProjeto)
                 <li class="mr-2">
-                    <button wire:click="$set('activeTab', 'servicos')" class="inline-block p-4 {{ $activeTab === 'servicos' ? 'text-primary-600 border-b-2 border-primary-600' : 'text-gray-500 hover:text-gray-600 hover:border-gray-300' }} rounded-t-lg">
+                    <button wire:click="$set('activeTab', 'servicos')" class="inline-block p-4 {{ $activeTab === 'servicos' ? 'text-yellow-500 border-b-2 border-yellow-500' : 'text-gray-500 hover:text-yellow-600 hover:border-yellow-300' }} rounded-t-lg">
                         Serviços
                     </button>
                 </li>
